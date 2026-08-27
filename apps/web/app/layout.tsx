@@ -10,6 +10,9 @@ export const metadata: Metadata = {
   description:
     "A premium trading journal for Indian equity and swing traders. Track trades, analyze performance, and improve your trading systematically.",
   keywords: "trading journal, stock trading, swing trading, Indian equity, trade analysis",
+  verification: {
+    google: "6lVkmBYmvNlsNtkw6uCbljw7ct5Nhs00TUk3xPBrLjk",
+  },
 };
 
 export default function RootLayout({
