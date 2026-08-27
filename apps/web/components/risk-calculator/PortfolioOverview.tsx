@@ -107,7 +107,7 @@ export function PortfolioOverview({ state, portfolio }: PortfolioOverviewProps) 
 
       <div className="bg-sidebar-active p-3 rounded-md flex items-start gap-3" style={{ background: "rgba(234, 179, 8, 0.1)" }}>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#EAB308" strokeWidth="2" className="mt-0.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-        <div className="text-sm" style={{ color: "rgba(255, 255, 255, 0.8)" }}>
+        <div className="text-sm text-secondary dark:text-white/80">
           <span className="font-semibold" style={{ color: "#EAB308" }}>Insight:</span> You can take {Math.max(0, fullRiskTradesCapacity).toFixed(1)} more full-risk trade{fullRiskTradesCapacity !== 1 ? 's' : ''} ({state.defaultTradeRiskPct.toFixed(2)}%) or multiple smaller trades within your remaining risk budget of {remainingRiskCapacityPct.toFixed(2)}%.
         </div>
       </div>
