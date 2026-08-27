@@ -12,8 +12,25 @@
   overflow: hidden;
   transition: background 0.3s, color 0.3s;
 }
+
+.login-page-root h1,
+.login-page-root h2,
+.login-page-root h3,
+.login-page-root .login-brand,
+.login-page-root .q-text {
+  color: #111827;
+}
+
 .login-page-root.dark {
   background: #0B0F1A;
+  color: #F1F5F9;
+}
+
+.login-page-root.dark h1,
+.login-page-root.dark h2,
+.login-page-root.dark h3,
+.login-page-root.dark .login-brand,
+.login-page-root.dark .q-text {
   color: #F1F5F9;
 }
 
