@@ -373,10 +373,10 @@ export default function PositionsClient({ initialPositions, capital = 1000000 }:
                     </td>
                     <td style={{ padding: "var(--space-3) 0", verticalAlign: "middle" }}>
                       <div style={{ fontSize: "var(--text-sm)", display: "flex", alignItems: "center", gap: 6 }}>
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-muted"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: "var(--text-secondary)" }}><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                         {formatHoldingPeriod(holdingMs)}
                       </div>
-                      <div className="text-muted" style={{ fontSize: "0.65rem", marginTop: 4 }}>
+                      <div style={{ color: "var(--text-secondary)", fontSize: "0.65rem", marginTop: 4 }}>
                         Since {new Date(pos.entryTime).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                       </div>
                     </td>
