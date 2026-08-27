@@ -39,7 +39,7 @@ export default function SnapshotTool({ userId }: { userId?: string }) {
         }
         
         const currentPath = window.location.pathname;
-        const publicUrl = `${window.location.origin}/shared/${userId}${currentPath === '/' ? '/journal' : currentPath}`;
+        const publicUrl = `${window.location.origin}/shared/${userId}${currentPath === '/' ? '' : currentPath}`;
         
         if (action === "copylink") {
           await navigator.clipboard.writeText(publicUrl);
