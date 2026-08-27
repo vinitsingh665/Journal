@@ -4,19 +4,19 @@ import Link from "next/link";
 import { useState } from "react";
 import AiAssistant from "@/components/ai/AiAssistant";
 
-export default function Topbar() {
+export default function Topbar({ userName = "Trader", avatar = null, isGuest = false }: { userName?: string, avatar?: string | null, isGuest?: boolean }) {
 
   return (
     <header className="topbar" id="topbar">
       <div className="topbar-left">
         <div>
           <div className="topbar-title">Dashboard</div>
-          <div className="topbar-subtitle">Welcome back, Trader. Here&apos;s your performance overview.</div>
+          <div className="topbar-subtitle">Welcome back, {userName}. Here&apos;s your performance overview.</div>
         </div>
       </div>
 
       <div className="topbar-right">
-        <AiAssistant />
+        {!isGuest && <AiAssistant />}
 
         {/* New Trade Button */}
         <Link href="/trades/new" className="btn btn-primary" id="btn-new-trade">

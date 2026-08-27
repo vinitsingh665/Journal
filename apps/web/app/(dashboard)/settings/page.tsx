@@ -7,10 +7,10 @@ export default async function SettingsPage() {
   const userId = await getCurrentUser();
   if (!userId) redirect("/login");
 
-  // Fetch the actual user to pass name
+  // Fetch the actual user to pass name and email
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { name: true },
+    select: { name: true, email: true, isGuest: true },
   });
 
   const settings = await prisma.userSettings.findUnique({

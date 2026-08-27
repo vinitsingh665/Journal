@@ -38,6 +38,40 @@ interface ChartData {
   currentPrice: number | null;
 }
 
+function useLiveHoldingPeriod(entryTime: string | undefined, initialMs: number | null | undefined) {
+  const [ms, setMs] = useState(initialMs ?? null);
+
+  useEffect(() => {
+    setMs(initialMs ?? null);
+    if (initialMs !== null && initialMs !== undefined) return;
+    if (!entryTime) return;
+
+    const entryDate = new Date(entryTime).getTime();
+    if (isNaN(entryDate)) return;
+
+    const update = () => {
+      setMs(Date.now() - entryDate);
+    };
+    
+    update();
+    const interval = setInterval(update, 60000);
+    return () => clearInterval(interval);
+  }, [entryTime, initialMs]);
+
+  const text = ms !== null ? formatHoldingPeriod(ms) : "—";
+  const isLive = (initialMs === null || initialMs === undefined) && !!entryTime;
+
+  return {
+    text,
+    node: isLive ? (
+      <span style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "var(--text-primary)" }}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        {text}
+      </span>
+    ) : text
+  };
+}
+
 const TRADES_PER_PAGE = 12;
 
 export default function TradesList({ trades }: { trades: Trade[] }) {
@@ -55,6 +89,9 @@ export default function TradesList({ trades }: { trades: Trade[] }) {
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
   const [showAddExecution, setShowAddExecution] = useState(false);
   const [expandedTradeId, setExpandedTradeId] = useState<string | null>(null);
+
+  const selectedTrade = useMemo(() => trades.find((t) => t.id === selectedTradeId), [trades, selectedTradeId]);
+  const liveDuration = useLiveHoldingPeriod(selectedTrade?.entryTime, selectedTrade?.holdingPeriodMs);
 
   // ─── KPI Calculations ────────────────────────────────
   const kpis = useMemo(() => {
@@ -116,10 +153,6 @@ export default function TradesList({ trades }: { trades: Trade[] }) {
   useEffect(() => { setPage(1); }, [statusFilter, searchQuery]);
 
   // ─── Selected Trade ──────────────────────────────────
-  const selectedTrade = useMemo(
-    () => trades.find((t) => t.id === selectedTradeId) || null,
-    [trades, selectedTradeId]
-  );
 
   // Fetch chart data when a trade is selected
   useEffect(() => {
@@ -619,7 +652,7 @@ export default function TradesList({ trades }: { trades: Trade[] }) {
                   { label: "Entry", value: formatINR(selectedTrade.avgEntryPrice), sub: formatDate(selectedTrade.entryTime) },
                   { label: "Exit", value: selectedTrade.avgExitPrice ? formatINR(selectedTrade.avgExitPrice) : "—", sub: selectedTrade.exitTime ? formatDate(selectedTrade.exitTime) : "" },
                   { label: "Quantity", value: selectedTrade.totalBuyQty.toString() },
-                  { label: "Hold Time", value: formatHoldingPeriod(selectedTrade.holdingPeriodMs) },
+                  { label: "Hold Time", value: liveDuration.node },
                   { label: "Stop Loss", value: selectedTrade.stopLoss ? formatINR(selectedTrade.stopLoss) : "—", color: "var(--color-negative)" },
                   { label: "Target", value: selectedTrade.target ? formatINR(selectedTrade.target) : "—", color: "var(--color-positive)" },
                   { label: "Setup", value: selectedTrade.setup || "—" },

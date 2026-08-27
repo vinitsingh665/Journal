@@ -102,7 +102,7 @@ const ICONS: Record<string, React.ReactNode> = {
   ),
 };
 
-export default function Sidebar() {
+export default function Sidebar({ userName = "Trader", tradingStyle = "Swing Trader", avatar = null }: { userName?: string, tradingStyle?: string, avatar?: string | null }) {
   const pathname = usePathname();
 
   return (
@@ -152,10 +152,16 @@ export default function Sidebar() {
       {/* Footer */}
       <div className="sidebar-footer">
         <div className="sidebar-user">
-          <div className="sidebar-avatar">T</div>
+          <div className="sidebar-avatar" style={{ overflow: "hidden", border: avatar ? "1px solid var(--border-secondary)" : "none" }}>
+            {avatar ? (
+              <img src={avatar} alt="Profile Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            ) : (
+              userName.charAt(0).toUpperCase()
+            )}
+          </div>
           <div className="sidebar-user-info">
-            <span className="sidebar-user-name">Trader</span>
-            <span className="sidebar-user-role">Swing Trader</span>
+            <span className="sidebar-user-name">{userName}</span>
+            <span className="sidebar-user-role">{tradingStyle}</span>
           </div>
         </div>
       </div>

@@ -4,7 +4,12 @@ import { prisma } from "@repo/database";
 import Groq from "groq-sdk";
 import { fetchStockQuote } from "@/lib/yahoo-finance";
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+let groq: Groq;
+try {
+  groq = new Groq({ apiKey: process.env.GROQ_API_KEY || "dummy" });
+} catch (e) {
+  // handled in POST
+}
 
 const SYSTEM_PROMPT = `You are an AI Trading Assistant for a Trade Journal app. You engage in a conversation with the user to log trades or mistakes.
 The user will provide natural language prompts (often in Hinglish or English).
@@ -97,6 +102,9 @@ Do not include markdown blocks or any other text. Only the JSON.`;
 
 export async function POST(req: NextRequest) {
   try {
+    if (!process.env.GROQ_API_KEY) {
+      return NextResponse.json({ error: "Please add your GROQ_API_KEY to your .env file to use the AI Assistant." }, { status: 400 });
+    }
     const userId = await getCurrentUser();
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 

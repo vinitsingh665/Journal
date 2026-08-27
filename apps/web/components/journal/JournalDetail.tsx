@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { formatINR, formatDate, formatTime, formatHoldingPeriod, cn } from "@/lib/utils";
 
 interface Execution {
@@ -54,8 +54,39 @@ interface TradeData {
   nextId: string | null;
 }
 
+function useLiveHoldingPeriod(entryTime: string, initialMs: number | null) {
+  const [ms, setMs] = useState(initialMs);
+
+  useEffect(() => {
+    if (initialMs !== null) return;
+    const entryDate = new Date(entryTime).getTime();
+    
+    const update = () => {
+      setMs(Date.now() - entryDate);
+    };
+    
+    update();
+    const interval = setInterval(update, 60000);
+    return () => clearInterval(interval);
+  }, [entryTime, initialMs]);
+
+  const text = formatHoldingPeriod(ms);
+  const isLive = initialMs === null;
+
+  return {
+    text,
+    node: isLive ? (
+      <span style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "var(--text-primary)" }}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        {text}
+      </span>
+    ) : text
+  };
+}
+
 export default function JournalDetail({ trade }: { trade: TradeData }) {
   const router = useRouter();
+  const liveDuration = useLiveHoldingPeriod(trade.entryTime, trade.holdingPeriodMs);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -189,30 +220,30 @@ export default function JournalDetail({ trade }: { trade: TradeData }) {
 
           {/* KPI Row */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "var(--space-4)" }}>
-            <div className="card" style={{ padding: "var(--space-3) var(--space-4)", textAlign: "center" }}>
+            <div className="card" style={{ padding: "var(--space-3) var(--space-4)", textAlign: "center", overflow: "hidden" }} title={trade.rMultiple !== null ? `${trade.rMultiple >= 0 ? "+" : ""}${trade.rMultiple.toFixed(2)}R` : "—"}>
               <div className="text-muted" style={{ fontSize: "var(--text-xs)", marginBottom: 4 }}>R-MULTIPLE</div>
               <div className={cn(
                 (trade.rMultiple ?? 0) >= 0 ? "text-positive" : "text-negative"
-              )} style={{ fontSize: "var(--text-xl)", fontWeight: 700, fontFamily: "var(--font-mono)" }}>
+              )} style={{ fontSize: "var(--text-xl)", fontWeight: 700, fontFamily: "var(--font-mono)", whiteSpace: "nowrap", textOverflow: "ellipsis", overflow: "hidden" }}>
                 {trade.rMultiple !== null ? `${trade.rMultiple >= 0 ? "+" : ""}${trade.rMultiple.toFixed(2)}R` : "—"}
               </div>
             </div>
-            <div className="card" style={{ padding: "var(--space-3) var(--space-4)", textAlign: "center" }}>
+            <div className="card" style={{ padding: "var(--space-3) var(--space-4)", textAlign: "center", overflow: "hidden" }} title={formatINR(trade.netPnl, { showSign: true })}>
               <div className="text-muted" style={{ fontSize: "var(--text-xs)", marginBottom: 4 }}>P&L</div>
-              <div className={cn(trade.netPnl >= 0 ? "text-positive" : "text-negative")} style={{ fontSize: "var(--text-xl)", fontWeight: 700, fontFamily: "var(--font-mono)" }}>
-                {formatINR(trade.netPnl, { showSign: true })}
+              <div className={cn(trade.netPnl >= 0 ? "text-positive" : "text-negative")} style={{ fontSize: "var(--text-xl)", fontWeight: 700, fontFamily: "var(--font-mono)", whiteSpace: "nowrap", textOverflow: "ellipsis", overflow: "hidden" }}>
+                {formatINR(trade.netPnl, { showSign: true, compact: true })}
               </div>
             </div>
-            <div className="card" style={{ padding: "var(--space-3) var(--space-4)", textAlign: "center" }}>
+            <div className="card" style={{ padding: "var(--space-3) var(--space-4)", textAlign: "center", overflow: "hidden" }} title={`${trade.pnlPercentage >= 0 ? "+" : ""}${trade.pnlPercentage.toFixed(2)}%`}>
               <div className="text-muted" style={{ fontSize: "var(--text-xs)", marginBottom: 4 }}>RETURN</div>
-              <div className={cn(trade.pnlPercentage >= 0 ? "text-positive" : "text-negative")} style={{ fontSize: "var(--text-xl)", fontWeight: 700, fontFamily: "var(--font-mono)" }}>
+              <div className={cn(trade.pnlPercentage >= 0 ? "text-positive" : "text-negative")} style={{ fontSize: "var(--text-xl)", fontWeight: 700, fontFamily: "var(--font-mono)", whiteSpace: "nowrap", textOverflow: "ellipsis", overflow: "hidden" }}>
                 {trade.pnlPercentage >= 0 ? "+" : ""}{trade.pnlPercentage.toFixed(2)}%
               </div>
             </div>
-            <div className="card" style={{ padding: "var(--space-3) var(--space-4)", textAlign: "center" }}>
+            <div className="card" style={{ padding: "var(--space-3) var(--space-4)", textAlign: "center", overflow: "hidden" }} title={liveDuration.text}>
               <div className="text-muted" style={{ fontSize: "var(--text-xs)", marginBottom: 4 }}>DURATION</div>
-              <div style={{ fontSize: "var(--text-xl)", fontWeight: 700, fontFamily: "var(--font-mono)" }}>
-                {formatHoldingPeriod(trade.holdingPeriodMs)}
+              <div style={{ fontSize: "var(--text-xl)", fontWeight: 700, fontFamily: "var(--font-mono)", whiteSpace: "nowrap", textOverflow: "ellipsis", overflow: "hidden" }}>
+                {liveDuration.node}
               </div>
             </div>
             <div className="card" style={{ padding: "var(--space-3) var(--space-4)", textAlign: "center" }}>
@@ -517,7 +548,7 @@ export default function JournalDetail({ trade }: { trade: TradeData }) {
                 </div>
                 <div style={{ padding: "var(--space-3) var(--space-4)" }}>
                   <div className="text-muted" style={{ fontSize: "var(--text-xs)", marginBottom: 2 }}>Holding Time</div>
-                  <div style={{ fontWeight: 600, fontFamily: "var(--font-mono)" }}>{formatHoldingPeriod(trade.holdingPeriodMs)}</div>
+                  <div style={{ fontWeight: 600, fontFamily: "var(--font-mono)" }}>{liveDuration.node}</div>
                 </div>
                 <div style={{ padding: "var(--space-3) var(--space-4)" }}>
                   <div className="text-muted" style={{ fontSize: "var(--text-xs)", marginBottom: 2 }}>Net P&L</div>

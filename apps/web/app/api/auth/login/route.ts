@@ -5,7 +5,14 @@ import { verifyPassword, createToken, setSessionCookie, clearSessionCookie } fro
 // Login
 export async function POST(request: NextRequest) {
   try {
-    const { password } = await request.json();
+    const { email, password } = await request.json();
+
+    if (!email || !email.includes("@")) {
+      return NextResponse.json(
+        { error: "A valid email is required" },
+        { status: 400 }
+      );
+    }
 
     if (!password) {
       return NextResponse.json(
@@ -14,12 +21,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const user = await prisma.user.findFirst();
+    const user = await prisma.user.findUnique({
+      where: { email }
+    });
 
     if (!user) {
       return NextResponse.json(
-        { error: "No account found. Please set up first." },
-        { status: 404 }
+        { error: "Incorrect email or password" },
+        { status: 401 }
+      );
+    }
+
+    if (!user.passwordHash) {
+      return NextResponse.json(
+        { error: "This account uses Google Sign-In" },
+        { status: 401 }
       );
     }
 

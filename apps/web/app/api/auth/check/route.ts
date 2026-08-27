@@ -8,6 +8,8 @@ import {
   clearSessionCookie,
 } from "@/lib/auth";
 
+export const dynamic = "force-dynamic";
+
 // Check if user exists
 export async function GET() {
   try {

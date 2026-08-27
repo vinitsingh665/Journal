@@ -251,18 +251,18 @@ export default function AnalyticsDashboard({ initialTrades }: { initialTrades: T
       {/* 1. TOP KPI ROW */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "var(--space-4)" }}>
         {[
-          { label: "TOTAL P&L", value: formatINR(totalPnl, { showSign: true }), color: totalPnl >= 0 ? "var(--color-positive)" : "var(--color-negative)" },
+          { label: "TOTAL P&L", value: formatINR(totalPnl, { showSign: true, compact: true }), color: totalPnl >= 0 ? "var(--color-positive)" : "var(--color-negative)", rawValue: formatINR(totalPnl, { showSign: true }) },
           { label: "WIN RATE", value: `${winRate.toFixed(1)}%`, sub: `${winningCount}W / ${losingCount}L` },
           { label: "PROFIT FACTOR", value: profitFactor.toFixed(2), sub: profitFactor > 2 ? "Excellent" : profitFactor > 1 ? "Good" : "Needs Work", color: profitFactor > 1 ? "var(--color-positive)" : "var(--color-negative)" },
-          { label: "EXPECTANCY", value: formatINR(expectancy, { showSign: true }), sub: "Per Trade", color: expectancy >= 0 ? "var(--color-positive)" : "var(--color-negative)" },
+          { label: "EXPECTANCY", value: formatINR(expectancy, { showSign: true, compact: true }), sub: "Per Trade", color: expectancy >= 0 ? "var(--color-positive)" : "var(--color-negative)", rawValue: formatINR(expectancy, { showSign: true }) },
           { label: "AVG R-MULTIPLE", value: `${avgRMultiple >= 0 ? "+" : ""}${avgRMultiple.toFixed(2)}R`, sub: "Per Trade", color: avgRMultiple >= 0 ? "var(--color-positive)" : "var(--color-negative)" },
-          { label: "MAX DRAWDOWN", value: formatINR(-maxDrawdown), sub: "Peak to Trough", color: "var(--color-negative)" },
+          { label: "MAX DRAWDOWN", value: formatINR(-maxDrawdown, { compact: true }), sub: "Peak to Trough", color: "var(--color-negative)", rawValue: formatINR(-maxDrawdown) },
           { label: "AVG HOLDING TIME", value: formatTime(avgHoldingMs), sub: "Per Trade" },
         ].map((kpi, i) => (
-          <div key={i} className="card" style={{ padding: "var(--space-5)" }}>
-            <div className="text-muted" style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.05em", marginBottom: "var(--space-2)" }}>{kpi.label}</div>
-            <div style={{ fontSize: "var(--text-2xl)", fontWeight: 700, color: kpi.color || "var(--text-primary)", marginBottom: "var(--space-1)" }}>{kpi.value}</div>
-            {kpi.sub && <div className="text-muted" style={{ fontSize: "var(--text-xs)" }}>{kpi.sub}</div>}
+          <div key={i} className="card" style={{ padding: "var(--space-5)", overflow: "hidden" }} title={kpi.rawValue || kpi.value}>
+            <div className="text-muted" style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.05em", marginBottom: "var(--space-2)", whiteSpace: "nowrap", textOverflow: "ellipsis", overflow: "hidden" }}>{kpi.label}</div>
+            <div style={{ fontSize: "var(--text-2xl)", fontWeight: 700, color: kpi.color || "var(--text-primary)", marginBottom: "var(--space-1)", whiteSpace: "nowrap", textOverflow: "ellipsis", overflow: "hidden" }}>{kpi.value}</div>
+            {kpi.sub && <div className="text-muted" style={{ fontSize: "var(--text-xs)", whiteSpace: "nowrap", textOverflow: "ellipsis", overflow: "hidden" }}>{kpi.sub}</div>}
           </div>
         ))}
       </div>
