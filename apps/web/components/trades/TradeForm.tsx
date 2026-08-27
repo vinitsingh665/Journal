@@ -91,7 +91,7 @@ export default function TradeForm({ userId, tradeId, initialData }: TradeFormPro
             emotionalState: aiData.emotionalState || prev.emotionalState,
             postTradeReview: aiData.postTradeReview || prev.postTradeReview,
           }));
-          const newEntry = aiData.price || parseFloat(prev.price) || 0;
+          const newEntry = aiData.price || parseFloat(form.price) || 0;
           if (newEntry > 0) {
             if (aiData.stopLoss) setSlPercent((Math.abs(newEntry - aiData.stopLoss) / newEntry * 100).toFixed(2));
             if (aiData.target) setTargetPercent((Math.abs(aiData.target - newEntry) / newEntry * 100).toFixed(2));

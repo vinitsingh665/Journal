@@ -148,7 +148,8 @@ export default function PositionsClient({ initialPositions, capital = 1000000 }:
   // Calculate total risk (for positions with a stop loss)
   const totalRisk = enrichedPositions.reduce((acc, pos) => {
     if (pos.stopLoss && pos.stopLoss > 0) {
-       const riskPerShare = pos.direction === "LONG" ? (pos.currentPrice - pos.stopLoss) : (pos.stopLoss - pos.currentPrice);
+       const price = pos.currentPrice ?? pos.avgEntryPrice;
+       const riskPerShare = pos.direction === "LONG" ? (price - pos.stopLoss) : (pos.stopLoss - price);
        if (riskPerShare > 0) return acc + (riskPerShare * pos.openQty);
        return acc; // If current price is past stop loss, risk is technically realized or higher
     }

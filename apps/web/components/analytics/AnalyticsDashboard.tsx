@@ -316,7 +316,8 @@ export default function AnalyticsDashboard({ initialTrades }: { initialTrades: T
                   },
                   y: { 
                     position: "right",
-                    grid: { color: "rgba(0,0,0,0.05)", borderDash: [5, 5] },
+                    grid: { color: "rgba(0,0,0,0.05)" },
+                    border: { dash: [5, 5] },
                     ticks: { 
                       font: { size: 10 }, 
                       color: "var(--text-muted)",
@@ -364,7 +365,8 @@ export default function AnalyticsDashboard({ initialTrades }: { initialTrades: T
                   },
                   y: { 
                     position: "right",
-                    grid: { color: "rgba(0,0,0,0.05)", borderDash: [5, 5] },
+                    grid: { color: "rgba(0,0,0,0.05)" },
+                    border: { dash: [5, 5] },
                     ticks: { 
                       font: { size: 10 }, 
                       color: "var(--text-muted)",
@@ -395,10 +397,9 @@ export default function AnalyticsDashboard({ initialTrades }: { initialTrades: T
                   data: [winningCount, losingCount],
                   backgroundColor: ['#10b981', '#ef4444'],
                   borderWidth: 0,
-                  cutout: '75%',
                 }]
               }}
-              options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }}
+              options={{ cutout: '75%', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }}
             />
             <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center" }}>
               <div style={{ fontSize: "var(--text-2xl)", fontWeight: 700 }}>{winningCount + losingCount}</div>
@@ -439,10 +440,9 @@ export default function AnalyticsDashboard({ initialTrades }: { initialTrades: T
                   data: [rBins['> 3R'], rBins['2R to 3R'], rBins['1R to 2R'], rBins['0 to 1R'], rBins['< -3R'] + rBins['-3R to -2R'] + rBins['-2R to -1R'] + rBins['-1R to 0']],
                   backgroundColor: ['#059669', '#10b981', '#34d399', '#f59e0b', '#ef4444'],
                   borderWidth: 0,
-                  cutout: '75%',
                 }]
               }}
-              options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }}
+              options={{ cutout: '75%', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }}
             />
             <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center" }}>
               <div style={{ fontSize: "var(--text-xl)", fontWeight: 700 }}>{avgRMultiple > 0 ? "+" : ""}{avgRMultiple.toFixed(2)}R</div>

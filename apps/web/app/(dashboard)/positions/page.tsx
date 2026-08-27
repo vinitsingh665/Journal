@@ -24,7 +24,7 @@ export default async function PositionsPage() {
   });
 
   const settings = await prisma.userSettings.findUnique({ where: { userId } });
-  const capital = settings?.capital || 1000000;
+  const capital = settings?.defaultCapital || 1000000;
 
   // Serialize complex dates
   const serializedTrades = trades.map(t => ({

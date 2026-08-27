@@ -166,10 +166,11 @@ const barOptions = {
   plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c: any) => `₹${Math.abs(c.raw).toLocaleString()}` } } },
   scales: {
     x: {
-      grid: { color: "rgba(0,0,0,0.05)", borderDash: [5, 5] },
+      grid: { color: "rgba(0,0,0,0.05)" },
+      border: { dash: [5, 5] },
       ticks: { font: { size: 10 }, color: "var(--text-muted)", callback: (v: any) => v < 0 ? `-₹${Math.abs(v/1000)}K` : `₹${v/1000}K`, maxTicksLimit: 5 }
     },
-    y: { grid: { display: false }, ticks: { font: { size: 10, weight: "500" }, color: "var(--text-primary)" } }
+    y: { grid: { display: false }, ticks: { font: { size: 10, weight: 500 }, color: "var(--text-primary)" } }
   }
 };
 
@@ -301,7 +302,6 @@ export default function MistakesPage() {
       data: Object.values(categoryCounts),
       backgroundColor: Object.keys(categoryCounts).map(k => CATEGORY_STYLES[k]?.color || "#000"),
       borderWidth: 0,
-      cutout: "75%",
     }]
   };
 
@@ -551,7 +551,7 @@ export default function MistakesPage() {
             <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
               <div style={{ width: 100, height: 100, position: "relative" }}>
                 {mistakes.length > 0 ? (
-                  <Doughnut data={donutData} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }} />
+                  <Doughnut data={donutData} options={{ cutout: "75%", responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }} />
                 ) : (
                   <div style={{ width: "100%", height: "100%", borderRadius: "50%", border: "8px solid var(--border-color)" }}></div>
                 )}
