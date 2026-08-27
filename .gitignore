@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Next.js
+.next/
+out/
+
+# Build
+dist/
+build/
+
+# Turbo
+.turbo/
+
+# Environment
+.env
+.env.local
+.env.production
+.env.development
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Prisma
+packages/database/prisma/migrations/
+
+# Uploads
+apps/web/public/uploads/

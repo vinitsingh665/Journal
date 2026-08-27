@@ -1,0 +1,312 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─── AUTH ────────────────────────────────────────────
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  trades        Trade[]
+  tradePlans    TradePlan[]
+  executions    Execution[]
+  positions     Position[]
+  dailyJournals DailyJournal[]
+  screenshots   Screenshot[]
+  importLogs    ImportLog[]
+  settings      UserSettings?
+}
+
+model UserSettings {
+  id             String  @id @default(cuid())
+  userId         String  @unique
+  user           User    @relation(fields: [userId], references: [id])
+  defaultCapital Float   @default(500000)
+  defaultRiskPct Float   @default(1.0)
+  currency       String  @default("INR")
+  theme          String  @default("light")
+  accentColor    String  @default("blue")
+  geminiApiKey   String?
+}
+
+// ─── RAW DATA ───────────────────────────────────────
+
+model RawImportData {
+  id          String    @id @default(cuid())
+  source      String
+  rawData     Json
+  fileName    String?
+  importLogId String?
+  importLog   ImportLog? @relation(fields: [importLogId], references: [id])
+  createdAt   DateTime  @default(now())
+
+  @@index([importLogId])
+}
+
+model ImportLog {
+  id           String          @id @default(cuid())
+  userId       String
+  user         User            @relation(fields: [userId], references: [id])
+  source       String
+  fileName     String?
+  totalRows    Int             @default(0)
+  newRecords   Int             @default(0)
+  duplicates   Int             @default(0)
+  errors       Int             @default(0)
+  errorDetails Json?
+  status       String
+  startedAt    DateTime        @default(now())
+  completedAt  DateTime?
+  rawData      RawImportData[]
+
+  @@index([userId])
+}
+
+// ─── EXECUTIONS ─────────────────────────────────────
+
+model Execution {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+
+  fingerprint    String   @unique
+  symbol         String
+  exchange       String   @default("NSE")
+  side           String
+  quantity       Float
+  executedQty    Float
+  price          Float
+  avgPrice       Float
+
+  orderId        String?
+  executionId    String?
+  orderType      String?
+  productType    String?
+  orderStatus    String?
+
+  executionTime  DateTime
+  orderTime      DateTime?
+
+  brokerage      Float?
+  stt            Float?
+  exchangeCharges Float?
+  gst            Float?
+  sebiCharges    Float?
+  stampDuty      Float?
+  totalCharges   Float?
+
+  tradeId        String?
+  trade          Trade?   @relation(fields: [tradeId], references: [id])
+
+  rawImportDataId String?
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([userId])
+  @@index([symbol])
+  @@index([tradeId])
+  @@index([executionTime])
+}
+
+// ─── TRADES ─────────────────────────────────────────
+
+model Trade {
+  id             String    @id @default(cuid())
+  userId         String
+  user           User      @relation(fields: [userId], references: [id])
+
+  symbol         String
+  exchange       String    @default("NSE")
+  direction      String
+  status         String
+
+  totalBuyQty    Float     @default(0)
+  totalSellQty   Float     @default(0)
+  avgEntryPrice  Float     @default(0)
+  avgExitPrice   Float?
+
+  grossPnl       Float     @default(0)
+  totalCharges   Float     @default(0)
+  netPnl         Float     @default(0)
+  pnlPercentage  Float     @default(0)
+
+  isArchived     Boolean   @default(false)
+
+  riskAmount     Float?
+  rMultiple      Float?
+
+  entryTime      DateTime
+  exitTime       DateTime?
+  holdingPeriodMs BigInt?
+
+  // Journal fields
+  strategy       String?
+  setup          String?
+  thesis         String?
+  plannedEntry   Float?
+  stopLoss       Float?
+  target         Float?
+  expectedRR     Float?
+  marketCondition String?
+  confidence     Int?
+  reasonForEntry String?
+  reasonForExit  String?
+  emotionalState String?
+  notes          String?
+  postTradeReview String?
+
+  tradePlanId    String?
+  tradePlan      TradePlan? @relation(fields: [tradePlanId], references: [id])
+
+  executions     Execution[]
+  mistakes       TradeMistake[]
+  screenshots    Screenshot[]
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([userId])
+  @@index([symbol])
+  @@index([status])
+  @@index([entryTime])
+  @@index([strategy])
+}
+
+// ─── PRE-TRADE PLANNING ────────────────────────────
+
+model TradePlan {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+
+  symbol         String
+  exchange       String   @default("NSE")
+  direction      String
+
+  plannedEntry   Float
+  stopLoss       Float
+  target         Float
+  riskAmount     Float?
+  expectedRR     Float?
+
+  strategy       String?
+  setup          String?
+  thesis         String?
+  marketCondition String?
+  confidence     Int?
+
+  status         String   @default("PLANNED")
+
+  actualEntry    Float?
+  slippage       Float?
+
+  trades         Trade[]
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([userId])
+  @@index([symbol])
+  @@index([status])
+}
+
+// ─── POSITIONS ──────────────────────────────────────
+
+model Position {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+
+  symbol        String
+  exchange      String   @default("NSE")
+  quantity      Float
+  avgPrice      Float
+  currentPrice  Float?
+
+  unrealizedPnl Float?
+  unrealizedPct Float?
+
+  lastUpdated   DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([userId, symbol, exchange])
+  @@index([userId])
+}
+
+// ─── MISTAKES ───────────────────────────────────────
+
+model MistakeTag {
+  id          String         @id @default(cuid())
+  name        String         @unique
+  description String?
+  color       String?
+  trades      TradeMistake[]
+}
+
+model TradeMistake {
+  id           String     @id @default(cuid())
+  tradeId      String
+  trade        Trade      @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  mistakeTagId String
+  mistakeTag   MistakeTag @relation(fields: [mistakeTagId], references: [id])
+  notes        String?
+
+  @@unique([tradeId, mistakeTagId])
+}
+
+// ─── SCREENSHOTS ────────────────────────────────────
+
+model Screenshot {
+  id       String   @id @default(cuid())
+  userId   String
+  user     User     @relation(fields: [userId], references: [id])
+  tradeId  String?
+  trade    Trade?   @relation(fields: [tradeId], references: [id])
+
+  url      String
+  caption  String?
+  phase    String?
+
+  createdAt DateTime @default(now())
+
+  @@index([tradeId])
+}
+
+// ─── DAILY JOURNAL ──────────────────────────────────
+
+model DailyJournal {
+  id               String   @id @default(cuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id])
+  date             DateTime
+
+  totalPnl         Float    @default(0)
+  totalTrades      Int      @default(0)
+  winningTrades    Int      @default(0)
+  losingTrades     Int      @default(0)
+
+  marketNotes      String?
+  preMarketPlan    String?
+  postMarketReview String?
+  emotionalState   String?
+  lessonsLearned   String?
+
+  aiReview         String?
+  aiFocus          String?
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@unique([userId, date])
+}
