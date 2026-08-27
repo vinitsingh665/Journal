@@ -1,17 +1,16 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@repo/database";
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    const userId = await getCurrentUser();
+    if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const actionPlans = await prisma.actionPlan.findMany({
-      where: { userId: session.user.id },
+      where: { userId },
       orderBy: { createdAt: "asc" },
     });
 
@@ -24,8 +23,8 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    const userId = await getCurrentUser();
+    if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -38,7 +37,7 @@ export async function POST(req: Request) {
 
     const newActionPlan = await prisma.actionPlan.create({
       data: {
-        userId: session.user.id,
+        userId,
         content: content.trim(),
       },
     });
