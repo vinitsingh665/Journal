@@ -168,9 +168,9 @@ const barOptions = {
     x: {
       grid: { color: "rgba(128,128,128,0.2)" },
       border: { dash: [5, 5] },
-      ticks: { font: { size: 10 }, color: "#94a3b8", callback: (v: any) => v < 0 ? `-₹${Math.abs(v/1000)}K` : `₹${v/1000}K`, maxTicksLimit: 5 }
+      ticks: { font: { size: 10 }, color: "#71717a", callback: (v: any) => v < 0 ? `-₹${Math.abs(v/1000)}K` : `₹${v/1000}K`, maxTicksLimit: 5 }
     },
-    y: { grid: { display: false }, ticks: { font: { size: 10, weight: 500 }, color: "#d4d4d8" } }
+    y: { grid: { display: false }, ticks: { font: { size: 10, weight: 500 }, color: "#71717a" } }
   }
 };
 
