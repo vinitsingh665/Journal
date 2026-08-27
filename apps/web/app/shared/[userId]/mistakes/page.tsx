@@ -437,7 +437,7 @@ export default function MistakesPage() {
       </div>
 
       {/* MAIN GRID */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: "var(--space-6)" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "3fr 1fr", gap: "var(--space-6)" }}>
         
         {/* LEFT COLUMN: TABLE */}
         <div className="card" style={{ display: "flex", flexDirection: "column" }}>
