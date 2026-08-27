@@ -9,6 +9,7 @@
 .items-baseline { align-items: baseline; }
 .justify-between { justify-content: space-between; }
 .justify-center { justify-content: center; }
+.justify-end { justify-content: flex-end; }
 
 .gap-1 { gap: 0.25rem; }
 .gap-2 { gap: 0.5rem; }
@@ -60,6 +61,7 @@
 
 .p-3 { padding: 0.75rem; }
 .p-4 { padding: 1rem; }
+.p-6 { padding: 1.5rem; }
 .py-0\.5 { padding-top: 0.125rem; padding-bottom: 0.125rem; }
 .py-1\.5 { padding-top: 0.375rem; padding-bottom: 0.375rem; }
 .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
@@ -73,6 +75,7 @@
 .pl-8 { padding-left: 2rem; }
 .pr-2 { padding-right: 0.5rem; }
 .pr-6 { padding-right: 1.5rem; }
+.pt-0 { padding-top: 0; }
 .pt-4 { padding-top: 1rem; }
 .pt-6 { padding-top: 1.5rem; }
 .pb-3 { padding-bottom: 0.75rem; }
@@ -139,8 +142,15 @@
 
 .relative { position: relative; }
 .absolute { position: absolute; }
+.fixed { position: fixed; }
 .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
 .inset-2 { top: 0.5rem; right: 0.5rem; bottom: 0.5rem; left: 0.5rem; }
+.z-50 { z-index: 50; }
+.bg-black\/60 { background-color: rgba(0, 0, 0, 0.6); }
+.backdrop-blur-sm { backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+.max-w-md { max-width: 28rem; }
+.shadow-2xl { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+.space-y-4 > * + * { margin-top: 1rem; }
 .top-0 { top: 0; }
 .left-0 { left: 0; }
 .left-3 { left: 0.75rem; }

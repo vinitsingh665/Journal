@@ -126,7 +126,7 @@ export default function RiskCalculatorPage() {
 
       {showSaveModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-surface border border-border-secondary rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-card border border-border-secondary rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="p-6">
               <h2 className="text-xl font-bold text-text-primary mb-1">Save Template</h2>
               <p className="text-secondary text-sm mb-6">Give your risk profile a recognizable name.</p>
@@ -139,7 +139,7 @@ export default function RiskCalculatorPage() {
                     value={templateName}
                     onChange={(e) => setTemplateName(e.target.value)}
                     placeholder="e.g., Aggressive Options, 1% Swing..."
-                    className="w-full bg-background border border-border-secondary rounded-xl px-4 py-3 text-text-primary placeholder:text-muted focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50"
+                    className="w-full bg-input/50 border border-border-secondary rounded-xl px-4 py-3 text-text-primary placeholder:text-muted focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50"
                     autoFocus
                   />
                 </div>
