@@ -278,7 +278,7 @@ export default function AnalyticsDashboard({ initialTrades }: { initialTrades: T
                 <div className="text-muted" style={{ display: "flex", alignItems: "center", gap: 4 }}><div style={{ width: 6, height: 6, borderRadius: "50%", background: "#d1d5db" }}></div> Benchmark (NIFTY 50)</div>
               </div>
             </div>
-            <select className="input" style={{ padding: "4px 8px", fontSize: "var(--text-xs)", height: "auto" }}>
+            <select className="input" style={{ padding: "4px 8px", fontSize: "var(--text-xs)", height: "auto", color: "var(--text-primary)", backgroundColor: "var(--bg-primary)" }}>
               <option>Daily</option>
               <option>Weekly</option>
             </select>
@@ -312,15 +312,15 @@ export default function AnalyticsDashboard({ initialTrades }: { initialTrades: T
                 scales: {
                   x: { 
                     grid: { display: false },
-                    ticks: { font: { size: 10 }, color: "var(--text-muted)" }
+                    ticks: { font: { size: 10 }, color: "#71717a" }
                   },
                   y: { 
                     position: "right",
-                    grid: { color: "rgba(0,0,0,0.05)" },
+                    grid: { color: "rgba(128,128,128,0.1)" },
                     border: { dash: [5, 5] },
                     ticks: { 
                       font: { size: 10 }, 
-                      color: "var(--text-muted)",
+                      color: "#71717a",
                       callback: function(value: any) {
                         if (value === 0) return '₹0';
                         if (Math.abs(value) >= 100000) return '₹' + (value / 100000).toFixed(1) + 'L';
@@ -339,8 +339,8 @@ export default function AnalyticsDashboard({ initialTrades }: { initialTrades: T
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-4)" }}>
             <div style={{ fontSize: "var(--text-sm)", fontWeight: 700 }}>MONTHLY PERFORMANCE <span className="text-muted">ⓘ</span></div>
             <div style={{ display: "flex", background: "var(--bg-secondary)", borderRadius: 6, padding: 2 }}>
-              <button style={{ background: "var(--bg-primary)", border: "none", padding: "4px 8px", fontSize: 10, fontWeight: 600, borderRadius: 4, boxShadow: "0 1px 2px rgba(0,0,0,0.05)" }}>P&L</button>
-              <button className="text-muted" style={{ background: "transparent", border: "none", padding: "4px 8px", fontSize: 10, fontWeight: 600 }}>R-Multiple</button>
+              <button style={{ background: "var(--bg-primary)", color: "var(--text-primary)", border: "none", padding: "4px 8px", fontSize: 10, fontWeight: 600, borderRadius: 4, boxShadow: "0 1px 2px rgba(0,0,0,0.05)" }}>P&L</button>
+              <button className="text-muted" style={{ background: "transparent", color: "var(--text-muted)", border: "none", padding: "4px 8px", fontSize: 10, fontWeight: 600 }}>R-Multiple</button>
             </div>
           </div>
           <div style={{ height: 280 }}>
@@ -361,15 +361,15 @@ export default function AnalyticsDashboard({ initialTrades }: { initialTrades: T
                 scales: {
                   x: { 
                     grid: { display: false },
-                    ticks: { font: { size: 10 }, color: "var(--text-muted)" }
+                    ticks: { font: { size: 10 }, color: "#71717a" }
                   },
                   y: { 
                     position: "right",
-                    grid: { color: "rgba(0,0,0,0.05)" },
+                    grid: { color: "rgba(128,128,128,0.1)" },
                     border: { dash: [5, 5] },
                     ticks: { 
                       font: { size: 10 }, 
-                      color: "var(--text-muted)",
+                      color: "#71717a",
                       callback: function(value: any) {
                         if (value === 0) return '₹0';
                         if (Math.abs(value) >= 100000) return (value < 0 ? '-' : '') + '₹' + (Math.abs(value) / 100000).toFixed(1) + 'L';
@@ -424,7 +424,13 @@ export default function AnalyticsDashboard({ initialTrades }: { initialTrades: T
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
-                scales: { x: { grid: { display: false } }, y: { display: false } }
+                scales: { 
+                  x: { 
+                    grid: { display: false },
+                    ticks: { font: { size: 10 }, color: "#71717a" }
+                  }, 
+                  y: { display: false } 
+                }
               }}
             />
           </div>
