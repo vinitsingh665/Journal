@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import html2canvas from "html2canvas";
-import { usePathname } from "next/navigation";
 
 export default function SnapshotTool({ userId }: { userId?: string }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -27,8 +26,6 @@ export default function SnapshotTool({ userId }: { userId?: string }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const pathname = usePathname();
-
   const takeSnapshot = async (action: "download" | "copy" | "copylink" | "newtab" | "tweet") => {
     setIsOpen(false);
     setIsCapturing(true);
@@ -41,7 +38,8 @@ export default function SnapshotTool({ userId }: { userId?: string }) {
           return;
         }
         
-        const publicUrl = `${window.location.origin}/shared/${userId}${pathname === '/' ? '/journal' : pathname}`;
+        const currentPath = window.location.pathname;
+        const publicUrl = `${window.location.origin}/shared/${userId}${currentPath === '/' ? '/journal' : currentPath}`;
         
         if (action === "copylink") {
           await navigator.clipboard.writeText(publicUrl);
