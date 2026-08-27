@@ -16,44 +16,49 @@ export function RiskTemplates({ templates, actions }: RiskTemplatesProps) {
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" strokeWidth="2"><path d="M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14"></path><path d="M12 22v-9"></path><path d="M8 12h8"></path></svg>
         <h3 className="font-bold text-sm tracking-wide text-secondary">SAVED TEMPLATES</h3>
       </div>
-      
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-5 w-full">
         {templates.map(t => (
-          <div key={t.id} className="bg-surface border border-border-secondary rounded-3xl p-6 flex flex-col justify-between group transition-all hover:border-primary/50 hover:shadow-lg h-[280px] w-full relative overflow-hidden">
-            <div className="flex justify-between items-start mb-2">
-              <span className="font-bold text-text-primary text-lg line-clamp-2 leading-tight pr-6">{t.name}</span>
+          <div 
+            key={t.id} 
+            onClick={() => actions.loadTemplate(t.id)}
+            className="card group cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-primary/40 relative overflow-hidden"
+          >
+            <div className="p-6 flex flex-col gap-5 h-full w-full">
+              {/* Header: Icon + Title + Delete */}
+            <div className="flex justify-between items-start">
+              <div className="flex items-center gap-2.5">
+                <div className="p-1.5 bg-primary/10 text-primary rounded-lg">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                </div>
+                <h4 className="font-semibold text-text-primary text-base line-clamp-1">{t.name}</h4>
+              </div>
               <button 
                 onClick={(e) => { e.stopPropagation(); actions.deleteTemplate(t.id); }}
-                className="text-muted hover:text-negative transition-colors opacity-0 group-hover:opacity-100 absolute top-4 right-4 bg-surface/80 rounded-full p-1.5"
+                className="text-muted/40 hover:text-negative transition-colors p-1"
                 title="Delete Template"
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
               </button>
             </div>
-            
-            <div className="flex flex-col gap-3 mb-4 flex-1 justify-center">
-              <div className="flex flex-col">
-                <span className="text-[11px] text-muted uppercase tracking-wider font-semibold">Capital</span>
-                <strong className="text-text-primary text-base truncate">{formatINR(t.capital)}</strong>
+
+            {/* Main Stat: Capital */}
+            <div>
+              <p className="text-[11px] uppercase tracking-wider text-muted font-medium mb-1">Trading Capital</p>
+              <p className="text-2xl font-bold text-text-primary tracking-tight truncate">{formatINR(t.capital)}</p>
+            </div>
+
+            {/* Minor Stats: Pills */}
+            <div className="flex gap-4 mt-2">
+              <div className="flex-1 bg-background/50 border border-border-secondary/40 rounded-xl py-3 px-2 flex flex-col items-center justify-center">
+                <span className="text-[10px] uppercase text-muted font-semibold mb-1">Risk</span>
+                <span className="text-sm font-bold text-primary">{t.defaultTradeRiskPct}%</span>
               </div>
-              <div className="flex justify-between items-center">
-                <div className="flex flex-col">
-                  <span className="text-[11px] text-muted uppercase tracking-wider font-semibold">Risk</span>
-                  <strong className="text-text-primary text-base">{t.defaultTradeRiskPct}%</strong>
-                </div>
-                <div className="flex flex-col text-right">
-                  <span className="text-[11px] text-muted uppercase tracking-wider font-semibold">Win Rate</span>
-                  <strong className="text-text-primary text-base">{t.winRatePct}%</strong>
-                </div>
+              <div className="flex-1 bg-background/50 border border-border-secondary/40 rounded-xl py-3 px-2 flex flex-col items-center justify-center">
+                <span className="text-[10px] uppercase text-muted font-semibold mb-1">Win Rate</span>
+                <span className="text-sm font-bold text-text-primary">{t.winRatePct}%</span>
               </div>
             </div>
-            
-            <button 
-              onClick={() => actions.loadTemplate(t.id)}
-              className="w-full py-2.5 text-sm font-semibold rounded-lg bg-primary/10 text-primary hover:bg-primary hover:text-white transition-colors mt-auto"
-            >
-              Calculate
-            </button>
+            </div>
           </div>
         ))}
       </div>

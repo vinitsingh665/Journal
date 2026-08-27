@@ -27,7 +27,17 @@ export default function RiskCalculatorPage() {
           </p>
         </div>
         
-        {isCalculatorOpen && (
+        {!isCalculatorOpen ? (
+          <div className="flex gap-3">
+            <button 
+              onClick={engine.actions.openCalculator}
+              className="btn btn-primary"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Calculate Risk
+            </button>
+          </div>
+        ) : (
           <div className="flex gap-3">
             <button 
               onClick={engine.actions.saveTemplate}
@@ -38,7 +48,6 @@ export default function RiskCalculatorPage() {
                Save Template
             </button>
             <button className="btn btn-primary" onClick={() => {
-               // Reset everything to defaults
                engine.setters.setCapital(500000);
                engine.setters.setMaxPortfolioRiskPct(1.5);
                engine.setters.setDefaultTradeRiskPct(0.5);
@@ -56,7 +65,7 @@ export default function RiskCalculatorPage() {
 
       <div className="flex gap-6 items-start">
         {/* Left Sidebar for Templates */}
-        {hasTemplates && (
+        {hasTemplates && !isCalculatorOpen && (
           <div className="w-[300px] shrink-0">
             <RiskTemplates templates={engine.state.savedTemplates} actions={engine.actions} />
           </div>
@@ -64,26 +73,7 @@ export default function RiskCalculatorPage() {
 
         {/* Main Content Area */}
         <div className="flex-1 min-w-0 w-full">
-          {!isCalculatorOpen ? (
-            <div className="card flex flex-col items-center justify-center p-16 text-center border-dashed border-2 border-border-secondary">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6 text-primary">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
-              </div>
-              <h2 className="text-2xl font-bold mb-2">
-                {hasTemplates ? "Calculate your risk" : "Calculate your first risk"}
-              </h2>
-              <p className="text-muted mb-8 max-w-md">
-                Plan your position sizing and portfolio risk management before entering a trade to protect your capital.
-              </p>
-              <button 
-                onClick={engine.actions.openCalculator}
-                className="btn btn-primary btn-lg"
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mr-2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                {hasTemplates ? "Calculate New Risk" : "Calculate First Risk"}
-              </button>
-            </div>
-          ) : (
+          {isCalculatorOpen && (
             <div className="flex flex-col gap-6">
               <PortfolioOverview state={engine.state} portfolio={engine.portfolio} />
 
