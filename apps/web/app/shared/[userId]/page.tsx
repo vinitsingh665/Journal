@@ -14,7 +14,7 @@ import EquityCurve from "@/components/dashboard/EquityCurve";
 import PnlDistribution from "@/components/dashboard/PnlDistribution";
 import RecentTrades from "@/components/dashboard/RecentTrades";
 import { Suspense } from "react";
-import DashboardLoading from "../(dashboard)/loading";
+import DashboardLoading from "../../(dashboard)/loading";
 
 async function SharedDashboardContent({ userId }: { userId: string }) {
   // Fetch all trades (excluding archived ones)

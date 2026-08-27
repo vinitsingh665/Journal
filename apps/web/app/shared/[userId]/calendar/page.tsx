@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { fetchMultipleQuotes, calculateUnrealizedPnl } from "@/lib/yahoo-finance";
 import CalendarView from "@/components/calendar/CalendarView";
 import { Suspense } from "react";
-import DashboardLoading from "../../(dashboard)/loading";
+import DashboardLoading from "../../../(dashboard)/loading";
 
 async function SharedCalendarContent({ userId }: { userId: string }) {
   // Fetch ALL trades to group by Entry Date
