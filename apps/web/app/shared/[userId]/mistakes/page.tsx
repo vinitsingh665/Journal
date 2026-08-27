@@ -437,10 +437,10 @@ export default function MistakesPage() {
       </div>
 
       {/* MAIN GRID */}
-      <div style={{ display: "grid", gridTemplateColumns: "3fr 1fr", gap: "var(--space-6)" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "var(--space-6)" }}>
         
         {/* LEFT COLUMN: TABLE */}
-        <div className="card" style={{ display: "flex", flexDirection: "column" }}>
+        <div className="card" style={{ display: "flex", flexDirection: "column", gridColumn: "span 3" }}>
           
           {/* Table Toolbar */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 20px", borderBottom: "1px solid var(--border-color)" }}>
@@ -538,7 +538,7 @@ export default function MistakesPage() {
         </div>
 
         {/* RIGHT COLUMN: INSIGHTS */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-6)" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-6)", gridColumn: "span 1" }}>
           
           {/* MISTAKES BREAKDOWN */}
           <div className="card" style={{ padding: "var(--space-5)" }}>
