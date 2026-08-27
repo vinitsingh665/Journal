@@ -218,8 +218,6 @@ export default function SnapshotTool({ userId }: { userId?: string }) {
             Copy link
           </button>
           
-          <div style={{ height: "1px", background: "var(--border-color)", margin: "4px 0" }}></div>
-          
           <button
             onClick={() => takeSnapshot("tweet")}
             style={{
