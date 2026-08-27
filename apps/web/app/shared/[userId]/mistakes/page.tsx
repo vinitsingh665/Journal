@@ -380,7 +380,7 @@ export default function MistakesPage() {
       </div>
 
       {/* METRICS ROW */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "var(--space-6)", marginBottom: "var(--space-6)" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: "var(--space-6)", marginBottom: "var(--space-6)" }}>
         {/* Total Mistakes */}
         <div className="card" style={{ padding: "var(--space-5)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
@@ -437,7 +437,7 @@ export default function MistakesPage() {
       </div>
 
       {/* MAIN GRID */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "var(--space-6)" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: "var(--space-6)" }}>
         
         {/* LEFT COLUMN: TABLE */}
         <div className="card" style={{ display: "flex", flexDirection: "column", gridColumn: "span 3" }}>
