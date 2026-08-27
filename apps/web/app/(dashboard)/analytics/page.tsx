@@ -30,9 +30,9 @@ export default async function AnalyticsPage() {
     orderBy: { entryTime: "asc" },
   });
 
-  const openTrades = trades.filter((t) => t.status === "OPEN" || t.status === "PARTIAL");
+  const openTrades = trades.filter((t: any) => t.status === "OPEN" || t.status === "PARTIAL");
   const uniqueSymbols = [
-    ...new Set(openTrades.map((t) => JSON.stringify({ symbol: t.symbol, exchange: t.exchange }))),
+    ...new Set(openTrades.map((t: any) => JSON.stringify({ symbol: t.symbol, exchange: t.exchange }))),
   ].map((s) => JSON.parse(s) as { symbol: string; exchange: string });
 
   let liveQuotes = new Map<string, { regularMarketPrice: number }>();
@@ -44,7 +44,7 @@ export default async function AnalyticsPage() {
     console.error("Failed to fetch live quotes for analytics:", e);
   }
 
-  const serializedTrades = trades.map((t) => {
+  const serializedTrades = trades.map((t: any) => {
     let netPnl = t.netPnl;
     if (t.status === "OPEN" || t.status === "PARTIAL") {
       const quote = liveQuotes.get(`${t.symbol}:${t.exchange}`);
