@@ -1,9 +1,11 @@
+import { Suspense } from "react";
+import DashboardLoading from "../loading";
 import { prisma } from "@repo/database";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import PositionsClient from "@/components/positions/PositionsClient";
 
-export default async function PositionsPage() {
+async function PositionsContent() {
   const userId = await getCurrentUser();
   if (!userId) redirect("/login");
 
@@ -40,4 +42,12 @@ export default async function PositionsPage() {
   }));
 
   return <PositionsClient initialPositions={serializedTrades} capital={capital} />;
+}
+
+export default function PositionsPage() {
+  return (
+    <Suspense fallback={<DashboardLoading />}>
+      <PositionsContent />
+    </Suspense>
+  );
 }

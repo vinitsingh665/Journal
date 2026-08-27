@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import DashboardLoading from "../loading";
 import { prisma } from "@repo/database";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
@@ -5,7 +7,7 @@ import Link from "next/link";
 import { fetchMultipleQuotes, calculateUnrealizedPnl } from "@/lib/yahoo-finance";
 import JournalList from "@/components/journal/JournalList";
 
-export default async function JournalPage() {
+async function JournalContent() {
   const userId = await getCurrentUser();
   if (!userId) redirect("/login");
 
@@ -120,5 +122,13 @@ export default async function JournalPage() {
       </div>
       <JournalList trades={serialized} />
     </>
+  );
+}
+
+export default function JournalPage() {
+  return (
+    <Suspense fallback={<DashboardLoading />}>
+      <JournalContent />
+    </Suspense>
   );
 }

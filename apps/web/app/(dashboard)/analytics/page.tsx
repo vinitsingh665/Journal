@@ -1,10 +1,12 @@
+import { Suspense } from "react";
+import DashboardLoading from "../loading";
 import { prisma } from "@repo/database";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { fetchMultipleQuotes, calculateUnrealizedPnl } from "@/lib/yahoo-finance";
 import AnalyticsDashboard from "@/components/analytics/AnalyticsDashboard";
 
-export default async function AnalyticsPage() {
+async function AnalyticsContent() {
   const userId = await getCurrentUser();
   if (!userId) redirect("/login");
 
@@ -81,5 +83,13 @@ export default async function AnalyticsPage() {
       </div>
       <AnalyticsDashboard initialTrades={serializedTrades as any} />
     </>
+  );
+}
+
+export default function AnalyticsPage() {
+  return (
+    <Suspense fallback={<DashboardLoading />}>
+      <AnalyticsContent />
+    </Suspense>
   );
 }

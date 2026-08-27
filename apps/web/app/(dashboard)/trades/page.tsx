@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import DashboardLoading from "../loading";
 import { prisma } from "@repo/database";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
@@ -5,7 +7,7 @@ import Link from "next/link";
 import { fetchMultipleQuotes, calculateUnrealizedPnl } from "@/lib/yahoo-finance";
 import TradesList from "@/components/trades/TradesList";
 
-export default async function TradesPage() {
+async function TradesContent() {
   const userId = await getCurrentUser();
   if (!userId) redirect("/login");
 
@@ -124,5 +126,13 @@ export default async function TradesPage() {
       </div>
       <TradesList trades={serializedTrades} />
     </>
+  );
+}
+
+export default function TradesPage() {
+  return (
+    <Suspense fallback={<DashboardLoading />}>
+      <TradesContent />
+    </Suspense>
   );
 }
