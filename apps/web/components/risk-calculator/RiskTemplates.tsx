@@ -5,9 +5,10 @@ import { RiskTemplate } from "./useRiskEngine";
 interface RiskTemplatesProps {
   templates: RiskTemplate[];
   actions: any;
+  isShared?: boolean;
 }
 
-export function RiskTemplates({ templates, actions }: RiskTemplatesProps) {
+export function RiskTemplates({ templates, actions, isShared }: RiskTemplatesProps) {
   if (!templates || templates.length === 0) return null;
 
   return (
@@ -32,15 +33,17 @@ export function RiskTemplates({ templates, actions }: RiskTemplatesProps) {
                 </div>
                 <h4 className="font-semibold text-text-primary text-base line-clamp-1">{t.name}</h4>
               </div>
-              <span 
-                role="button"
-                tabIndex={0}
-                onClick={(e) => { e.stopPropagation(); actions.deleteTemplate(t.id); }}
-                className="text-muted/40 hover:text-negative transition-colors p-1"
-                title="Delete Template"
-              >
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-              </span>
+              {!isShared && (
+                <span 
+                  role="button"
+                  tabIndex={0}
+                  onClick={(e) => { e.stopPropagation(); actions.deleteTemplate(t.id); }}
+                  className="text-muted/40 hover:text-negative transition-colors p-1"
+                  title="Delete Template"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                </span>
+              )}
             </div>
 
             {/* Main Stat: Capital */}

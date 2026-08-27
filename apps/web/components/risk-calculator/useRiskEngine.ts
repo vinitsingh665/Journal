@@ -23,7 +23,7 @@ export interface PlannerTrade {
   status: "OPEN" | "PLANNED";
 }
 
-export function useRiskEngine() {
+export function useRiskEngine(userId?: string) {
   // Global Settings
   const [capital, setCapital] = useState<number>(500000);
   const [maxPortfolioRiskPct, setMaxPortfolioRiskPct] = useState<number>(1.5);
@@ -51,33 +51,39 @@ export function useRiskEngine() {
   useEffect(() => {
     const fetchTemplates = async () => {
       try {
-        const res = await fetch("/api/risk-templates");
+        const endpoint = userId 
+          ? `/api/risk-templates/public/${userId}` 
+          : "/api/risk-templates";
+          
+        const res = await fetch(endpoint);
         if (res.ok) {
           const dbTemplates = await res.json();
           setSavedTemplates(dbTemplates);
           
-          // One-time migration of localStorage if db is empty but local exists
-          const stored = localStorage.getItem("risk_templates");
-          if (stored && dbTemplates.length === 0) {
-            try {
-              const localData = JSON.parse(stored);
-              if (Array.isArray(localData) && localData.length > 0) {
-                for (const t of localData) {
-                  await fetch("/api/risk-templates", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(t),
-                  });
+          if (!userId) {
+            // One-time migration of localStorage if db is empty but local exists (only for owner)
+            const stored = localStorage.getItem("risk_templates");
+            if (stored && dbTemplates.length === 0) {
+              try {
+                const localData = JSON.parse(stored);
+                if (Array.isArray(localData) && localData.length > 0) {
+                  for (const t of localData) {
+                    await fetch("/api/risk-templates", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify(t),
+                    });
+                  }
+                  const updatedRes = await fetch("/api/risk-templates");
+                  if (updatedRes.ok) {
+                    setSavedTemplates(await updatedRes.json());
+                  }
                 }
-                const updatedRes = await fetch("/api/risk-templates");
-                if (updatedRes.ok) {
-                  setSavedTemplates(await updatedRes.json());
-                }
-              }
-            } catch (e) {}
-            localStorage.removeItem("risk_templates");
-          } else if (stored) {
-             localStorage.removeItem("risk_templates");
+              } catch (e) {}
+              localStorage.removeItem("risk_templates");
+            } else if (stored) {
+               localStorage.removeItem("risk_templates");
+            }
           }
         }
       } catch (err) {
@@ -85,7 +91,7 @@ export function useRiskEngine() {
       }
     };
     fetchTemplates();
-  }, []);
+  }, [userId]);
 
   // Derived: Global Risk Wallet
   const maxRiskBudget = capital * (maxPortfolioRiskPct / 100);
@@ -207,6 +213,8 @@ export function useRiskEngine() {
   };
 
   const saveTemplate = async (name: string) => {
+    if (userId) return; // Disallow saving in shared view
+
     const newTemplateData = {
       name: name || `Profile ${savedTemplates.length + 1}`,
       capital,
@@ -245,6 +253,8 @@ export function useRiskEngine() {
   };
   
   const deleteTemplate = async (id: string) => {
+    if (userId) return; // Disallow deleting in shared view
+    
     setSavedTemplates(savedTemplates.filter(t => t.id !== id));
     try {
       await fetch(`/api/risk-templates/${id}`, { method: "DELETE" });
