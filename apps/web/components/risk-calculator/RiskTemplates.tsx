@@ -23,7 +23,7 @@ export function RiskTemplates({ templates, actions }: RiskTemplatesProps) {
             onClick={() => actions.loadTemplate(t.id)}
             className="card group cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-primary/40 relative overflow-hidden"
           >
-            <div className="p-6 flex flex-col gap-5 h-full w-full">
+            <div style={{ padding: '24px' }} className="flex flex-col gap-5 h-full w-full box-border">
               {/* Header: Icon + Title + Delete */}
             <div className="flex justify-between items-start">
               <div className="flex items-center gap-2.5">
@@ -32,13 +32,15 @@ export function RiskTemplates({ templates, actions }: RiskTemplatesProps) {
                 </div>
                 <h4 className="font-semibold text-text-primary text-base line-clamp-1">{t.name}</h4>
               </div>
-              <button 
+              <span 
+                role="button"
+                tabIndex={0}
                 onClick={(e) => { e.stopPropagation(); actions.deleteTemplate(t.id); }}
                 className="text-muted/40 hover:text-negative transition-colors p-1"
                 title="Delete Template"
               >
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-              </button>
+              </span>
             </div>
 
             {/* Main Stat: Capital */}

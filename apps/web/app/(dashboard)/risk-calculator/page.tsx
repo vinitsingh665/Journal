@@ -40,6 +40,14 @@ export default function RiskCalculatorPage() {
         ) : (
           <div className="flex gap-3">
             <button 
+              onClick={engine.actions.closeCalculator}
+              className="btn btn-secondary bg-transparent border-border-secondary text-secondary mr-2"
+              title="Go back to the Risk Calculator home"
+            >
+               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+               Back
+            </button>
+            <button 
               onClick={engine.actions.saveTemplate}
               className="btn btn-secondary bg-transparent border-border-secondary"
               title="Save current risk settings as a new template"
@@ -73,6 +81,24 @@ export default function RiskCalculatorPage() {
 
         {/* Main Content Area */}
         <div className="flex-1 min-w-0 w-full">
+          {!isCalculatorOpen && !hasTemplates && (
+            <div className="flex flex-col items-center justify-center py-24 bg-surface border border-dashed border-border-secondary rounded-2xl w-full h-[400px]">
+              <div className="w-16 h-16 bg-primary/10 text-primary rounded-2xl flex items-center justify-center mb-6">
+                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+              </div>
+              <h2 className="text-xl font-bold text-text-primary mb-2">No Risk Templates Yet</h2>
+              <p className="text-secondary max-w-sm text-center mb-8">
+                Calculate your first risk profile. You can save your capital and risk settings as a template later.
+              </p>
+              <button 
+                onClick={engine.actions.openCalculator}
+                className="btn btn-primary px-6 py-2.5"
+              >
+                Calculate your first risk
+              </button>
+            </div>
+          )}
+
           {isCalculatorOpen && (
             <div className="flex flex-col gap-6">
               <PortfolioOverview state={engine.state} portfolio={engine.portfolio} />
