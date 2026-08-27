@@ -1,19 +1,20 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import html2canvas from "html2canvas";
 import { usePathname } from "next/navigation";
 
 export default function SnapshotTool({ userId }: { userId?: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
+  const [notification, setNotification] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
 
-  const showToast = (message: string) => {
-    setToast(message);
-    setTimeout(() => setToast(null), 3000);
-  };
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -35,7 +36,7 @@ export default function SnapshotTool({ userId }: { userId?: string }) {
     try {
       if (action === "copylink" || action === "tweet") {
         if (!userId) {
-          showToast("Error: Cannot generate public link without User ID.");
+          alert("Error: User ID not found. Cannot generate public link.");
           setIsCapturing(false);
           return;
         }
@@ -44,7 +45,8 @@ export default function SnapshotTool({ userId }: { userId?: string }) {
         
         if (action === "copylink") {
           await navigator.clipboard.writeText(publicUrl);
-          showToast("Public share link copied to clipboard!");
+          setNotification("Anyone with this link can view this page (read-only mode).");
+          setTimeout(() => setNotification(null), 4000);
         } else if (action === "tweet") {
           const tweetText = encodeURIComponent(`Check out my trading performance on TraderLabs! 📈📊\n${publicUrl}`);
           window.open(`https://twitter.com/intent/tweet?text=${tweetText}`, "_blank");
@@ -80,10 +82,12 @@ export default function SnapshotTool({ userId }: { userId?: string }) {
               await navigator.clipboard.write([
                 new ClipboardItem({ "image/png": blob })
               ]);
-              showToast("Snapshot copied to clipboard!");
+              setNotification("Snapshot copied to clipboard!");
+              setTimeout(() => setNotification(null), 3000);
             } catch (err) {
               console.error("Failed to copy image: ", err);
-              showToast("Failed to copy image. Browser not supported.");
+              setNotification("Failed to copy image to clipboard.");
+              setTimeout(() => setNotification(null), 3000);
             }
           }
         }, "image/png");
@@ -101,7 +105,7 @@ export default function SnapshotTool({ userId }: { userId?: string }) {
       }
     } catch (e) {
       console.error("Failed to capture snapshot:", e);
-      showToast("Failed to capture snapshot.");
+      alert("Failed to capture snapshot.");
     } finally {
       setIsCapturing(false);
     }
@@ -279,33 +283,64 @@ export default function SnapshotTool({ userId }: { userId?: string }) {
         </div>
       )}
 
-      {/* Custom Toast Notification */}
-      {toast && (
+      {mounted && notification && createPortal(
         <div style={{
           position: "fixed",
-          bottom: "24px",
-          left: "50%",
-          transform: "translateX(-50%)",
-          background: "var(--bg-secondary)",
-          color: "var(--text-primary)",
-          padding: "12px 20px",
-          borderRadius: "8px",
-          border: "1px solid var(--border-color)",
-          boxShadow: "0 10px 25px rgba(0,0,0,0.5)",
-          zIndex: 999999,
-          fontSize: "14px",
+          top: 0, left: 0, right: 0, bottom: 0,
           display: "flex",
           alignItems: "center",
-          gap: "10px",
-          fontWeight: 500,
-          animation: "fadeInUp 0.2s ease-out"
+          justifyContent: "center",
+          zIndex: 999999,
+          pointerEvents: "none"
         }}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-            <polyline points="22 4 12 14.01 9 11.01"></polyline>
-          </svg>
-          {toast}
-        </div>
+          <div style={{
+            background: "var(--bg-secondary)",
+            color: "var(--text-primary)",
+            padding: "16px 24px",
+            borderRadius: "12px",
+            border: "1px solid var(--border-color)",
+            boxShadow: "0 25px 50px -12px rgba(0,0,0,0.5)",
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+            fontWeight: 500,
+            animation: "fadeIn 0.2s ease-out",
+            pointerEvents: "auto"
+          }}>
+            <div style={{ 
+              background: "rgba(16, 185, 129, 0.1)", 
+              color: "#10b981", 
+              borderRadius: "50%", 
+              width: 32, 
+              height: 32, 
+              display: "flex", 
+              alignItems: "center", 
+              justifyContent: "center" 
+            }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+            {notification}
+            <button 
+              onClick={() => setNotification(null)}
+              style={{
+                background: "transparent",
+                border: "none",
+                color: "var(--text-muted)",
+                cursor: "pointer",
+                marginLeft: "8px",
+                padding: "4px",
+                display: "flex"
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
+        </div>,
+        document.body
       )}
     </div>
   );
