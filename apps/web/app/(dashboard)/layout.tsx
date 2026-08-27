@@ -27,7 +27,7 @@ export default async function DashboardLayout({
     <div className="app-layout">
       <Sidebar userName={userName} tradingStyle={tradingStyle} avatar={avatar} />
       <div className="app-main">
-        <Topbar userName={userName} avatar={avatar} isGuest={user?.isGuest} />
+        <Topbar userName={userName} avatar={avatar} isGuest={user?.isGuest} userId={userId} />
         <main className="app-content">{children}</main>
       </div>
     </div>

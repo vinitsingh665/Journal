@@ -5,7 +5,7 @@ import { useState } from "react";
 import AiAssistant from "@/components/ai/AiAssistant";
 import SnapshotTool from "@/components/layout/SnapshotTool";
 
-export default function Topbar({ userName = "Trader", avatar = null, isGuest = false }: { userName?: string, avatar?: string | null, isGuest?: boolean }) {
+export default function Topbar({ userName = "Trader", avatar = null, isGuest = false, userId }: { userName?: string, avatar?: string | null, isGuest?: boolean, userId?: string }) {
 
   return (
     <header className="topbar" id="topbar">
@@ -17,7 +17,7 @@ export default function Topbar({ userName = "Trader", avatar = null, isGuest = f
       </div>
 
       <div className="topbar-right">
-        <SnapshotTool />
+        <SnapshotTool userId={userId} />
         {!isGuest && <AiAssistant />}
 
         {/* New Trade Button */}
