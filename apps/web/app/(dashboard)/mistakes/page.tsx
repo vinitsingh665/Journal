@@ -166,11 +166,11 @@ const barOptions = {
   plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c: any) => `₹${Math.abs(c.raw).toLocaleString()}` } } },
   scales: {
     x: {
-      grid: { color: "rgba(0,0,0,0.05)" },
+      grid: { color: "rgba(128,128,128,0.2)" },
       border: { dash: [5, 5] },
-      ticks: { font: { size: 10 }, color: "var(--text-muted)", callback: (v: any) => v < 0 ? `-₹${Math.abs(v/1000)}K` : `₹${v/1000}K`, maxTicksLimit: 5 }
+      ticks: { font: { size: 10 }, color: "#94a3b8", callback: (v: any) => v < 0 ? `-₹${Math.abs(v/1000)}K` : `₹${v/1000}K`, maxTicksLimit: 5 }
     },
-    y: { grid: { display: false }, ticks: { font: { size: 10, weight: 500 }, color: "var(--text-primary)" } }
+    y: { grid: { display: false }, ticks: { font: { size: 10, weight: 500 }, color: "#d4d4d8" } }
   }
 };
 
@@ -357,12 +357,12 @@ export default function MistakesPage() {
           <p className="text-muted" style={{ margin: 0, fontSize: "var(--text-sm)" }}>Analyze your mistakes to identify patterns and become a better trader.</p>
         </div>
         <div style={{ display: "flex", gap: 12 }}>
-          <button className="input" style={{ display: "flex", alignItems: "center", gap: 8, background: "var(--bg-secondary)", border: "1px solid var(--border-color)", padding: "8px 12px", height: "auto" }}>
+          <button className="input" style={{ display: "flex", alignItems: "center", gap: 8, background: "var(--bg-secondary)", border: "1px solid var(--border-color)", padding: "8px 12px", height: "auto", borderRadius: "var(--radius-md)", color: "var(--text-primary)" }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
             23 Aug - 29 Aug 2026
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
           </button>
-          <button className="input" style={{ display: "flex", alignItems: "center", gap: 8, background: "var(--bg-secondary)", border: "1px solid var(--border-color)", padding: "8px 12px", height: "auto" }}>
+          <button className="input" style={{ display: "flex", alignItems: "center", gap: 8, background: "var(--bg-secondary)", border: "1px solid var(--border-color)", padding: "8px 12px", height: "auto", borderRadius: "var(--radius-md)", color: "var(--text-primary)" }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
             All Accounts
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
