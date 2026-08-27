@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@prisma/client": "~6.19.0",
     "@react-oauth/google": "^0.13.5",
     "@repo/database": "workspace:*",
     "@repo/trading-engine": "workspace:*",
