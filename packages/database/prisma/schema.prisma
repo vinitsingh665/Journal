@@ -26,6 +26,7 @@ model User {
   dailyJournals DailyJournal[]
   screenshots   Screenshot[]
   importLogs    ImportLog[]
+  actionPlans   ActionPlan[]
   settings      UserSettings?
 }
 
@@ -315,4 +316,16 @@ model DailyJournal {
   updatedAt        DateTime @updatedAt
 
   @@unique([userId, date])
+}
+
+// ─── ACTION PLANS ───────────────────────────────────
+
+model ActionPlan {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }

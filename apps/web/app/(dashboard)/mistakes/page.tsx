@@ -200,13 +200,52 @@ export default function MistakesPage() {
   });
 
   // Action Plan State
-  const [actionPlans, setActionPlans] = useState([
-    "Focus on patience and wait for proper setups.",
-    "Never move stop loss once trade is active.",
-    "Limit max 2 trades per day.",
-    "Always define SL before entering trade."
-  ]);
+  const [actionPlans, setActionPlans] = useState<{id: string, content: string}[]>([]);
   const [newActionPlan, setNewActionPlan] = useState("");
+  const [isActionPlansLoaded, setIsActionPlansLoaded] = useState(false);
+
+  // Fetch Action Plans
+  useEffect(() => {
+    fetch("/api/action-plans")
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setActionPlans(data);
+        }
+        setIsActionPlansLoaded(true);
+      })
+      .catch(err => console.error("Failed to load action plans:", err));
+  }, []);
+
+  const handleAddActionPlan = async () => {
+    if (!newActionPlan.trim()) return;
+    const content = newActionPlan.trim();
+    setNewActionPlan(""); // Optimistic clear
+
+    try {
+      const res = await fetch("/api/action-plans", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content }),
+      });
+      if (res.ok) {
+        const newPlan = await res.json();
+        setActionPlans(prev => [...prev, newPlan]);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleDeleteActionPlan = async (id: string) => {
+    // Optimistic delete
+    setActionPlans(prev => prev.filter(p => p.id !== id));
+    try {
+      await fetch(`/api/action-plans/${id}`, { method: "DELETE" });
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   // Load from LocalStorage on mount
   useEffect(() => {
@@ -608,14 +647,15 @@ export default function MistakesPage() {
           <div className="card" style={{ padding: "var(--space-5)" }}>
             <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.05em", marginBottom: 16 }}>ACTION PLAN</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 16 }}>
-              {actionPlans.map((item, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8, fontSize: 12 }}>
+              {actionPlans.map((item) => (
+                <div key={item.id} style={{ display: "flex", alignItems: "flex-start", gap: 8, fontSize: 12 }}>
                   <div style={{ color: "#8b5cf6", marginTop: 2 }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg></div>
-                  <span className="text-muted" style={{ lineHeight: 1.4, flex: 1 }}>{item}</span>
-                  <button onClick={() => setActionPlans(actionPlans.filter((_, idx) => idx !== i))} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-negative)", padding: 0 }}>✕</button>
+                  <span className="text-muted" style={{ lineHeight: 1.4, flex: 1 }}>{item.content}</span>
+                  <button onClick={() => handleDeleteActionPlan(item.id)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-negative)", padding: 0 }}>✕</button>
                 </div>
               ))}
-              {actionPlans.length === 0 && <span className="text-muted" style={{ fontSize: 12 }}>No action plans yet.</span>}
+              {actionPlans.length === 0 && isActionPlansLoaded && <span className="text-muted" style={{ fontSize: 12 }}>No action plans yet.</span>}
+              {!isActionPlansLoaded && <span className="text-muted" style={{ fontSize: 12 }}>Loading action plans...</span>}
             </div>
             <div style={{ display: "flex", gap: 8 }}>
               <input 
@@ -626,19 +666,13 @@ export default function MistakesPage() {
                 className="input"
                 style={{ flex: 1, background: "var(--bg-secondary)", border: "1px solid var(--border-color)", padding: "8px 12px", borderRadius: 6, fontSize: 12 }} 
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' && newActionPlan.trim()) {
-                    setActionPlans([...actionPlans, newActionPlan.trim()]);
-                    setNewActionPlan("");
+                  if (e.key === 'Enter') {
+                    handleAddActionPlan();
                   }
                 }}
               />
               <button 
-                onClick={() => {
-                  if (newActionPlan.trim()) {
-                    setActionPlans([...actionPlans, newActionPlan.trim()]);
-                    setNewActionPlan("");
-                  }
-                }} 
+                onClick={handleAddActionPlan} 
                 className="btn btn-ghost" 
                 style={{ fontSize: 12, color: "#8b5cf6", border: "1px solid rgba(139, 92, 246, 0.3)", padding: "8px 12px" }}
               >
