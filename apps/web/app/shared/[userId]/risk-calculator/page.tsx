@@ -21,6 +21,13 @@ export default function SharedRiskCalculatorPage() {
   const [templateName, setTemplateName] = React.useState("");
   const [showToast, setShowToast] = React.useState(false);
 
+  React.useEffect(() => {
+    // Automatically open the calculator view when someone visits the shared link
+    if (!engine.state.isCalculatorOpen) {
+      engine.actions.openCalculator();
+    }
+  }, [engine.actions]);
+
   const handleSaveTemplate = async () => {
     await engine.actions.saveTemplate(templateName);
     setShowSaveModal(false);
