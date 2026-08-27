@@ -26,7 +26,7 @@ export default function SnapshotTool({ userId }: { userId?: string }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const takeSnapshot = async (action: "download" | "copy" | "copylink" | "newtab" | "tweet") => {
+  const takeSnapshot = async (action: "download" | "copy" | "copylink" | "tweet") => {
     setIsOpen(false);
     setIsCapturing(true);
 
@@ -86,17 +86,6 @@ export default function SnapshotTool({ userId }: { userId?: string }) {
               console.error("Failed to copy image: ", err);
               setNotification("Failed to copy image to clipboard.");
               setTimeout(() => setNotification(null), 3000);
-            }
-          }
-        }, "image/png");
-      } else if (action === "newtab") {
-        canvas.toBlob((blob) => {
-          if (blob) {
-            // Browsers often block data/blob URLs from opening directly, so we write to a new window
-            const newWindow = window.open();
-            if (newWindow) {
-              newWindow.document.write(`<body style="margin:0;display:flex;justify-content:center;background:#0e1117;"><img src="${URL.createObjectURL(blob)}" style="max-width:100%;height:auto;" /></body>`);
-              newWindow.document.title = "TraderLabs Snapshot";
             }
           }
         }, "image/png");
@@ -229,31 +218,7 @@ export default function SnapshotTool({ userId }: { userId?: string }) {
             Copy link
           </button>
           
-          <button
-            onClick={() => takeSnapshot("newtab")}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              width: "100%",
-              padding: "8px 16px",
-              background: "transparent",
-              border: "none",
-              color: "var(--text-primary)",
-              fontSize: "13px",
-              cursor: "pointer",
-              textAlign: "left"
-            }}
-            onMouseOver={(e) => e.currentTarget.style.background = "var(--border-secondary)"}
-            onMouseOut={(e) => e.currentTarget.style.background = "transparent"}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-              <polyline points="15 3 21 3 21 9" />
-              <line x1="10" y1="14" x2="21" y2="3" />
-            </svg>
-            Open in new tab
-          </button>
+          <div style={{ height: "1px", background: "var(--border-color)", margin: "4px 0" }}></div>
           
           <button
             onClick={() => takeSnapshot("tweet")}
