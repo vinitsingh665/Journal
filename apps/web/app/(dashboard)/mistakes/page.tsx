@@ -247,23 +247,50 @@ export default function MistakesPage() {
     }
   };
 
-  // Load from LocalStorage on mount
+  // Fetch from DB on mount, and migrate local data if needed
   useEffect(() => {
-    const stored = localStorage.getItem("mistakes_data");
-    if (stored) {
+    const fetchMistakes = async () => {
       try {
-        setMistakes(JSON.parse(stored));
-      } catch (e) {}
-    }
-    setIsLoaded(true);
+        const res = await fetch("/api/mistakes");
+        if (res.ok) {
+          const dbMistakes = await res.json();
+          setMistakes(dbMistakes);
+          
+          // One-time migration of localStorage if db is empty but local exists
+          const stored = localStorage.getItem("mistakes_data");
+          if (stored && dbMistakes.length === 0) {
+            try {
+              const localData = JSON.parse(stored);
+              if (Array.isArray(localData) && localData.length > 0) {
+                // Migrate them one by one
+                for (const m of localData) {
+                  await fetch("/api/mistakes", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(m),
+                  });
+                }
+                // Re-fetch after migration
+                const updatedRes = await fetch("/api/mistakes");
+                if (updatedRes.ok) {
+                  setMistakes(await updatedRes.json());
+                }
+              }
+            } catch (e) {}
+            // Clear localStorage so we don't migrate again
+            localStorage.removeItem("mistakes_data");
+          } else if (stored) {
+             localStorage.removeItem("mistakes_data");
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load mistakes:", err);
+      } finally {
+        setIsLoaded(true);
+      }
+    };
+    fetchMistakes();
   }, []);
-
-  // Save to LocalStorage whenever mistakes change
-  useEffect(() => {
-    if (isLoaded) {
-      localStorage.setItem("mistakes_data", JSON.stringify(mistakes));
-    }
-  }, [mistakes, isLoaded]);
 
   // Load AI prefill if exists
   useEffect(() => {
@@ -358,28 +385,35 @@ export default function MistakesPage() {
 
   const mostRepeated = Object.entries(mistakeFrequencies).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
-  const handleAddMistake = (e: React.FormEvent) => {
+  const handleAddMistake = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newM = {
-      id: Date.now(),
-      title: newMistake.title,
-      desc: newMistake.desc,
-      category: newMistake.category,
-      color: CATEGORY_STYLES[newMistake.category].color,
-      bg: CATEGORY_STYLES[newMistake.category].bg,
-      icon: "!",
-      symbol: newMistake.symbol.toUpperCase(),
-      direction: newMistake.direction,
-      priceIn: Number(newMistake.priceIn),
-      priceOut: Number(newMistake.priceOut),
-      date: new Date(newMistake.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
-      impact: -Math.abs(Number(newMistake.impact)), // ensure negative
-      recurred: Number(newMistake.recurred),
-    };
-    
-    setMistakes([newM, ...mistakes]);
-    setShowModal(false);
-    setNewMistake({ title: "", desc: "", category: "Entry", symbol: "", direction: "LONG", priceIn: 0, priceOut: 0, date: new Date().toISOString().split('T')[0], impact: 0, recurred: 1 });
+    if (!newMistake.title || !newMistake.symbol || !newMistake.priceIn || !newMistake.priceOut) return;
+
+    try {
+      const res = await fetch("/api/mistakes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newMistake),
+      });
+
+      if (res.ok) {
+        const added = await res.json();
+        setMistakes([added, ...mistakes]);
+        setShowModal(false);
+        setNewMistake({ title: "", desc: "", category: "Entry", symbol: "", direction: "LONG", priceIn: 0, priceOut: 0, date: new Date().toISOString().split('T')[0], impact: 0, recurred: 1 });
+      }
+    } catch (e) {
+      console.error("Failed to save mistake", e);
+    }
+  };
+
+  const handleDeleteMistake = async (id: string) => {
+    setMistakes(mistakes.filter(x => x.id !== id));
+    try {
+      await fetch(`/api/mistakes/${id}`, { method: "DELETE" });
+    } catch (e) {
+      console.error("Failed to delete mistake", e);
+    }
   };
 
   // Sort & Filter
@@ -526,7 +560,7 @@ export default function MistakesPage() {
                   <tr key={m.id} style={{ borderBottom: "1px solid var(--border-color)", background: "transparent" }}>
                     <td style={{ padding: "16px 20px" }}>
                       <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
-                        <div style={{ marginTop: 2, color: m.color }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg></div>
+                        <div style={{ marginTop: 2, color: CATEGORY_STYLES[m.category]?.color || "#ef4444" }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg></div>
                         <div>
                           <div style={{ fontWeight: 600, marginBottom: 4, color: "var(--text-primary)" }}>{m.title}</div>
                           <div className="text-muted" style={{ fontSize: 12, lineHeight: 1.4, maxWidth: 300 }}>{m.desc}</div>
@@ -534,7 +568,7 @@ export default function MistakesPage() {
                       </div>
                     </td>
                     <td style={{ padding: "16px 20px" }}>
-                      <span style={{ padding: "4px 8px", background: m.bg, color: m.color, borderRadius: 4, fontSize: 11, fontWeight: 600, whiteSpace: "nowrap" }}>{m.category}</span>
+                      <span style={{ padding: "4px 8px", background: CATEGORY_STYLES[m.category]?.bg || "rgba(239, 68, 68, 0.1)", color: CATEGORY_STYLES[m.category]?.color || "#ef4444", borderRadius: 4, fontSize: 11, fontWeight: 600, whiteSpace: "nowrap" }}>{m.category}</span>
                     </td>
                     <td style={{ padding: "16px 20px" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
@@ -543,12 +577,14 @@ export default function MistakesPage() {
                       </div>
                       <div className="text-muted" style={{ fontSize: 11, whiteSpace: "nowrap" }}>₹{m.priceIn.toFixed(2)} → ₹{m.priceOut.toFixed(2)}</div>
                     </td>
-                    <td style={{ padding: "16px 20px", fontWeight: 500, color: "var(--text-primary)", whiteSpace: "nowrap" }}>{m.date}</td>
+                    <td style={{ padding: "16px 20px", fontWeight: 500, color: "var(--text-primary)", whiteSpace: "nowrap" }}>
+                      {new Date(m.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                    </td>
                     <td style={{ padding: "16px 20px", textAlign: "right", fontWeight: 600, color: "#ef4444" }}>-₹{Math.abs(m.impact).toLocaleString()}</td>
                     <td style={{ padding: "16px 20px", textAlign: "center", fontWeight: 500, color: "var(--text-muted)", whiteSpace: "nowrap" }}>{m.recurred} times</td>
                     <td style={{ padding: "16px 20px", textAlign: "center" }}>
                       <button 
-                        onClick={() => setMistakes(mistakes.filter(x => x.id !== m.id))} 
+                        onClick={() => handleDeleteMistake(m.id)} 
                         title="Delete Mistake"
                         style={{ background: "transparent", border: "none", cursor: "pointer", color: "var(--text-negative)", padding: 4 }}
                       >

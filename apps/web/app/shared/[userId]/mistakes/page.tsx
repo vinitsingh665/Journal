@@ -217,23 +217,20 @@ export default function MistakesPage() {
     }
   }, [params?.userId]);
 
-  // Load from LocalStorage on mount
+  // Fetch from public API on mount
   useEffect(() => {
-    const stored = localStorage.getItem("mistakes_data");
-    if (stored) {
-      try {
-        setMistakes(JSON.parse(stored));
-      } catch (e) {}
-    }
-    setIsLoaded(true);
-  }, []);
+    fetch(`/api/mistakes/public/${params.userId}`)
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setMistakes(data);
+        }
+      })
+      .catch(err => console.error("Failed to load public mistakes:", err))
+      .finally(() => setIsLoaded(true));
+  }, [params.userId]);
 
-  // Save to LocalStorage whenever mistakes change
-  useEffect(() => {
-    if (isLoaded) {
-      localStorage.setItem("mistakes_data", JSON.stringify(mistakes));
-    }
-  }, [mistakes, isLoaded]);
+
 
   // Load AI prefill if exists
   useEffect(() => {
@@ -491,7 +488,7 @@ export default function MistakesPage() {
                   <tr key={m.id} style={{ borderBottom: "1px solid var(--border-color)", background: "transparent" }}>
                     <td style={{ padding: "16px 20px" }}>
                       <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
-                        <div style={{ marginTop: 2, color: m.color }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg></div>
+                        <div style={{ marginTop: 2, color: CATEGORY_STYLES[m.category]?.color || "#ef4444" }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg></div>
                         <div>
                           <div style={{ fontWeight: 600, marginBottom: 4, color: "var(--text-primary)" }}>{m.title}</div>
                           <div className="text-muted" style={{ fontSize: 12, lineHeight: 1.4, maxWidth: 300 }}>{m.desc}</div>
@@ -499,7 +496,7 @@ export default function MistakesPage() {
                       </div>
                     </td>
                     <td style={{ padding: "16px 20px" }}>
-                      <span style={{ padding: "4px 8px", background: m.bg, color: m.color, borderRadius: 4, fontSize: 11, fontWeight: 600, whiteSpace: "nowrap" }}>{m.category}</span>
+                      <span style={{ padding: "4px 8px", background: CATEGORY_STYLES[m.category]?.bg || "rgba(239, 68, 68, 0.1)", color: CATEGORY_STYLES[m.category]?.color || "#ef4444", borderRadius: 4, fontSize: 11, fontWeight: 600, whiteSpace: "nowrap" }}>{m.category}</span>
                     </td>
                     <td style={{ padding: "16px 20px" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
@@ -508,7 +505,9 @@ export default function MistakesPage() {
                       </div>
                       <div className="text-muted" style={{ fontSize: 11, whiteSpace: "nowrap" }}>₹{m.priceIn.toFixed(2)} → ₹{m.priceOut.toFixed(2)}</div>
                     </td>
-                    <td style={{ padding: "16px 20px", fontWeight: 500, color: "var(--text-primary)", whiteSpace: "nowrap" }}>{m.date}</td>
+                    <td style={{ padding: "16px 20px", fontWeight: 500, color: "var(--text-primary)", whiteSpace: "nowrap" }}>
+                      {new Date(m.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                    </td>
                     <td style={{ padding: "16px 20px", textAlign: "right", fontWeight: 600, color: "#ef4444" }}>-₹{Math.abs(m.impact).toLocaleString()}</td>
                     <td style={{ padding: "16px 20px", textAlign: "center", fontWeight: 500, color: "var(--text-muted)", whiteSpace: "nowrap" }}>{m.recurred} times</td>
                   </tr>
