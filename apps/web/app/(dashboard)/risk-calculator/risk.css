@@ -154,11 +154,14 @@
 .top-0 { top: 0; }
 .left-0 { left: 0; }
 .left-3 { left: 0.75rem; }
+.left-1\/2 { left: 50%; }
 .right-0 { right: 0; }
 .right-3 { right: 0.75rem; }
 .right-5 { right: 1.25rem; }
+.bottom-6 { bottom: 1.5rem; }
 .top-1\/2 { top: 50%; }
 .-translate-y-1\/2 { transform: translateY(-50%); }
+.-translate-x-1\/2 { transform: translateX(-50%); }
 
 .overflow-x-auto { overflow-x: auto; }
 .whitespace-nowrap { white-space: nowrap; }
