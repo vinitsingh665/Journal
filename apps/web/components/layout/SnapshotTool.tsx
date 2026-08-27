@@ -37,17 +37,33 @@ export default function SnapshotTool({ userId }: { userId?: string }) {
           setIsCapturing(false);
           return;
         }
-        
-        const currentPath = window.location.pathname;
-        const publicUrl = `${window.location.origin}/shared/${userId}${currentPath === '/' ? '' : currentPath}`;
-        
-        if (action === "copylink") {
-          await navigator.clipboard.writeText(publicUrl);
-          setNotification("Anyone with this link can view this page (read-only mode).");
-          setTimeout(() => setNotification(null), 4000);
-        } else if (action === "tweet") {
-          const tweetText = encodeURIComponent(`Check out my trading performance on TraderLabs! 📈📊\n${publicUrl}`);
-          window.open(`https://twitter.com/intent/tweet?text=${tweetText}`, "_blank");
+        try {
+          const res = await fetch("/api/shared/generate-link", { method: "POST" });
+          if (!res.ok) throw new Error("Failed to generate link");
+          
+          const { token } = await res.json();
+          const currentPath = window.location.pathname;
+          
+          // Remove the /dashboard prefix if the user is in /dashboard/mistakes etc.
+          // Because shared routes don't have /dashboard prefix.
+          let cleanPath = currentPath;
+          if (cleanPath.startsWith('/dashboard')) {
+             cleanPath = cleanPath.replace('/dashboard', '');
+          }
+
+          const publicUrl = `${window.location.origin}/s/${token}${cleanPath === '/' ? '' : cleanPath}`;
+          
+          if (action === "copylink") {
+            await navigator.clipboard.writeText(publicUrl);
+            setNotification("Link copied! It will expire in 24 hours.");
+            setTimeout(() => setNotification(null), 4000);
+          } else if (action === "tweet") {
+            const tweetText = encodeURIComponent(`Check out my trading performance on TraderLabs! 📈📊\n${publicUrl}`);
+            window.open(`https://twitter.com/intent/tweet?text=${tweetText}`, "_blank");
+          }
+        } catch (e) {
+          console.error(e);
+          alert("Error generating temporary link.");
         }
         setIsCapturing(false);
         return;
