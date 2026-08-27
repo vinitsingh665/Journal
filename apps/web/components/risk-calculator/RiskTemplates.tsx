@@ -17,7 +17,7 @@ export function RiskTemplates({ templates, actions }: RiskTemplatesProps) {
         <h3 className="font-bold text-sm tracking-wide">SAVED TEMPLATES</h3>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+      <div className="flex flex-col gap-3">
         {templates.map(t => (
           <div key={t.id} className="bg-input/50 border border-border-secondary rounded-lg p-4 flex justify-between items-center group transition-colors hover:border-primary/30">
             <div className="flex-1 min-w-0 mr-4">

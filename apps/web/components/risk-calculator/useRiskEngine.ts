@@ -28,6 +28,9 @@ export function useRiskEngine() {
   const [capital, setCapital] = useState<number>(500000);
   const [maxPortfolioRiskPct, setMaxPortfolioRiskPct] = useState<number>(1.5);
   
+  // UI State
+  const [isCalculatorOpen, setIsCalculatorOpen] = useState<boolean>(false);
+  
   // Current Trade Inputs
   const [symbol, setSymbol] = useState<string>("");
   const [exchange, setExchange] = useState<string>("NSE");
@@ -132,7 +135,9 @@ export function useRiskEngine() {
     ? (remainingRiskCapacityPct / defaultTradeRiskPct) 
     : 0;
 
-  // Actions
+  const openCalculator = () => setIsCalculatorOpen(true);
+  const closeCalculator = () => setIsCalculatorOpen(false);
+
   const addTradeToPlanner = () => {
     const newTrade: PlannerTrade = {
       id: Math.random().toString(36).substring(7),
@@ -200,6 +205,7 @@ export function useRiskEngine() {
     setDefaultTradeRiskPct(t.defaultTradeRiskPct);
     setSlippagePct(t.slippagePct);
     setWinRatePct(t.winRatePct);
+    setIsCalculatorOpen(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   
@@ -209,6 +215,7 @@ export function useRiskEngine() {
 
   return {
     state: {
+      isCalculatorOpen,
       capital, maxPortfolioRiskPct, defaultTradeRiskPct,
       symbol, exchange, sector,
       entry, stop, target, direction, slippagePct, winRatePct,
@@ -242,6 +249,8 @@ export function useRiskEngine() {
       fullRiskTradesCapacity
     },
     actions: {
+      openCalculator,
+      closeCalculator,
       addTradeToPlanner,
       removeTrade,
       clearAllTrades,
