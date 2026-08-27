@@ -13,6 +13,14 @@ import { RiskTemplates } from "@/components/risk-calculator/RiskTemplates";
 
 export default function RiskCalculatorPage() {
   const engine = useRiskEngine();
+  const [showSaveModal, setShowSaveModal] = React.useState(false);
+  const [templateName, setTemplateName] = React.useState("");
+
+  const handleSaveTemplate = () => {
+    engine.actions.saveTemplate(templateName);
+    setShowSaveModal(false);
+    setTemplateName("");
+  };
 
   const hasTemplates = engine.state.savedTemplates && engine.state.savedTemplates.length > 0;
   const isCalculatorOpen = engine.state.isCalculatorOpen;
@@ -48,7 +56,7 @@ export default function RiskCalculatorPage() {
                Back
             </button>
             <button 
-              onClick={engine.actions.saveTemplate}
+              onClick={() => setShowSaveModal(true)}
               className="btn btn-secondary bg-transparent border-border-secondary"
               title="Save current risk settings as a new template"
             >
@@ -71,16 +79,16 @@ export default function RiskCalculatorPage() {
         )}
       </div>
 
-      <div className="flex gap-6 items-start">
-        {/* Left Sidebar for Templates */}
+      <div className="w-full">
+        {/* Horizontal Grid for Templates */}
         {hasTemplates && !isCalculatorOpen && (
-          <div className="w-[300px] shrink-0">
+          <div className="mb-8">
             <RiskTemplates templates={engine.state.savedTemplates} actions={engine.actions} />
           </div>
         )}
 
         {/* Main Content Area */}
-        <div className="flex-1 min-w-0 w-full">
+        <div className="w-full">
           {!isCalculatorOpen && !hasTemplates && (
             <div className="flex flex-col items-center justify-center py-24 bg-surface border border-dashed border-border-secondary rounded-2xl w-full h-[400px]">
               <div className="w-16 h-16 bg-primary/10 text-primary rounded-2xl flex items-center justify-center mb-6">
@@ -115,6 +123,46 @@ export default function RiskCalculatorPage() {
           )}
         </div>
       </div>
+
+      {showSaveModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-surface border border-border-secondary rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6">
+              <h2 className="text-xl font-bold text-text-primary mb-1">Save Template</h2>
+              <p className="text-secondary text-sm mb-6">Give your risk profile a recognizable name.</p>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-muted mb-2">Template Name</label>
+                  <input 
+                    type="text" 
+                    value={templateName}
+                    onChange={(e) => setTemplateName(e.target.value)}
+                    placeholder="e.g., Aggressive Options, 1% Swing..."
+                    className="w-full bg-background border border-border-secondary rounded-xl px-4 py-3 text-text-primary placeholder:text-muted focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50"
+                    autoFocus
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="p-6 pt-0 flex gap-3 justify-end">
+              <button 
+                onClick={() => setShowSaveModal(false)}
+                className="btn btn-secondary bg-transparent border-border-secondary"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleSaveTemplate}
+                disabled={!templateName.trim()}
+                className="btn btn-primary"
+              >
+                Save Template
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

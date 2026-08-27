@@ -49,21 +49,43 @@ export function useRiskEngine() {
   const [savedTemplates, setSavedTemplates] = useState<RiskTemplate[]>([]);
 
   useEffect(() => {
-    const stored = localStorage.getItem("risk_templates");
-    if (stored) {
+    const fetchTemplates = async () => {
       try {
-        setSavedTemplates(JSON.parse(stored));
-      } catch (e) {}
-    }
+        const res = await fetch("/api/risk-templates");
+        if (res.ok) {
+          const dbTemplates = await res.json();
+          setSavedTemplates(dbTemplates);
+          
+          // One-time migration of localStorage if db is empty but local exists
+          const stored = localStorage.getItem("risk_templates");
+          if (stored && dbTemplates.length === 0) {
+            try {
+              const localData = JSON.parse(stored);
+              if (Array.isArray(localData) && localData.length > 0) {
+                for (const t of localData) {
+                  await fetch("/api/risk-templates", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(t),
+                  });
+                }
+                const updatedRes = await fetch("/api/risk-templates");
+                if (updatedRes.ok) {
+                  setSavedTemplates(await updatedRes.json());
+                }
+              }
+            } catch (e) {}
+            localStorage.removeItem("risk_templates");
+          } else if (stored) {
+             localStorage.removeItem("risk_templates");
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load templates:", err);
+      }
+    };
+    fetchTemplates();
   }, []);
-
-  useEffect(() => {
-    if (savedTemplates.length > 0) {
-      localStorage.setItem("risk_templates", JSON.stringify(savedTemplates));
-    } else {
-      localStorage.removeItem("risk_templates");
-    }
-  }, [savedTemplates]);
 
   // Derived: Global Risk Wallet
   const maxRiskBudget = capital * (maxPortfolioRiskPct / 100);
@@ -184,17 +206,30 @@ export function useRiskEngine() {
     setDirection(trade.direction);
   };
 
-  const saveTemplate = () => {
-    const newTemplate: RiskTemplate = {
-      id: Math.random().toString(36).substring(7),
-      name: `Profile ${savedTemplates.length + 1}`,
+  const saveTemplate = async (name: string) => {
+    const newTemplateData = {
+      name: name || `Profile ${savedTemplates.length + 1}`,
       capital,
       maxPortfolioRiskPct,
       defaultTradeRiskPct,
       slippagePct,
       winRatePct
     };
-    setSavedTemplates([...savedTemplates, newTemplate]);
+
+    try {
+      const res = await fetch("/api/risk-templates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newTemplateData),
+      });
+
+      if (res.ok) {
+        const newTemplate = await res.json();
+        setSavedTemplates([...savedTemplates, newTemplate]);
+      }
+    } catch (e) {
+      console.error("Failed to save template", e);
+    }
   };
 
   const loadTemplate = (id: string) => {
@@ -209,8 +244,13 @@ export function useRiskEngine() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   
-  const deleteTemplate = (id: string) => {
+  const deleteTemplate = async (id: string) => {
     setSavedTemplates(savedTemplates.filter(t => t.id !== id));
+    try {
+      await fetch(`/api/risk-templates/${id}`, { method: "DELETE" });
+    } catch (e) {
+      console.error("Failed to delete template", e);
+    }
   };
 
   return {
