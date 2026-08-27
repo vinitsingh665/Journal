@@ -7,7 +7,13 @@ import { usePathname } from "next/navigation";
 export default function SnapshotTool({ userId }: { userId?: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const showToast = (message: string) => {
+    setToast(message);
+    setTimeout(() => setToast(null), 3000);
+  };
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -29,7 +35,7 @@ export default function SnapshotTool({ userId }: { userId?: string }) {
     try {
       if (action === "copylink" || action === "tweet") {
         if (!userId) {
-          alert("Error: User ID not found. Cannot generate public link.");
+          showToast("Error: Cannot generate public link without User ID.");
           setIsCapturing(false);
           return;
         }
@@ -38,7 +44,7 @@ export default function SnapshotTool({ userId }: { userId?: string }) {
         
         if (action === "copylink") {
           await navigator.clipboard.writeText(publicUrl);
-          alert("Public share link copied to clipboard!\n\nAnyone with this link can view this page (read-only mode).");
+          showToast("Public share link copied to clipboard!");
         } else if (action === "tweet") {
           const tweetText = encodeURIComponent(`Check out my trading performance on TraderLabs! 📈📊\n${publicUrl}`);
           window.open(`https://twitter.com/intent/tweet?text=${tweetText}`, "_blank");
@@ -74,10 +80,10 @@ export default function SnapshotTool({ userId }: { userId?: string }) {
               await navigator.clipboard.write([
                 new ClipboardItem({ "image/png": blob })
               ]);
-              alert("Snapshot copied to clipboard!");
+              showToast("Snapshot copied to clipboard!");
             } catch (err) {
               console.error("Failed to copy image: ", err);
-              alert("Failed to copy image to clipboard. Your browser might not support it.");
+              showToast("Failed to copy image. Browser not supported.");
             }
           }
         }, "image/png");
@@ -95,7 +101,7 @@ export default function SnapshotTool({ userId }: { userId?: string }) {
       }
     } catch (e) {
       console.error("Failed to capture snapshot:", e);
-      alert("Failed to capture snapshot.");
+      showToast("Failed to capture snapshot.");
     } finally {
       setIsCapturing(false);
     }
@@ -270,6 +276,35 @@ export default function SnapshotTool({ userId }: { userId?: string }) {
             </svg>
             Tweet Image
           </button>
+        </div>
+      )}
+
+      {/* Custom Toast Notification */}
+      {toast && (
+        <div style={{
+          position: "fixed",
+          bottom: "24px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          background: "var(--bg-secondary)",
+          color: "var(--text-primary)",
+          padding: "12px 20px",
+          borderRadius: "8px",
+          border: "1px solid var(--border-color)",
+          boxShadow: "0 10px 25px rgba(0,0,0,0.5)",
+          zIndex: 999999,
+          fontSize: "14px",
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
+          fontWeight: 500,
+          animation: "fadeInUp 0.2s ease-out"
+        }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+          {toast}
         </div>
       )}
     </div>
