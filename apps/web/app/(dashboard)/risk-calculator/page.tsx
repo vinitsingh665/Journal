@@ -54,10 +54,10 @@ export default function RiskCalculatorPage() {
         )}
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6 items-start">
+      <div className="flex flex-col md:flex-row gap-6 items-start">
         {/* Left Sidebar for Templates */}
         {hasTemplates && (
-          <div className="w-full lg:w-80 shrink-0">
+          <div className="w-full md:w-[320px] shrink-0">
             <RiskTemplates templates={engine.state.savedTemplates} actions={engine.actions} />
           </div>
         )}
