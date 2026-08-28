@@ -48,8 +48,10 @@ export function PositionSizeCard({ current, actions }: PositionSizeCardProps) {
 
         <div className="min-w-0">
           <div className="text-xs font-semibold text-secondary mb-1">Capital Required</div>
-          <div className="text-lg font-bold text-text-primary tracking-tight truncate" title={formatINR(capitalDeployed)}>{formatINR(capitalDeployed)}</div>
-          <div className="text-[10px] text-muted mt-1">{capitalUtilizationPct.toFixed(1)}% of capital</div>
+          <div className={cn("text-lg font-bold tracking-tight truncate", capitalUtilizationPct > 100 ? "text-negative" : "text-text-primary")} title={formatINR(capitalDeployed)}>{formatINR(capitalDeployed)}</div>
+          <div className={cn("text-[10px] mt-1", capitalUtilizationPct > 100 ? "text-negative font-medium" : "text-muted")}>
+            {capitalUtilizationPct.toFixed(1)}% of capital {capitalUtilizationPct > 100 && "(Leverage Required)"}
+          </div>
         </div>
 
         <div className="min-w-0">
