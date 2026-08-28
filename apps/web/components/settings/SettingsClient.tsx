@@ -126,7 +126,7 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
         },
         body: JSON.stringify({ name, tradingStyle, about, avatar }),
       });
-      
+
       if (res.ok) {
         // Refresh the router so the layout (Sidebar/Topbar) refetches the user
         router.refresh();
@@ -231,12 +231,12 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
           <div className="settings-grid">
             {/* LEFT COLUMN */}
             <div className="settings-section">
-              
+
               {/* PROFILE CARD */}
               <div>
                 <h2 className="settings-row-title" style={{ marginBottom: "var(--space-2)", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-secondary)" }}>PROFILE</h2>
                 <p className="settings-row-desc" style={{ marginBottom: "var(--space-4)" }}>Update your profile information and preferences.</p>
-                
+
                 <div className="card card-body">
                   <div style={{ display: "flex", gap: "var(--space-5)", marginBottom: "var(--space-5)" }}>
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "var(--space-3)", width: "120px" }}>
@@ -248,8 +248,8 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
                         )}
                       </div>
                       <div className="avatar-actions" style={{ display: "flex", flexDirection: "column", gap: 4, width: "100%" }}>
-                        <button 
-                          className="btn btn-secondary btn-sm" 
+                        <button
+                          className="btn btn-secondary btn-sm"
                           style={{ width: "100%", padding: "6px 8px" }}
                           onClick={() => !isGuest && setShowAvatarPicker(!showAvatarPicker)}
                           disabled={isGuest}
@@ -261,7 +261,7 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
                         </button>
                       </div>
                     </div>
-                    
+
                     <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "var(--space-4)" }}>
                       {showAvatarPicker && (
                         <div style={{ marginBottom: "var(--space-2)", padding: "var(--space-4)", backgroundColor: "var(--bg-secondary)", borderRadius: "var(--radius-md)", border: "1px solid var(--border-secondary)" }}>
@@ -283,7 +283,7 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
                                   background: "var(--bg-primary)"
                                 }}
                               >
-                                <img src={url} alt={`Avatar option ${i+1}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                <img src={url} alt={`Avatar option ${i + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                               </button>
                             ))}
                           </div>
@@ -296,17 +296,17 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
                         </div>
                         <div className="form-group" style={{ flex: 1 }}>
                           <label className="form-label">Email</label>
-                          <input 
-                            className="form-input" 
-                            value={email} 
-                            readOnly 
+                          <input
+                            className="form-input"
+                            value={email}
+                            readOnly
                             title="Your login email cannot be changed"
-                            style={{ 
-                              backgroundColor: "var(--bg-secondary)", 
-                              color: "var(--text-muted)", 
+                            style={{
+                              backgroundColor: "var(--bg-secondary)",
+                              color: "var(--text-muted)",
                               cursor: "not-allowed",
                               opacity: 0.7
-                            }} 
+                            }}
                           />
                         </div>
                       </div>
@@ -343,7 +343,7 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
               <div>
                 <h2 className="settings-row-title" style={{ marginBottom: "var(--space-2)", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-secondary)" }}>PREFERENCES</h2>
                 <p className="settings-row-desc" style={{ marginBottom: "var(--space-4)" }}>Customize your default settings and behavior.</p>
-                
+
                 <div className="card card-body" style={{ display: "flex", flexDirection: "column" }}>
                   <div className="settings-row">
                     <div className="settings-row-text">
@@ -447,13 +447,13 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
                       <div className="settings-row-desc">Choose how you want to see P&L values.</div>
                     </div>
                     <div className="segmented-control" style={{ width: 220 }}>
-                      <button 
+                      <button
                         className={cn("segmented-btn", showPnlIn === "Currency" && "active")}
                         onClick={() => !isGuest && setShowPnlIn("Currency")}
                         style={{ flex: 1 }}
                         disabled={isGuest}
                       >Currency</button>
-                      <button 
+                      <button
                         className={cn("segmented-btn", showPnlIn === "R Multiple" && "active")}
                         onClick={() => !isGuest && setShowPnlIn("R Multiple")}
                         style={{ flex: 1 }}
@@ -467,17 +467,17 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
 
             {/* RIGHT COLUMN */}
             <div className="settings-section">
-              
+
               {/* ACCOUNT SUMMARY */}
               <div>
                 <h2 className="settings-row-title" style={{ marginBottom: "var(--space-2)", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-secondary)" }}>ACCOUNT SUMMARY</h2>
                 <p className="settings-row-desc" style={{ marginBottom: "var(--space-4)" }}>Your current plan and usage overview.</p>
-                
+
                 <div className="card card-body">
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-6)" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "var(--space-4)" }}>
                       <div style={{ width: 44, height: 44, borderRadius: "var(--radius-lg)", background: "var(--accent-primary-light)", color: "var(--accent-primary)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 4v16M22 4v16M4 4l8 4 8-4M4 20l8-4 8 4M12 8v8"/></svg>
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 4v16M22 4v16M4 4l8 4 8-4M4 20l8-4 8 4M12 8v8" /></svg>
                       </div>
                       <div>
                         <div style={{ fontSize: "var(--text-md)", fontWeight: 700, color: "var(--text-primary)" }}>Pro Plan</div>
@@ -517,7 +517,7 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
               <div>
                 <h2 className="settings-row-title" style={{ marginBottom: "var(--space-2)", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-secondary)" }}>QUICK SETTINGS</h2>
                 <p className="settings-row-desc" style={{ marginBottom: "var(--space-4)" }}>Enable or disable key features.</p>
-                
+
                 <div className="card card-body">
                   <div className="settings-row">
                     <div className="settings-row-text">
@@ -580,7 +580,7 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
               <div>
                 <h2 className="settings-row-title" style={{ marginBottom: "var(--space-2)", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-secondary)" }}>DANGER ZONE</h2>
                 <p className="settings-row-desc" style={{ marginBottom: "var(--space-4)" }}>Irreversible and dangerous actions.</p>
-                
+
                 <div className="card card-body settings-danger-card">
                   <div className="settings-row">
                     <div className="settings-row-text">
@@ -601,8 +601,8 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
                       </div>
                       <div className="settings-row-desc">Permanently delete your account and all data.</div>
                     </div>
-                    <button 
-                      className="btn btn-secondary btn-sm" 
+                    <button
+                      className="btn btn-secondary btn-sm"
                       style={{ color: "var(--color-negative)", borderColor: "rgba(239, 68, 68, 0.2)", fontWeight: 600, background: "rgba(239, 68, 68, 0.05)" }}
                       onClick={() => !isGuest && setShowDeleteConfirm(true)}
                       disabled={isGuest}
@@ -620,7 +620,7 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
               <div>
                 <h2 className="settings-row-title" style={{ marginBottom: "var(--space-2)", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-secondary)" }}>RISK MANAGEMENT</h2>
                 <p className="settings-row-desc" style={{ marginBottom: "var(--space-4)" }}>Configure your default risk parameters.</p>
-                
+
                 <div className="card card-body" style={{ display: "flex", flexDirection: "column" }}>
                   <div className="settings-row">
                     <div className="settings-row-text">
@@ -646,12 +646,12 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
                 </div>
               </div>
             </div>
-            
+
             <div className="settings-section">
               <div>
                 <h2 className="settings-row-title" style={{ marginBottom: "var(--space-2)", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-secondary)" }}>FEES & COMMISSIONS</h2>
                 <p className="settings-row-desc" style={{ marginBottom: "var(--space-4)" }}>Manage broker fees for accurate P&L tracking.</p>
-                
+
                 <div className="card card-body" style={{ display: "flex", flexDirection: "column" }}>
                   <div className="settings-row">
                     <div className="settings-row-text">
@@ -677,7 +677,7 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
               <div>
                 <h2 className="settings-row-title" style={{ marginBottom: "var(--space-2)", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-secondary)" }}>BROKER CONNECTIONS</h2>
                 <p className="settings-row-desc" style={{ marginBottom: "var(--space-4)" }}>Link your brokers for automatic trade syncing.</p>
-                
+
                 <div className="card card-body" style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)" }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "var(--space-4)", border: "1px solid var(--border-secondary)", borderRadius: "var(--radius-md)" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "var(--space-4)" }}>
@@ -706,7 +706,7 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
               <div>
                 <h2 className="settings-row-title" style={{ marginBottom: "var(--space-2)", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-secondary)" }}>SYNC SETTINGS</h2>
                 <p className="settings-row-desc" style={{ marginBottom: "var(--space-4)" }}>Configure background synchronization.</p>
-                
+
                 <div className="card card-body" style={{ display: "flex", flexDirection: "column" }}>
                   <div className="settings-row">
                     <div className="settings-row-text">
@@ -736,7 +736,7 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
               <div>
                 <h2 className="settings-row-title" style={{ marginBottom: "var(--space-2)", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-secondary)" }}>EMAIL NOTIFICATIONS</h2>
                 <p className="settings-row-desc" style={{ marginBottom: "var(--space-4)" }}>Control what we send to your inbox.</p>
-                
+
                 <div className="card card-body" style={{ display: "flex", flexDirection: "column" }}>
                   <div className="settings-row">
                     <div className="settings-row-text">
@@ -759,7 +759,7 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
               <div>
                 <h2 className="settings-row-title" style={{ marginBottom: "var(--space-2)", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-secondary)" }}>APP NOTIFICATIONS</h2>
                 <p className="settings-row-desc" style={{ marginBottom: "var(--space-4)" }}>In-app alerts and sounds.</p>
-                
+
                 <div className="card card-body" style={{ display: "flex", flexDirection: "column" }}>
                   <div className="settings-row">
                     <div className="settings-row-text">
@@ -785,237 +785,237 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
               <div>
                 <h2 className="settings-row-title" style={{ marginBottom: "var(--space-2)", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-secondary)" }}>AUTHENTICATION</h2>
                 <p className="settings-row-desc" style={{ marginBottom: "var(--space-4)" }}>Manage your password and security settings.</p>
-                
+
                 <div className="card card-body" style={{ display: "flex", flexDirection: "column" }}>
                   <div className="settings-row">
                     <div className="settings-row-text">
                       <div className="settings-row-title">Two-Factor Authentication</div>
-                    <label className="form-label">Current Password</label>
-                    <input type="password" className="form-input" />
+                      <label className="form-label">Current Password</label>
+                      <input type="password" className="form-input" />
+                    </div>
+                    <div className="form-group mb-3">
+                      <label className="form-label">New Password</label>
+                      <input type="password" className="form-input" />
+                    </div>
+                    <button className="btn btn-primary mt-2">Update Password</button>
                   </div>
-                  <div className="form-group mb-3">
-                    <label className="form-label">New Password</label>
-                    <input type="password" className="form-input" />
-                  </div>
-                  <button className="btn btn-primary mt-2">Update Password</button>
                 </div>
               </div>
             </div>
-          </div>
-          <div className="settings-section">
-            <div>
-              <h2 className="settings-row-title" style={{ marginBottom: "var(--space-2)", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-secondary)" }}>ACTIVE SESSIONS</h2>
-              <p className="settings-row-desc" style={{ marginBottom: "var(--space-4)" }}>Devices currently logged into your account.</p>
-              
-              <div className="card card-body">
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingBottom: "var(--space-3)", borderBottom: "1px solid var(--border-secondary)", marginBottom: "var(--space-3)" }}>
-                  <div>
-                    <div style={{ fontWeight: 600 }}>Windows PC • Chrome</div>
-                    <div className="text-muted" style={{ fontSize: "var(--text-xs)" }}>Mumbai, India (Current)</div>
-                  </div>
-                  <span className="badge badge-open">Active</span>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <div>
-                    <div style={{ fontWeight: 600 }}>iPhone 14 • Safari</div>
-                    <div className="text-muted" style={{ fontSize: "var(--text-xs)" }}>Mumbai, India (2 hours ago)</div>
-                  </div>
-                  <button className="btn btn-secondary btn-sm">Revoke</button>
-                </div>
-                <button className="btn btn-secondary mt-4" style={{ width: "100%", color: "var(--color-negative)" }}>Revoke All Other Sessions</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : activeTab === "Billing" ? (
-        <div className="settings-grid">
-          <div className="settings-section">
-            <div>
-              <h2 className="settings-row-title" style={{ marginBottom: "var(--space-2)", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-secondary)" }}>SUBSCRIPTION</h2>
-              <p className="settings-row-desc" style={{ marginBottom: "var(--space-4)" }}>Manage your plan and billing cycle.</p>
-              
-              <div className="card card-body" style={{ background: "linear-gradient(135deg, rgba(var(--accent-primary-rgb), 0.05), transparent)" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "var(--space-6)" }}>
-                  <div>
-                    <h3 style={{ fontSize: "var(--text-xl)", fontWeight: 700, margin: "0 0 4px 0", color: "var(--accent-primary)" }}>Pro Plan</h3>
-                    <p className="text-muted" style={{ margin: 0, fontSize: "var(--text-sm)" }}>Billed annually (₹2,999/yr)</p>
-                  </div>
-                  <span className="badge badge-long">Active</span>
-                </div>
-                
-                <div style={{ marginBottom: "var(--space-6)" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-                    <span style={{ fontSize: "var(--text-sm)", fontWeight: 500 }}>Usage: AI Analysis Credits</span>
-                    <span style={{ fontSize: "var(--text-sm)", fontWeight: 600 }}>32%</span>
-                  </div>
-                  <div className="settings-progress-bar-bg" style={{ height: 8 }}>
-                    <div className="settings-progress-bar-fill" style={{ width: "32%", background: "var(--accent-primary)" }}></div>
-                  </div>
-                  <div className="text-muted mt-2" style={{ fontSize: "var(--text-xs)" }}>3,250 of 10,000 credits used. Resets on 12 Sep.</div>
-                </div>
+            <div className="settings-section">
+              <div>
+                <h2 className="settings-row-title" style={{ marginBottom: "var(--space-2)", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-secondary)" }}>ACTIVE SESSIONS</h2>
+                <p className="settings-row-desc" style={{ marginBottom: "var(--space-4)" }}>Devices currently logged into your account.</p>
 
-                <div style={{ display: "flex", gap: "var(--space-3)" }}>
-                  <button className="btn btn-primary">Change Plan</button>
-                  <button className="btn btn-secondary">Cancel Subscription</button>
+                <div className="card card-body">
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingBottom: "var(--space-3)", borderBottom: "1px solid var(--border-secondary)", marginBottom: "var(--space-3)" }}>
+                    <div>
+                      <div style={{ fontWeight: 600 }}>Windows PC • Chrome</div>
+                      <div className="text-muted" style={{ fontSize: "var(--text-xs)" }}>Mumbai, India (Current)</div>
+                    </div>
+                    <span className="badge badge-open">Active</span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <div>
+                      <div style={{ fontWeight: 600 }}>iPhone 14 • Safari</div>
+                      <div className="text-muted" style={{ fontSize: "var(--text-xs)" }}>Mumbai, India (2 hours ago)</div>
+                    </div>
+                    <button className="btn btn-secondary btn-sm">Revoke</button>
+                  </div>
+                  <button className="btn btn-secondary mt-4" style={{ width: "100%", color: "var(--color-negative)" }}>Revoke All Other Sessions</button>
                 </div>
               </div>
             </div>
           </div>
-          
-          <div className="settings-section">
-            <div>
-              <h2 className="settings-row-title" style={{ marginBottom: "var(--space-2)", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-secondary)" }}>PAYMENT METHOD</h2>
-              <p className="settings-row-desc" style={{ marginBottom: "var(--space-4)" }}>Manage your credit cards.</p>
-              
-              <div className="card card-body">
-                <div style={{ display: "flex", alignItems: "center", gap: "var(--space-4)", padding: "var(--space-3)", border: "1px solid var(--border-secondary)", borderRadius: "var(--radius-md)", marginBottom: "var(--space-4)" }}>
-                  <div style={{ width: 40, height: 28, background: "#1a1f36", borderRadius: 4, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: 10, fontStyle: "italic" }}>VISA</div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 600 }}>•••• •••• •••• 4242</div>
-                    <div className="text-muted" style={{ fontSize: "var(--text-xs)" }}>Expires 12/28</div>
+        ) : activeTab === "Billing" ? (
+          <div className="settings-grid">
+            <div className="settings-section">
+              <div>
+                <h2 className="settings-row-title" style={{ marginBottom: "var(--space-2)", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-secondary)" }}>SUBSCRIPTION</h2>
+                <p className="settings-row-desc" style={{ marginBottom: "var(--space-4)" }}>Manage your plan and billing cycle.</p>
+
+                <div className="card card-body" style={{ background: "linear-gradient(135deg, rgba(var(--accent-primary-rgb), 0.05), transparent)" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "var(--space-6)" }}>
+                    <div>
+                      <h3 style={{ fontSize: "var(--text-xl)", fontWeight: 700, margin: "0 0 4px 0", color: "var(--accent-primary)" }}>Pro Plan</h3>
+                      <p className="text-muted" style={{ margin: 0, fontSize: "var(--text-sm)" }}>Billed annually (₹2,999/yr)</p>
+                    </div>
+                    <span className="badge badge-long">Active</span>
                   </div>
-                  <button className="btn btn-ghost btn-sm">Edit</button>
-                </div>
-                <button className="btn btn-secondary" style={{ width: "100%" }}>+ Add New Method</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : activeTab === "Data & Export" ? (
-        <div className="settings-grid">
-          <div className="settings-section">
-            <div>
-              <h2 className="settings-row-title" style={{ marginBottom: "var(--space-2)", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-secondary)" }}>EXPORT TRADES</h2>
-              <p className="settings-row-desc" style={{ marginBottom: "var(--space-4)" }}>Download your trading history for taxes or external analysis.</p>
-              
-              <div className="card card-body">
-                <div className="settings-row">
-                  <div className="settings-row-text">
-                    <div className="settings-row-title">CSV Export</div>
-                    <div className="settings-row-desc">Raw trade data in spreadsheet format.</div>
+
+                  <div style={{ marginBottom: "var(--space-6)" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                      <span style={{ fontSize: "var(--text-sm)", fontWeight: 500 }}>Usage: AI Analysis Credits</span>
+                      <span style={{ fontSize: "var(--text-sm)", fontWeight: 600 }}>32%</span>
+                    </div>
+                    <div className="settings-progress-bar-bg" style={{ height: 8 }}>
+                      <div className="settings-progress-bar-fill" style={{ width: "32%", background: "var(--accent-primary)" }}></div>
+                    </div>
+                    <div className="text-muted mt-2" style={{ fontSize: "var(--text-xs)" }}>3,250 of 10,000 credits used. Resets on 12 Sep.</div>
                   </div>
-                  <button className="btn btn-secondary btn-sm">Download CSV</button>
-                </div>
-                <div className="settings-row">
-                  <div className="settings-row-text">
-                    <div className="settings-row-title">PDF Tax Report</div>
-                    <div className="settings-row-desc">Formatted document with total P&L and fees.</div>
+
+                  <div style={{ display: "flex", gap: "var(--space-3)" }}>
+                    <button className="btn btn-primary">Change Plan</button>
+                    <button className="btn btn-secondary">Cancel Subscription</button>
                   </div>
-                  <button className="btn btn-secondary btn-sm">Generate PDF</button>
                 </div>
               </div>
             </div>
-          </div>
-          <div className="settings-section">
-            <div>
-              <h2 className="settings-row-title" style={{ marginBottom: "var(--space-2)", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-secondary)" }}>ACCOUNT BACKUP</h2>
-              <p className="settings-row-desc" style={{ marginBottom: "var(--space-4)" }}>Keep a safe offline copy of your entire journal.</p>
-              
-              <div className="card card-body">
-                <div style={{ padding: "var(--space-4)", background: "rgba(var(--accent-primary-rgb), 0.05)", borderRadius: "var(--radius-md)", marginBottom: "var(--space-4)" }}>
-                  <h4 style={{ margin: "0 0 8px 0", fontSize: "var(--text-sm)", fontWeight: 600 }}>Full JSON Backup</h4>
-                  <p className="text-muted" style={{ margin: 0, fontSize: "var(--text-sm)", lineHeight: 1.5 }}>
-                    Download a raw JSON file containing every trade, execution, mistake, and journal entry in your account. You can use this file to restore your account later.
-                  </p>
-                </div>
-                <button className="btn btn-primary" style={{ width: "100%" }}>Create Full Backup</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : activeTab === "Appearance" ? (
-        <div className="settings-grid">
-          <div className="settings-section">
-            <div>
-              <h2 className="settings-row-title" style={{ marginBottom: "var(--space-2)", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-secondary)" }}>THEME & LAYOUT</h2>
-              <p className="settings-row-desc" style={{ marginBottom: "var(--space-4)" }}>Customize how the application looks.</p>
-              
-              <div className="card card-body" style={{ display: "flex", flexDirection: "column" }}>
-                <div className="settings-row">
-                  <div className="settings-row-text">
-                    <div className="settings-row-title">Color Theme</div>
-                    <div className="settings-row-desc">Select your preferred color scheme.</div>
+
+            <div className="settings-section">
+              <div>
+                <h2 className="settings-row-title" style={{ marginBottom: "var(--space-2)", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-secondary)" }}>PAYMENT METHOD</h2>
+                <p className="settings-row-desc" style={{ marginBottom: "var(--space-4)" }}>Manage your credit cards.</p>
+
+                <div className="card card-body">
+                  <div style={{ display: "flex", alignItems: "center", gap: "var(--space-4)", padding: "var(--space-3)", border: "1px solid var(--border-secondary)", borderRadius: "var(--radius-md)", marginBottom: "var(--space-4)" }}>
+                    <div style={{ width: 40, height: 28, background: "#1a1f36", borderRadius: 4, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: 10, fontStyle: "italic" }}>VISA</div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 600 }}>•••• •••• •••• 4242</div>
+                      <div className="text-muted" style={{ fontSize: "var(--text-xs)" }}>Expires 12/28</div>
+                    </div>
+                    <button className="btn btn-ghost btn-sm">Edit</button>
                   </div>
-                  <select className="form-select" style={{ width: 160 }} value={theme} onChange={e => setTheme(e.target.value as any)}>
-                    <option value="system">System Default</option>
-                    <option value="light">Light Mode</option>
-                    <option value="dark">Dark Mode</option>
-                  </select>
-                </div>
-                
-                <div className="settings-row">
-                  <div className="settings-row-text">
-                    <div className="settings-row-title">Accent Color</div>
-                    <div className="settings-row-desc">Primary color for buttons and highlights.</div>
-                  </div>
-                  <select className="form-select" style={{ width: 160 }} value={accent} onChange={e => setAccent(e.target.value as any)}>
-                    <option value="blue">Blue (Default)</option>
-                    <option value="indigo">Indigo</option>
-                    <option value="emerald">Emerald</option>
-                    <option value="violet">Violet</option>
-                  </select>
-                </div>
-                <div className="settings-row">
-                  <div className="settings-row-text">
-                    <div className="settings-row-title">Compact Mode</div>
-                    <div className="settings-row-desc">Reduce padding to fit more data on screen.</div>
-                  </div>
-                  <Toggle active={compactMode} onChange={setCompactMode} />
+                  <button className="btn btn-secondary" style={{ width: "100%" }}>+ Add New Method</button>
                 </div>
               </div>
             </div>
           </div>
+        ) : activeTab === "Data & Export" ? (
+          <div className="settings-grid">
+            <div className="settings-section">
+              <div>
+                <h2 className="settings-row-title" style={{ marginBottom: "var(--space-2)", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-secondary)" }}>EXPORT TRADES</h2>
+                <p className="settings-row-desc" style={{ marginBottom: "var(--space-4)" }}>Download your trading history for taxes or external analysis.</p>
+
+                <div className="card card-body">
+                  <div className="settings-row">
+                    <div className="settings-row-text">
+                      <div className="settings-row-title">CSV Export</div>
+                      <div className="settings-row-desc">Raw trade data in spreadsheet format.</div>
+                    </div>
+                    <button className="btn btn-secondary btn-sm">Download CSV</button>
+                  </div>
+                  <div className="settings-row">
+                    <div className="settings-row-text">
+                      <div className="settings-row-title">PDF Tax Report</div>
+                      <div className="settings-row-desc">Formatted document with total P&L and fees.</div>
+                    </div>
+                    <button className="btn btn-secondary btn-sm">Generate PDF</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="settings-section">
+              <div>
+                <h2 className="settings-row-title" style={{ marginBottom: "var(--space-2)", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-secondary)" }}>ACCOUNT BACKUP</h2>
+                <p className="settings-row-desc" style={{ marginBottom: "var(--space-4)" }}>Keep a safe offline copy of your entire journal.</p>
+
+                <div className="card card-body">
+                  <div style={{ padding: "var(--space-4)", background: "rgba(var(--accent-primary-rgb), 0.05)", borderRadius: "var(--radius-md)", marginBottom: "var(--space-4)" }}>
+                    <h4 style={{ margin: "0 0 8px 0", fontSize: "var(--text-sm)", fontWeight: 600 }}>Full JSON Backup</h4>
+                    <p className="text-muted" style={{ margin: 0, fontSize: "var(--text-sm)", lineHeight: 1.5 }}>
+                      Download a raw JSON file containing every trade, execution, mistake, and journal entry in your account. You can use this file to restore your account later.
+                    </p>
+                  </div>
+                  <button className="btn btn-primary" style={{ width: "100%" }}>Create Full Backup</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : activeTab === "Appearance" ? (
+          <div className="settings-grid">
+            <div className="settings-section">
+              <div>
+                <h2 className="settings-row-title" style={{ marginBottom: "var(--space-2)", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-secondary)" }}>THEME & LAYOUT</h2>
+                <p className="settings-row-desc" style={{ marginBottom: "var(--space-4)" }}>Customize how the application looks.</p>
+
+                <div className="card card-body" style={{ display: "flex", flexDirection: "column" }}>
+                  <div className="settings-row">
+                    <div className="settings-row-text">
+                      <div className="settings-row-title">Color Theme</div>
+                      <div className="settings-row-desc">Select your preferred color scheme.</div>
+                    </div>
+                    <select className="form-select" style={{ width: 160 }} value={theme} onChange={e => setTheme(e.target.value as any)}>
+                      <option value="system">System Default</option>
+                      <option value="light">Light Mode</option>
+                      <option value="dark">Dark Mode</option>
+                    </select>
+                  </div>
+
+                  <div className="settings-row">
+                    <div className="settings-row-text">
+                      <div className="settings-row-title">Accent Color</div>
+                      <div className="settings-row-desc">Primary color for buttons and highlights.</div>
+                    </div>
+                    <select className="form-select" style={{ width: 160 }} value={accent} onChange={e => setAccent(e.target.value as any)}>
+                      <option value="blue">Blue (Default)</option>
+                      <option value="indigo">Indigo</option>
+                      <option value="emerald">Emerald</option>
+                      <option value="violet">Violet</option>
+                    </select>
+                  </div>
+                  <div className="settings-row">
+                    <div className="settings-row-text">
+                      <div className="settings-row-title">Compact Mode</div>
+                      <div className="settings-row-desc">Reduce padding to fit more data on screen.</div>
+                    </div>
+                    <Toggle active={compactMode} onChange={setCompactMode} />
+                  </div>
+                </div>
+              </div>
+            </div>
 
 
-        </div>
-      ) : activeTab === "About" ? (
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", paddingTop: "var(--space-12)", paddingBottom: "var(--space-12)" }}>
-          {/* Logo */}
-          <div style={{ 
-            width: 72, 
-            height: 72, 
-            borderRadius: 20, 
-            display: "flex", 
-            alignItems: "center", 
-            justifyContent: "center",
-            marginBottom: "var(--space-6)",
-            overflow: "hidden"
-          }}>
-            <img src="/about-logo.png" alt="App Logo" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           </div>
-          
-          {/* App Name */}
-          <h2 style={{ fontSize: "var(--text-3xl)", fontWeight: 800, margin: 0, marginBottom: "var(--space-4)" }}>TraderLabs</h2>
-          
-          {/* Version Badge */}
-          <div style={{ 
-            border: "1px solid rgba(255, 255, 255, 0.1)", 
-            background: "rgba(255, 255, 255, 0.03)",
-            padding: "4px 16px",
-            borderRadius: 8,
-            marginBottom: "var(--space-10)"
-          }}>
-            <span style={{ color: "var(--accent-primary)", fontWeight: 700, fontFamily: "monospace", fontSize: "14px" }}>v1.3.0</span>
-          </div>
+        ) : activeTab === "About" ? (
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", paddingTop: "var(--space-12)", paddingBottom: "var(--space-12)" }}>
+            {/* Logo */}
+            <div style={{
+              width: 100,
+              height: 100,
+              borderRadius: 20,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              marginBottom: "var(--space-2)",
+              overflow: "hidden"
+            }}>
+              <img src="/about-logo.png" alt="App Logo" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            </div>
 
-          {/* Action Buttons */}
-          <div style={{ display: "flex", gap: "var(--space-4)", marginBottom: "var(--space-12)" }}>
-            <a href="/about/contact" className="card card-body" style={{ textDecoration: "none", color: "inherit", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: "12px 24px", minWidth: 160 }}>
-              <span style={{ fontWeight: 700 }}>Contact Support</span>
-            </a>
-            <a href="/about/bug-report" className="card card-body" style={{ textDecoration: "none", color: "inherit", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: "12px 24px", minWidth: 160 }}>
-              <span style={{ fontWeight: 700 }}>Report a Bug</span>
-            </a>
-          </div>
+            {/* App Name */}
+            <h2 style={{ fontSize: "var(--text-3xl)", fontWeight: 800, margin: 0, marginBottom: "var(--space-4)" }}>TraderLabs</h2>
 
-          {/* Links */}
-          <div style={{ display: "flex", gap: "var(--space-6)" }}>
-            <a href="/about/terms" className="text-muted" style={{ textDecoration: "none", fontSize: "var(--text-sm)", transition: "color 0.2s" }}>Terms of Service</a>
-            <a href="/about/privacy" className="text-muted" style={{ textDecoration: "none", fontSize: "var(--text-sm)", transition: "color 0.2s" }}>Privacy Policy</a>
-            <a href="/about/changelog" className="text-muted" style={{ textDecoration: "none", fontSize: "var(--text-sm)", transition: "color 0.2s" }}>Changelog</a>
+            {/* Version Badge */}
+            <div style={{
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+              background: "rgba(255, 255, 255, 0.03)",
+              padding: "4px 16px",
+              borderRadius: 8,
+              marginBottom: "var(--space-10)"
+            }}>
+              <span style={{ color: "var(--accent-primary)", fontWeight: 700, fontFamily: "monospace", fontSize: "14px" }}>v1.3.0</span>
+            </div>
+
+            {/* Action Buttons */}
+            <div style={{ display: "flex", gap: "var(--space-4)", marginBottom: "var(--space-12)" }}>
+              <a href="/about/contact" className="card card-body" style={{ textDecoration: "none", color: "inherit", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: "12px 24px", minWidth: 160 }}>
+                <span style={{ fontWeight: 700 }}>Contact Support</span>
+              </a>
+              <a href="/about/bug-report" className="card card-body" style={{ textDecoration: "none", color: "inherit", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: "12px 24px", minWidth: 160 }}>
+                <span style={{ fontWeight: 700 }}>Report a Bug</span>
+              </a>
+            </div>
+
+            {/* Links */}
+            <div style={{ display: "flex", gap: "var(--space-6)" }}>
+              <a href="/about/terms" className="text-muted" style={{ textDecoration: "none", fontSize: "var(--text-sm)", transition: "color 0.2s" }}>Terms of Service</a>
+              <a href="/about/privacy" className="text-muted" style={{ textDecoration: "none", fontSize: "var(--text-sm)", transition: "color 0.2s" }}>Privacy Policy</a>
+              <a href="/about/changelog" className="text-muted" style={{ textDecoration: "none", fontSize: "var(--text-sm)", transition: "color 0.2s" }}>Changelog</a>
+            </div>
           </div>
-        </div>
-      ) : null}
+        ) : null}
       </div>
 
       {/* Delete Confirmation Modal */}
@@ -1043,21 +1043,21 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
               <h3 style={{ fontSize: "1.1rem", margin: 0, fontWeight: 600 }}>Delete Account?</h3>
             </div>
-            
+
             <p style={{ color: "var(--text-secondary)", marginBottom: "var(--space-5)", lineHeight: 1.5 }}>
               Are you absolutely sure you want to permanently delete your account? This will erase all of your trades, plans, journals, and settings. <strong>This action cannot be undone.</strong>
             </p>
-            
+
             <div style={{ display: "flex", gap: "var(--space-3)", justifyContent: "flex-end" }}>
-              <button 
-                className="btn btn-secondary" 
+              <button
+                className="btn btn-secondary"
                 onClick={() => setShowDeleteConfirm(false)}
                 disabled={isDeleting}
               >
                 Cancel
               </button>
-              <button 
-                className="btn" 
+              <button
+                className="btn"
                 style={{ backgroundColor: "var(--color-negative)", color: "white", border: "none" }}
                 onClick={handleDeleteAccount}
                 disabled={isDeleting}
