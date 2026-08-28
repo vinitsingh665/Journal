@@ -9,7 +9,6 @@ interface PortfolioOverviewProps {
 
 export function PortfolioOverview({ state, portfolio, setters }: PortfolioOverviewProps) {
   const [showSettingsModal, setShowSettingsModal] = React.useState(false);
-
   const { capital, maxPortfolioRiskPct } = state;
   const { 
     maxRiskBudget, 
@@ -35,10 +34,17 @@ export function PortfolioOverview({ state, portfolio, setters }: PortfolioOvervi
         <div className="flex gap-2">
           <button 
             onClick={() => setShowSettingsModal(true)}
-            className="btn btn-secondary btn-sm bg-transparent border-border-secondary hover:bg-white/5 transition-colors"
+            className="btn btn-secondary btn-sm bg-transparent border-border-secondary"
           >
              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-             Risk Settings
+             Risk Rules
+          </button>
+          <button 
+            onClick={() => setShowSettingsModal(true)}
+            className="btn btn-secondary btn-sm bg-transparent border-border-secondary"
+          >
+             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+             Advanced
           </button>
         </div>
       </div>
@@ -115,79 +121,92 @@ export function PortfolioOverview({ state, portfolio, setters }: PortfolioOvervi
       </div>
 
       {showSettingsModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-md z-[100] flex items-center justify-center p-4">
-          <div className="relative w-full max-w-md bg-gradient-to-b from-[#1E293B] to-[#0F172A] border border-white/10 rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.6)] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            {/* Subtle top glare */}
-            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
-            
-            <div className="p-6 border-b border-white/5">
-              <div className="flex items-center gap-3 mb-1">
-                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                </div>
-                <h2 className="text-xl font-bold text-white tracking-wide">Risk Settings</h2>
-              </div>
-              <p className="text-white/60 text-sm mt-2">Configure your global portfolio risk constraints to match your trading style.</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={() => setShowSettingsModal(false)}></div>
+          
+          <div className="bg-surface/95 backdrop-blur-xl border border-border-secondary rounded-2xl w-full max-w-md shadow-2xl overflow-hidden relative animate-in fade-in zoom-in-95 duration-200">
+            {/* Premium Header */}
+            <div className="p-6 border-b border-border-secondary/50 bg-gradient-to-r from-primary/10 to-transparent relative">
+              <button 
+                onClick={() => setShowSettingsModal(false)} 
+                className="absolute top-6 right-6 text-muted hover:text-text-primary transition-colors bg-sidebar-active/50 hover:bg-sidebar-active p-1.5 rounded-lg"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </button>
+              
+              <h2 className="text-xl font-bold text-text-primary flex items-center gap-2">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-primary"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                Advanced Risk Rules
+              </h2>
+              <p className="text-secondary text-sm mt-1.5">Configure your global portfolio risk constraints.</p>
             </div>
             
-            <div className="p-6 space-y-6">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-white/50 mb-3">Max Portfolio Risk (%)</label>
-                <div className="relative group">
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/30 to-purple-500/30 rounded-xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
-                  <input 
-                    type="number" 
-                    step="0.1"
-                    min="0.1"
-                    max="100"
-                    value={maxPortfolioRiskPct}
-                    onChange={(e) => {
-                      if (setters?.setMaxPortfolioRiskPct) {
-                        setters.setMaxPortfolioRiskPct(Number(e.target.value));
-                      }
-                    }}
-                    className="relative w-full bg-black/40 border border-white/10 rounded-xl px-5 py-3.5 pr-10 text-white font-mono text-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-inner"
-                  />
-                  <span className="absolute right-5 top-1/2 -translate-y-1/2 text-white/40 font-bold">%</span>
+            <div className="p-6 space-y-5">
+              {/* Max Portfolio Risk Setting */}
+              <div className="bg-sidebar-active/30 p-4.5 rounded-xl border border-border-secondary/40 shadow-sm transition-all hover:border-primary/30 p-5">
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-primary mb-3 flex items-center gap-1.5">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><path d="M16 12l-4-4-4 4M12 8v8"/></svg>
+                  Max Portfolio Risk
+                </label>
+                
+                <div className="flex items-center gap-4">
+                  <div className="relative flex-1">
+                    <input 
+                      type="number" 
+                      step="0.1"
+                      min="0.1"
+                      max="100"
+                      value={maxPortfolioRiskPct}
+                      onChange={(e) => {
+                        if (setters?.setMaxPortfolioRiskPct) {
+                          setters.setMaxPortfolioRiskPct(Number(e.target.value));
+                        }
+                      }}
+                      className="w-full bg-input/80 border border-border-secondary rounded-lg px-4 py-2.5 pr-8 text-text-primary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary font-mono text-lg font-bold shadow-inner transition-colors"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted font-bold text-sm">%</span>
+                  </div>
+                  <div className="text-[11px] text-secondary max-w-[150px] leading-relaxed">
+                    Maximum allowed open risk across all positions. (Standard is <span className="text-text-primary font-semibold">1.5% to 2.0%</span>)
+                  </div>
                 </div>
-                <p className="text-[11px] text-white/40 mt-3 leading-relaxed">Maximum allowed open risk across all positions. The standard recommendation is 1.5% to 2.0%.</p>
               </div>
 
-              <div className="pt-5 border-t border-white/5">
-                <div className="flex items-center justify-between">
-                  <div className="pr-4">
-                    <div className="text-sm font-bold text-white">Cash Only (No Leverage)</div>
-                    <div className="text-[11px] text-white/50 mt-1.5 leading-relaxed">Automatically cap your position sizes so they mathematically never exceed your total available capital.</div>
+              {/* Cash Only Toggle Setting */}
+              <div className="bg-sidebar-active/30 p-5 rounded-xl border border-border-secondary/40 shadow-sm transition-all hover:border-positive/30 flex items-center justify-between group cursor-pointer" onClick={() => setters?.setCashOnly && setters.setCashOnly(!state.cashOnly)}>
+                <div>
+                  <div className="text-sm font-bold text-text-primary flex items-center gap-2">
+                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={state.cashOnly ? "text-positive" : "text-muted"}><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M12 12h.01"/><path d="M17 12h.01"/><path d="M7 12h.01"/></svg>
+                     Cash Only (No Leverage)
                   </div>
-                  <button 
-                    onClick={() => {
-                      if (setters?.setCashOnly) {
-                        setters.setCashOnly(!state.cashOnly);
-                      }
-                    }}
-                    style={{ minWidth: "46px", width: "46px", height: "26px", flexShrink: 0 }}
-                    className={cn(
-                      "relative inline-flex items-center rounded-full transition-all duration-300",
-                      state.cashOnly ? "bg-primary shadow-[0_0_15px_rgba(99,102,241,0.5)]" : "bg-white/10"
-                    )}
-                  >
-                    <span 
-                      className={cn(
-                        "inline-block h-5 w-5 transform rounded-full bg-white transition-transform duration-300 shadow-sm",
-                        state.cashOnly ? "translate-x-6" : "translate-x-0.5"
-                      )} 
-                    />
-                  </button>
+                  <div className="text-[11px] text-secondary mt-1.5 max-w-[250px] leading-relaxed">
+                    Automatically cap position size so it never exceeds your total available capital.
+                  </div>
                 </div>
+                
+                <button 
+                  style={{ minWidth: "46px", width: "46px", height: "26px", flexShrink: 0 }}
+                  className={cn(
+                    "relative inline-flex items-center rounded-full transition-all duration-300 shadow-inner ring-offset-2 ring-offset-surface focus:outline-none focus:ring-2 focus:ring-primary",
+                    state.cashOnly ? "bg-positive" : "bg-border-secondary group-hover:bg-border-secondary/80"
+                  )}
+                >
+                  <span 
+                    className={cn(
+                      "inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform duration-300 ease-spring",
+                      state.cashOnly ? "translate-x-6" : "translate-x-1"
+                    )} 
+                  />
+                </button>
               </div>
             </div>
             
             <div className="p-6 pt-2 pb-6 flex justify-end">
               <button 
                 onClick={() => setShowSettingsModal(false)}
-                className="btn btn-primary px-8 py-2.5 shadow-[0_4px_14px_0_rgb(99,102,241,0.39)] hover:shadow-[0_6px_20px_rgba(99,102,241,0.23)] hover:bg-primary/90 transition-all duration-200"
+                className="btn btn-primary px-8 py-2.5 rounded-xl font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all duration-200"
               >
-                Done
+                Save Settings
               </button>
             </div>
           </div>
