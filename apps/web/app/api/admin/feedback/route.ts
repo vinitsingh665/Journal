@@ -21,14 +21,34 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const { id, action } = await req.json();
+    const body = await req.json();
+    const { action, id, ...data } = body;
 
-    if (action === 'resolve') {
-      await (prisma as any).appFeedback.update({
+    if (action === 'resolve' && id) {
+      await prisma.appFeedback.update({
         where: { id },
         data: { status: 'resolved' }
       });
       return NextResponse.json({ success: true, message: 'Ticket resolved' });
+    }
+    
+    if (action === 'create') {
+      const newFeedback = await prisma.appFeedback.create({
+        data: {
+          type: data.type || 'contact',
+          subject: data.subject || 'No Subject',
+          body: data.body || '',
+          senderName: data.senderName || 'Anonymous',
+          senderEmail: data.senderEmail || 'No Email',
+          severity: data.severity || null,
+          affectedPage: data.affectedPage || null,
+          stepsToReproduce: data.stepsToReproduce || null,
+          expectedBehavior: data.expectedBehavior || null,
+          actualBehavior: data.actualBehavior || null,
+          status: 'new'
+        }
+      });
+      return NextResponse.json({ success: true, data: newFeedback });
     }
     
     return NextResponse.json({ success: false, error: 'Invalid action' }, { status: 400 });

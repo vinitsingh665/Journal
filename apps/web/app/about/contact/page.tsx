@@ -1,8 +1,46 @@
 "use client";
 
-import { Mail, MessageCircle, AtSign, BookOpen } from "lucide-react";
+import { Mail, MessageCircle, AtSign, BookOpen, CheckCircle2 } from "lucide-react";
+import { useState } from "react";
 
 export default function ContactPage() {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    category: "General Question",
+    message: ""
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.message || !formData.email) return;
+
+    setIsSubmitting(true);
+    try {
+      const res = await fetch('/api/admin/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create',
+          type: 'contact',
+          subject: formData.category,
+          body: formData.message,
+          senderName: formData.name || 'Anonymous',
+          senderEmail: formData.email
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setIsSuccess(true);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+    setIsSubmitting(false);
+  };
+
   return (
     <div style={{ animation: "fadeIn 0.3s ease-out", display: "flex", flexDirection: "column", alignItems: "center" }}>
       <div style={{ textAlign: "center", marginBottom: "var(--space-8)" }}>
@@ -91,7 +129,9 @@ export default function ContactPage() {
       </div>
 
       {/* Send a Message Form */}
-      <div style={{ 
+      <form 
+        onSubmit={handleSubmit}
+        style={{ 
         background: "var(--bg-secondary)", 
         border: "1px solid var(--border-secondary)", 
         borderRadius: "var(--radius-lg)", 
@@ -99,52 +139,99 @@ export default function ContactPage() {
         width: "100%", 
         maxWidth: 600
       }}>
-        <h2 style={{ fontSize: "var(--text-lg)", fontWeight: 700, marginBottom: "var(--space-5)" }}>Send a Message</h2>
-        
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-4)", marginBottom: "var(--space-4)" }}>
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label" style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-muted)" }}>YOUR NAME</label>
-            <input className="form-input" placeholder="e.g. Rahul Sharma" style={{ background: "var(--bg-primary)", borderColor: "var(--border-secondary)" }} />
+        {isSuccess ? (
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "40px 20px" }}>
+            <CheckCircle2 size={48} color="#10b981" style={{ marginBottom: 16 }} />
+            <h2 style={{ fontSize: "var(--text-xl)", fontWeight: 700, marginBottom: 8 }}>Message Sent!</h2>
+            <p style={{ color: "var(--text-muted)", textAlign: "center" }}>
+              Thanks for reaching out. We've received your message and will get back to you shortly.
+            </p>
+            <button 
+              type="button"
+              onClick={() => {
+                setIsSuccess(false);
+                setFormData({ name: "", email: "", category: "General Question", message: "" });
+              }}
+              style={{ marginTop: 24, padding: "8px 16px", background: "transparent", border: "1px solid var(--border-secondary)", borderRadius: "var(--radius-md)", color: "var(--text-primary)", cursor: "pointer" }}
+            >
+              Send Another Message
+            </button>
           </div>
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label" style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-muted)" }}>EMAIL</label>
-            <input className="form-input" placeholder="you@example.com" style={{ background: "var(--bg-primary)", borderColor: "var(--border-secondary)" }} />
-          </div>
-        </div>
+        ) : (
+          <>
+            <h2 style={{ fontSize: "var(--text-lg)", fontWeight: 700, marginBottom: "var(--space-5)" }}>Send a Message</h2>
+            
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-4)", marginBottom: "var(--space-4)" }}>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label" style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-muted)" }}>YOUR NAME</label>
+                <input 
+                  className="form-input" 
+                  placeholder="e.g. Rahul Sharma" 
+                  style={{ background: "var(--bg-primary)", borderColor: "var(--border-secondary)" }} 
+                  value={formData.name}
+                  onChange={e => setFormData({...formData, name: e.target.value})}
+                />
+              </div>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label" style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-muted)" }}>EMAIL</label>
+                <input 
+                  type="email"
+                  required
+                  className="form-input" 
+                  placeholder="you@example.com" 
+                  style={{ background: "var(--bg-primary)", borderColor: "var(--border-secondary)" }} 
+                  value={formData.email}
+                  onChange={e => setFormData({...formData, email: e.target.value})}
+                />
+              </div>
+            </div>
 
-        <div className="form-group" style={{ marginBottom: "var(--space-4)" }}>
-          <label className="form-label" style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-muted)" }}>CATEGORY</label>
-          <select className="form-select" style={{ background: "var(--bg-primary)", borderColor: "var(--border-secondary)" }}>
-            <option>General Question</option>
-            <option>Billing Issue</option>
-            <option>Technical Support</option>
-            <option>Feature Request</option>
-          </select>
-        </div>
+            <div className="form-group" style={{ marginBottom: "var(--space-4)" }}>
+              <label className="form-label" style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-muted)" }}>CATEGORY</label>
+              <select 
+                className="form-select" 
+                style={{ background: "var(--bg-primary)", borderColor: "var(--border-secondary)" }}
+                value={formData.category}
+                onChange={e => setFormData({...formData, category: e.target.value})}
+              >
+                <option>General Question</option>
+                <option>Billing Issue</option>
+                <option>Technical Support</option>
+                <option>Feature Request</option>
+              </select>
+            </div>
 
-        <div className="form-group" style={{ marginBottom: "var(--space-5)" }}>
-          <label className="form-label" style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-muted)" }}>MESSAGE</label>
-          <textarea 
-            className="form-input form-textarea" 
-            placeholder="Describe your issue or question..." 
-            style={{ background: "var(--bg-primary)", borderColor: "var(--border-secondary)", minHeight: 120 }}
-          ></textarea>
-        </div>
+            <div className="form-group" style={{ marginBottom: "var(--space-5)" }}>
+              <label className="form-label" style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-muted)" }}>MESSAGE</label>
+              <textarea 
+                required
+                className="form-input form-textarea" 
+                placeholder="Describe your issue or question..." 
+                style={{ background: "var(--bg-primary)", borderColor: "var(--border-secondary)", minHeight: 120 }}
+                value={formData.message}
+                onChange={e => setFormData({...formData, message: e.target.value})}
+              ></textarea>
+            </div>
 
-        <button 
-          className="btn btn-primary" 
-          style={{ 
-            background: "#f97316", // Accent orange from screenshot
-            color: "#fff", 
-            border: "none",
-            padding: "8px 24px",
-            fontWeight: 600
-          }}
-          onClick={(e) => e.preventDefault()}
-        >
-          Send Message
-        </button>
-      </div>
+            <button 
+              type="submit"
+              disabled={isSubmitting}
+              className="btn btn-primary" 
+              style={{ 
+                background: "#f97316",
+                color: "#fff", 
+                border: "none",
+                padding: "8px 24px",
+                fontWeight: 600,
+                opacity: isSubmitting ? 0.7 : 1,
+                cursor: isSubmitting ? "not-allowed" : "pointer"
+              }}
+            >
+              {isSubmitting ? "Sending..." : "Send Message"}
+            </button>
+          </>
+        )}
+      </form>
     </div>
   );
 }
