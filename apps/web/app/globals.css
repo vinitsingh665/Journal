@@ -2293,3 +2293,12 @@ h4 { font-size: var(--text-lg); }
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
+.logout-link:hover {
+  background: rgba(239, 68, 68, 0.1) !important;
+  color: #ef4444 !important;
+}
+.logout-link:hover svg {
+  color: #ef4444 !important;
+  opacity: 1 !important;
+}
