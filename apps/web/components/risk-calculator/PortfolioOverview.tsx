@@ -31,22 +31,13 @@ export function PortfolioOverview({ state, portfolio, setters }: PortfolioOvervi
           PORTFOLIO RISK OVERVIEW
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-muted"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
         </h2>
-        <div className="flex gap-2">
           <button 
             onClick={() => setShowSettingsModal(true)}
-            className="btn btn-secondary btn-sm bg-transparent border-border-secondary"
+            className="btn btn-secondary btn-sm bg-transparent border-border-secondary hover:bg-white/5 transition-colors"
           >
              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
              Risk Rules
           </button>
-          <button 
-            onClick={() => setShowSettingsModal(true)}
-            className="btn btn-secondary btn-sm bg-transparent border-border-secondary"
-          >
-             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-             Advanced
-          </button>
-        </div>
       </div>
 
       <div className="grid grid-cols-7 gap-4 mb-6">
@@ -121,68 +112,96 @@ export function PortfolioOverview({ state, portfolio, setters }: PortfolioOvervi
       </div>
 
       {showSettingsModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-card border border-border-secondary rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="p-6 border-b border-border-secondary">
-              <h2 className="text-xl font-bold text-text-primary">Advanced Risk Rules</h2>
-              <p className="text-secondary text-sm mt-1">Configure your global portfolio risk constraints.</p>
-            </div>
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-gradient-to-b from-[#1E2330] to-[#12151D] border border-white/10 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 relative">
             
-            <div className="p-6 space-y-5">
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-muted mb-2">Max Portfolio Risk (%)</label>
-                <div className="relative">
-                  <input 
-                    type="number" 
-                    step="0.1"
-                    min="0.1"
-                    max="100"
-                    value={maxPortfolioRiskPct}
-                    onChange={(e) => {
-                      if (setters?.setMaxPortfolioRiskPct) {
-                        setters.setMaxPortfolioRiskPct(Number(e.target.value));
-                      }
-                    }}
-                    className="w-full bg-input/50 border border-border-secondary rounded-xl px-4 py-3 pr-8 text-text-primary focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 font-mono"
-                  />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted">%</span>
+            {/* Header */}
+            <div className="px-6 py-5 border-b border-white/5 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                 </div>
-                <p className="text-xs text-secondary mt-2">Maximum allowed open risk across all positions. The standard recommendation is 1.5% to 2.0%.</p>
-              </div>
-
-              <div className="pt-2 border-t border-border-secondary">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="text-sm font-semibold text-text-primary">Cash Only (No Leverage)</div>
-                    <div className="text-xs text-secondary mt-1 max-w-[280px]">Automatically cap position size so it never exceeds your total available capital.</div>
-                  </div>
-                  <button 
-                    onClick={() => {
-                      if (setters?.setCashOnly) {
-                        setters.setCashOnly(!state.cashOnly);
-                      }
-                    }}
-                    style={{ minWidth: "44px", width: "44px", height: "24px", flexShrink: 0 }}
-                    className={cn(
-                      "relative inline-flex items-center rounded-full transition-colors",
-                      state.cashOnly ? "bg-primary" : "bg-border-secondary"
-                    )}
-                  >
-                    <span 
-                      className={cn(
-                        "inline-block h-4 w-4 transform rounded-full bg-white transition-transform",
-                        state.cashOnly ? "translate-x-6" : "translate-x-1"
-                      )} 
-                    />
-                  </button>
+                <div>
+                  <h2 className="text-lg font-bold text-white tracking-wide">Risk Rules</h2>
+                  <p className="text-white/50 text-xs">Configure your global constraints</p>
                 </div>
               </div>
-            </div>
-            
-            <div className="p-6 pt-0 flex justify-end">
               <button 
                 onClick={() => setShowSettingsModal(false)}
-                className="btn btn-primary px-6"
+                className="text-white/40 hover:text-white transition-colors"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </button>
+            </div>
+            
+            {/* Body */}
+            <div className="p-6 space-y-6">
+              
+              {/* Max Portfolio Risk */}
+              <div className="bg-white/5 rounded-xl p-4 border border-white/5 relative overflow-hidden group hover:border-primary/30 transition-colors">
+                <div className="absolute top-0 left-0 w-1 h-full bg-primary/50"></div>
+                <label className="block text-xs font-bold uppercase tracking-widest text-white/60 mb-3">Max Portfolio Risk</label>
+                <div className="flex items-center gap-4">
+                  <div className="relative flex-1">
+                    <input 
+                      type="number" 
+                      step="0.1"
+                      min="0.1"
+                      max="100"
+                      value={maxPortfolioRiskPct}
+                      onChange={(e) => {
+                        if (setters?.setMaxPortfolioRiskPct) {
+                          setters.setMaxPortfolioRiskPct(Number(e.target.value));
+                        }
+                      }}
+                      className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-2.5 pr-8 text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary font-mono text-lg transition-all"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 font-mono">%</span>
+                  </div>
+                </div>
+                <p className="text-[11px] text-white/40 mt-3 leading-relaxed">
+                  The maximum open risk allowed across all positions. The professional standard is 1.5% to 2.0%.
+                </p>
+              </div>
+
+              {/* Cash Only Toggle */}
+              <div className="bg-white/5 rounded-xl p-4 border border-white/5 flex items-center justify-between group hover:border-white/10 transition-colors">
+                <div className="pr-4">
+                  <div className="text-sm font-bold text-white flex items-center gap-2">
+                    Cash Only <span className="text-[10px] font-normal uppercase tracking-wider bg-white/10 px-2 py-0.5 rounded text-white/70">No Leverage</span>
+                  </div>
+                  <div className="text-xs text-white/40 mt-1.5 leading-relaxed">
+                    Automatically cap position size so it never exceeds your total available cash capital.
+                  </div>
+                </div>
+                <button 
+                  onClick={() => {
+                    if (setters?.setCashOnly) {
+                      setters.setCashOnly(!state.cashOnly);
+                    }
+                  }}
+                  style={{ minWidth: "44px", width: "44px", height: "24px", flexShrink: 0 }}
+                  className={cn(
+                    "relative inline-flex items-center rounded-full transition-all duration-300",
+                    state.cashOnly ? "bg-primary shadow-[0_0_10px_rgba(var(--color-primary-rgb),0.5)]" : "bg-white/10"
+                  )}
+                >
+                  <span 
+                    className={cn(
+                      "inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 shadow-sm",
+                      state.cashOnly ? "translate-x-6" : "translate-x-1"
+                    )} 
+                  />
+                </button>
+              </div>
+
+            </div>
+            
+            {/* Footer */}
+            <div className="px-6 py-4 bg-black/20 border-t border-white/5 flex justify-end">
+              <button 
+                onClick={() => setShowSettingsModal(false)}
+                className="btn btn-primary px-8 py-2.5 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all font-semibold"
               >
                 Done
               </button>
