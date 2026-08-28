@@ -111,7 +111,7 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
   const [twoFactorAuth, setTwoFactorAuth] = useState(false);
   const [compactMode, setCompactMode] = useState(false);
 
-  const tabs = ["General", "Trading", "Import & Sync", "Notifications", "Security", "Billing", "Data & Export", "Appearance"];
+  const tabs = ["General", "Trading", "Import & Sync", "Notifications", "Security", "Billing", "Data & Export", "Appearance", "About"];
 
   const handleSave = async () => {
     setSaving(true);
@@ -965,6 +965,66 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
           </div>
 
 
+        </div>
+      ) : activeTab === "About" ? (
+        <div className="settings-grid">
+          <div className="settings-section">
+            <div>
+              <h2 className="settings-row-title" style={{ marginBottom: "var(--space-2)", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-secondary)" }}>HELP & FEEDBACK</h2>
+              <p className="settings-row-desc" style={{ marginBottom: "var(--space-4)" }}>Get in touch or report an issue.</p>
+              
+              <div className="card card-body">
+                <a href="/about/contact" className="settings-row" style={{ textDecoration: "none", color: "inherit", cursor: "pointer" }}>
+                  <div className="settings-row-text">
+                    <div className="settings-row-title">Contact Support</div>
+                    <div className="settings-row-desc">Need help? We're here for you.</div>
+                  </div>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-muted"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </a>
+                <a href="/about/bug-report" className="settings-row" style={{ textDecoration: "none", color: "inherit", cursor: "pointer" }}>
+                  <div className="settings-row-text">
+                    <div className="settings-row-title">Report a Bug</div>
+                    <div className="settings-row-desc">Help us improve by reporting issues.</div>
+                  </div>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-muted"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+          
+          <div className="settings-section">
+            <div>
+              <h2 className="settings-row-title" style={{ marginBottom: "var(--space-2)", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-secondary)" }}>LEGAL & UPDATES</h2>
+              <p className="settings-row-desc" style={{ marginBottom: "var(--space-4)" }}>Important information about TraderLabs.</p>
+              
+              <div className="card card-body">
+                <a href="/about/terms" className="settings-row" style={{ textDecoration: "none", color: "inherit", cursor: "pointer" }}>
+                  <div className="settings-row-text">
+                    <div className="settings-row-title">Terms of Service</div>
+                    <div className="settings-row-desc">Rules and guidelines for using our platform.</div>
+                  </div>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-muted"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </a>
+                <a href="/about/privacy" className="settings-row" style={{ textDecoration: "none", color: "inherit", cursor: "pointer" }}>
+                  <div className="settings-row-text">
+                    <div className="settings-row-title">Privacy Policy</div>
+                    <div className="settings-row-desc">How we protect your data.</div>
+                  </div>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-muted"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </a>
+                <a href="/about/changelog" className="settings-row" style={{ textDecoration: "none", color: "inherit", cursor: "pointer" }}>
+                  <div className="settings-row-text">
+                    <div className="settings-row-title" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      Changelog
+                      <span className="badge badge-long">New</span>
+                    </div>
+                    <div className="settings-row-desc">See what's new in TraderLabs.</div>
+                  </div>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-muted"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
       ) : null}
       </div>
