@@ -65,13 +65,15 @@ export async function POST(request: NextRequest) {
       { name: "Broke trading plan", description: "Deviated from the predefined trading plan", color: "#DC2626" },
     ];
 
-    for (const tag of mistakeTags) {
-      await prisma.mistakeTag.upsert({
-        where: { name: tag.name },
-        update: {},
-        create: tag,
-      });
-    }
+    await Promise.all(
+      mistakeTags.map((tag) =>
+        prisma.mistakeTag.upsert({
+          where: { name: tag.name },
+          update: {},
+          create: tag,
+        })
+      )
+    );
 
     const token = await createToken(user.id);
     await setSessionCookie(token);

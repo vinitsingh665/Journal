@@ -66,8 +66,10 @@ export async function POST() {
     const token = await createToken(user.id);
     await setSessionCookie(token);
 
-    // Trigger cleanup in background without awaiting
-    cleanupOldGuests();
+    // Trigger cleanup in background after 5s to prevent SQLite locks during redirect
+    setTimeout(() => {
+      cleanupOldGuests().catch(console.error);
+    }, 5000);
 
     return NextResponse.json({ success: true, user });
   } catch (error) {
