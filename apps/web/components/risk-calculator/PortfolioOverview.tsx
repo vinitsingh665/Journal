@@ -4,9 +4,11 @@ import { formatINR, cn } from "@/lib/utils";
 interface PortfolioOverviewProps {
   state: any;
   portfolio: any;
+  setters?: any;
 }
 
-export function PortfolioOverview({ state, portfolio }: PortfolioOverviewProps) {
+export function PortfolioOverview({ state, portfolio, setters }: PortfolioOverviewProps) {
+  const [showSettingsModal, setShowSettingsModal] = React.useState(false);
   const { capital, maxPortfolioRiskPct } = state;
   const { 
     maxRiskBudget, 
@@ -30,11 +32,17 @@ export function PortfolioOverview({ state, portfolio }: PortfolioOverviewProps) 
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-muted"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
         </h2>
         <div className="flex gap-2">
-          <button className="btn btn-secondary btn-sm bg-transparent border-border-secondary">
+          <button 
+            onClick={() => setShowSettingsModal(true)}
+            className="btn btn-secondary btn-sm bg-transparent border-border-secondary"
+          >
              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
              Risk Rules
           </button>
-          <button className="btn btn-secondary btn-sm bg-transparent border-border-secondary">
+          <button 
+            onClick={() => setShowSettingsModal(true)}
+            className="btn btn-secondary btn-sm bg-transparent border-border-secondary"
+          >
              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
              Advanced
           </button>
@@ -111,6 +119,49 @@ export function PortfolioOverview({ state, portfolio }: PortfolioOverviewProps) 
           <span className="font-semibold" style={{ color: "#EAB308" }}>Insight:</span> You can take {Math.max(0, fullRiskTradesCapacity).toFixed(1)} more full-risk trade{fullRiskTradesCapacity !== 1 ? 's' : ''} ({state.defaultTradeRiskPct.toFixed(2)}%) or multiple smaller trades within your remaining risk budget of {remainingRiskCapacityPct.toFixed(2)}%.
         </div>
       </div>
+
+      {showSettingsModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-card border border-border-secondary rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-border-secondary">
+              <h2 className="text-xl font-bold text-text-primary">Advanced Risk Rules</h2>
+              <p className="text-secondary text-sm mt-1">Configure your global portfolio risk constraints.</p>
+            </div>
+            
+            <div className="p-6 space-y-5">
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-muted mb-2">Max Portfolio Risk (%)</label>
+                <div className="relative">
+                  <input 
+                    type="number" 
+                    step="0.1"
+                    min="0.1"
+                    max="100"
+                    value={maxPortfolioRiskPct}
+                    onChange={(e) => {
+                      if (setters?.setMaxPortfolioRiskPct) {
+                        setters.setMaxPortfolioRiskPct(Number(e.target.value));
+                      }
+                    }}
+                    className="w-full bg-input/50 border border-border-secondary rounded-xl px-4 py-3 pr-8 text-text-primary focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 font-mono"
+                  />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted">%</span>
+                </div>
+                <p className="text-xs text-secondary mt-2">Maximum allowed open risk across all positions. The standard recommendation is 1.5% to 2.0%.</p>
+              </div>
+            </div>
+            
+            <div className="p-6 pt-0 flex justify-end">
+              <button 
+                onClick={() => setShowSettingsModal(false)}
+                className="btn btn-primary px-6"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

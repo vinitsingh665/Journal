@@ -115,7 +115,7 @@ export default function SharedRiskCalculatorPage() {
 
           {isCalculatorOpen && (
             <div className="flex flex-col gap-6">
-              <PortfolioOverview state={engine.state} portfolio={engine.portfolio} />
+              <PortfolioOverview state={engine.state} portfolio={engine.portfolio} setters={engine.setters} />
 
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
                 <TradeInputsForm state={engine.state} setters={engine.setters} current={engine.current} />
