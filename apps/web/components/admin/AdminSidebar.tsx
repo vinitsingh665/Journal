@@ -26,18 +26,11 @@ export function AdminSidebar() {
     }}>
       {/* Brand */}
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 40, paddingLeft: 8 }}>
-        <div style={{ 
-          background: "linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%)", 
-          width: 32, 
-          height: 32, 
-          borderRadius: 8, 
-          display: "flex", 
-          alignItems: "center", 
-          justifyContent: "center",
-          boxShadow: "0 2px 10px rgba(79, 70, 229, 0.4)"
-        }}>
-          <Activity color="white" size={18} strokeWidth={3} />
-        </div>
+        <img 
+          src="/logo.png" 
+          alt="TraderLabs Logo" 
+          style={{ width: 32, height: 32, objectFit: "contain", filter: "drop-shadow(0 0 8px rgba(79, 70, 229, 0.4))" }} 
+        />
         <div>
           <div style={{ fontSize: 16, fontWeight: 800, letterSpacing: "-0.02em" }}>TraderLabs</div>
           <div style={{ fontSize: 10, fontWeight: 600, color: "#a1a1aa", letterSpacing: "0.05em" }}>COMMAND</div>
