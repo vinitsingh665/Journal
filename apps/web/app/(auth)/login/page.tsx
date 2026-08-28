@@ -238,7 +238,7 @@ export default function LoginPage() {
                 <div className="field">
                   <label>
                     Password
-                    {!isSetup && <button type="button" onClick={() => alert('Password recovery via email is not yet configured. Please contact support.')} className="forgot" style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', cursor: 'pointer' }}>Forgot password?</button>}
+                    {!isSetup && <Link href="/forgot-password" className="forgot">Forgot password?</Link>}
                   </label>
                   <div className="input-wrap">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
