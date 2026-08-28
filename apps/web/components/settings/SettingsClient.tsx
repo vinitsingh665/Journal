@@ -972,18 +972,16 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", paddingTop: "var(--space-12)", paddingBottom: "var(--space-12)" }}>
           {/* Logo */}
           <div style={{ 
-            background: "#f97316", 
             width: 72, 
             height: 72, 
             borderRadius: 20, 
             display: "flex", 
             alignItems: "center", 
             justifyContent: "center",
-            marginBottom: "var(--space-6)"
+            marginBottom: "var(--space-6)",
+            overflow: "hidden"
           }}>
-            <div style={{ background: "white", borderRadius: 8, padding: 8 }}>
-              <Activity color="#f97316" size={32} strokeWidth={3} />
-            </div>
+            <img src="/icon.png" alt="App Logo" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           </div>
           
           {/* App Name */}
@@ -997,7 +995,7 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
             borderRadius: 8,
             marginBottom: "var(--space-10)"
           }}>
-            <span style={{ color: "#f97316", fontWeight: 700, fontFamily: "monospace", fontSize: "14px" }}>v1.3.0</span>
+            <span style={{ color: "var(--accent-primary)", fontWeight: 700, fontFamily: "monospace", fontSize: "14px" }}>v1.3.0</span>
           </div>
 
           {/* Action Buttons */}
