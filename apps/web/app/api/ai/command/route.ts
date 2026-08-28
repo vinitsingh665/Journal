@@ -17,9 +17,9 @@ Your job is to parse their intent into a STRICT JSON structure.
 
 MANDATORY & OPTIONAL FIELD CHECK:
 Before returning an action intent (like CREATE_FORM_FILL or CREATE_MISTAKE), you must ensure all mandatory fields are provided by the user in the conversation history.
-- For a NEW TRADE (CREATE_FORM_FILL), mandatory fields are: symbol, side (BUY/SELL), and price (entry price). Optional fields are: quantity, priceOut (exit price), stopLoss, target, strategy, and notes.
+- For a NEW TRADE (CREATE_FORM_FILL), mandatory fields are: symbol, side (BUY/SELL), and price (entry price). NOTE: If the user says "at current price", "market price", or "live price", then price is NO LONGER mandatory. Set it to null. Optional fields are: exchange, quantity, priceOut, stopLoss, target, strategy, and notes.
 - For a MISTAKE (CREATE_MISTAKE), mandatory fields are: title, and impact (financial loss). Optional fields are: desc, category, and recurred.
-- For RISK CALCULATOR (CALCULATE_RISK), mandatory fields are: symbol, side (BUY/SELL), price (entry), and stopLoss. Optional fields are: target, riskPercent.
+- For RISK CALCULATOR (CALCULATE_RISK), mandatory fields are: symbol, side (BUY/SELL), price (entry), and stopLoss. NOTE: If the user says "at current price", set price to null. Optional fields are: exchange, target, riskPercent.
 - For EXIT or UPDATE, mandatory field is: symbol.
 
 EXCEPTION TO MANDATORY FIELDS / PROCEEDING:
@@ -35,7 +35,7 @@ Once you have all mandatory fields, return the action intent:
 
 If the user is describing a NEW trade they took or want to log (including past trades):
 Intent: "CREATE_FORM_FILL"
-Extract: symbol, side (BUY/SELL), quantity, price (entry price), priceOut (exit price), stopLoss, target.
+Extract: symbol, exchange (e.g. NSE, BSE, NASDAQ, CRYPTO. Default to NSE if unknown, but if it's a crypto pair like 'ethusdt', use CRYPTO), side (BUY/SELL), quantity, price (entry price, or null if market price), priceOut (exit price), stopLoss, target.
 Also extract executionTime (entry date/time) and exitTime (exit date/time) if mentioned, in ISO format "YYYY-MM-DDTHH:mm".
 Additionally, you MUST act as a professional trading analyst and generate a comprehensive 'thesis' (why they took the trade based on their prompt) and 'notes' (any additional context) in English. Translate their Hinglish reasons into professional trading terminology.
 
@@ -73,6 +73,7 @@ Respond ONLY with valid JSON matching this schema:
   "message": string | null,
   "data": {
     "symbol": string | null,
+    "exchange": string | null,
     "side": "BUY" | "SELL" | null,
     "quantity": number | null,
     "price": number | null,
@@ -330,7 +331,25 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // If it's CREATE_FORM_FILL, just return the parsed data for the frontend to handle
+    // If it's CREATE_FORM_FILL or CALCULATE_RISK, check if we need to auto-fetch the live price
+    if ((parsed.intent === "CREATE_FORM_FILL" || parsed.intent === "CALCULATE_RISK") && parsed.data.symbol && !parsed.data.price) {
+      const quote = await fetchStockQuote(parsed.data.symbol, parsed.data.exchange || "NSE");
+      if (quote && quote.regularMarketPrice) {
+        parsed.data.price = quote.regularMarketPrice;
+        if (!parsed.message) {
+          parsed.message = `Fetched current market price: ₹${quote.regularMarketPrice}`;
+        }
+      } else {
+        // If we fail to fetch, ask clarification instead
+        return NextResponse.json({ success: true, data: {
+          intent: "ASK_CLARIFICATION",
+          message: `I couldn't fetch the live market price for ${parsed.data.symbol}. Please provide your entry price.`,
+          data: parsed.data
+        }});
+      }
+    }
+
+    // Just return the parsed data for the frontend to handle
     return NextResponse.json({ success: true, data: parsed });
 
   } catch (error: any) {

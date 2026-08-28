@@ -73,6 +73,7 @@ export default function TradeForm({ userId, tradeId, initialData }: TradeFormPro
           setForm(prev => ({
             ...prev,
             symbol: aiData.symbol || prev.symbol,
+            exchange: aiData.exchange || prev.exchange,
             side: aiData.side || prev.side,
             quantity: aiData.quantity ? String(aiData.quantity) : prev.quantity,
             price: aiData.price ? String(aiData.price) : prev.price,

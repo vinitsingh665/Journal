@@ -86,7 +86,8 @@ export default function AiAssistant() {
         const msg = data.message || data.data?.message;
         setMessages([...newMessages, { role: "assistant", content: msg }]);
       } else if (data.data?.intent === "CREATE_FORM_FILL") {
-        setMessages([...newMessages, { role: "assistant", content: "Got all the details! Redirecting you to create the trade..." }]);
+        const msg = data.data?.message || "Got all the details! Redirecting you to create the trade...";
+        setMessages([...newMessages, { role: "assistant", content: msg }]);
         sessionStorage.setItem("aiTradePrefill", JSON.stringify(data.data.data));
         setTimeout(() => {
           setIsOpen(false);
@@ -110,7 +111,8 @@ export default function AiAssistant() {
           }
         }, 1500);
       } else if (data.data?.intent === "CALCULATE_RISK") {
-        setMessages([...newMessages, { role: "assistant", content: "Got it! Redirecting you to the Risk Calculator..." }]);
+        const msg = data.data?.message || "Got it! Redirecting you to the Risk Calculator...";
+        setMessages([...newMessages, { role: "assistant", content: msg }]);
         sessionStorage.setItem("aiRiskPrefill", JSON.stringify(data.data.data));
         setTimeout(() => {
           setIsOpen(false);
