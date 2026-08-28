@@ -3,6 +3,7 @@
 import { useState, FormEvent, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
+import Link from "next/link";
 import "./login.css";
 
 function GoogleButton({ setError, setLoading }: { setError: (s: string) => void, setLoading: (b: boolean) => void }) {
@@ -272,10 +273,9 @@ export default function LoginPage() {
         <footer className="login-footer-bar">
           <span>© 2026 TraderLabs. All rights reserved.</span>
           <div className="footer-nav">
-            <a href="#">Privacy Policy</a>
-            <a href="#">Terms of Service</a>
-            <a href="#">Contact Us</a>
-            <a href="#">Help Center</a>
+            <Link href="/about/privacy">Privacy Policy</Link>
+            <Link href="/about/terms">Terms of Service</Link>
+            <Link href="/about/contact">Contact Us</Link>
           </div>
         </footer>
       </div>
