@@ -981,7 +981,7 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
             marginBottom: "var(--space-6)",
             overflow: "hidden"
           }}>
-            <img src="/icon.png" alt="App Logo" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            <img src="/about-logo.png" alt="App Logo" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           </div>
           
           {/* App Name */}
