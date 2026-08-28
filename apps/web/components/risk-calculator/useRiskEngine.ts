@@ -27,6 +27,7 @@ export function useRiskEngine(userId?: string) {
   // Global Settings
   const [capital, setCapital] = useState<number>(500000);
   const [maxPortfolioRiskPct, setMaxPortfolioRiskPct] = useState<number>(1.5);
+  const [cashOnly, setCashOnly] = useState<boolean>(false);
   
   // UI State
   const [isCalculatorOpen, setIsCalculatorOpen] = useState<boolean>(false);
@@ -103,9 +104,16 @@ export function useRiskEngine(userId?: string) {
     ? Math.max(0, entry - stop) 
     : Math.max(0, stop - entry);
     
-  const currentPositionSize = currentRiskPerShare > 0 
+  let currentPositionSize = currentRiskPerShare > 0 
     ? Math.floor(tradeRiskAmount / currentRiskPerShare) 
     : 0;
+
+  if (cashOnly && entry > 0) {
+    const maxSharesByCapital = Math.floor(capital / entry);
+    if (currentPositionSize > maxSharesByCapital) {
+      currentPositionSize = maxSharesByCapital;
+    }
+  }
 
   const currentCapitalDeployed = currentPositionSize * entry;
   const currentCapitalUtilizationPct = capital > 0 ? (currentCapitalDeployed / capital) * 100 : 0;
@@ -266,13 +274,13 @@ export function useRiskEngine(userId?: string) {
   return {
     state: {
       isCalculatorOpen,
-      capital, maxPortfolioRiskPct, defaultTradeRiskPct,
+      capital, maxPortfolioRiskPct, defaultTradeRiskPct, cashOnly,
       symbol, exchange, sector,
       entry, stop, target, direction, slippagePct, winRatePct,
       trades, savedTemplates
     },
     setters: {
-      setCapital, setMaxPortfolioRiskPct, setDefaultTradeRiskPct,
+      setCapital, setMaxPortfolioRiskPct, setDefaultTradeRiskPct, setCashOnly,
       setSymbol, setExchange, setSector,
       setEntry, setStop, setTarget, setDirection, setSlippagePct, setWinRatePct
     },

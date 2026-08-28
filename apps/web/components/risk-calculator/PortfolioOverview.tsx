@@ -149,6 +149,33 @@ export function PortfolioOverview({ state, portfolio, setters }: PortfolioOvervi
                 </div>
                 <p className="text-xs text-secondary mt-2">Maximum allowed open risk across all positions. The standard recommendation is 1.5% to 2.0%.</p>
               </div>
+
+              <div className="pt-2 border-t border-border-secondary">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-sm font-semibold text-text-primary">Cash Only (No Leverage)</div>
+                    <div className="text-xs text-secondary mt-1 max-w-[280px]">Automatically cap position size so it never exceeds your total available capital.</div>
+                  </div>
+                  <button 
+                    onClick={() => {
+                      if (setters?.setCashOnly) {
+                        setters.setCashOnly(!state.cashOnly);
+                      }
+                    }}
+                    className={cn(
+                      "relative inline-flex h-6 w-11 items-center rounded-full transition-colors",
+                      state.cashOnly ? "bg-primary" : "bg-border-secondary"
+                    )}
+                  >
+                    <span 
+                      className={cn(
+                        "inline-block h-4 w-4 transform rounded-full bg-white transition-transform",
+                        state.cashOnly ? "translate-x-6" : "translate-x-1"
+                      )} 
+                    />
+                  </button>
+                </div>
+              </div>
             </div>
             
             <div className="p-6 pt-0 flex justify-end">
