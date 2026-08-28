@@ -1,6 +1,6 @@
 "use client";
 
-import { Mail, MessageCircle, Twitter, BookOpen } from "lucide-react";
+import { Mail, MessageCircle, AtSign, BookOpen } from "lucide-react";
 
 export default function ContactPage() {
   return (
@@ -67,7 +67,7 @@ export default function ContactPage() {
           alignItems: "center",
           gap: "var(--space-2)"
         }}>
-          <Twitter size={24} color="#ef4444" />
+          <AtSign size={24} color="#ef4444" />
           <div style={{ fontWeight: 600, fontSize: "var(--text-md)" }}>Twitter / X</div>
           <div className="text-muted" style={{ fontSize: "var(--text-xs)" }}>@traderlabs</div>
         </div>
