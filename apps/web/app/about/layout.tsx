@@ -1,7 +1,10 @@
+import { getCurrentUser } from "@/lib/auth";
 import React from "react";
 import Link from "next/link";
 
-export default function AboutLayout({ children }: { children: React.ReactNode }) {
+export default async function AboutLayout({ children }: { children: React.ReactNode }) {
+  const userId = await getCurrentUser();
+
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "var(--bg-primary)" }}>
       {/* Simple Header */}
@@ -17,9 +20,15 @@ export default function AboutLayout({ children }: { children: React.ReactNode })
           <Link href="/" style={{ textDecoration: "none", color: "var(--text-primary)", fontWeight: 800, fontSize: "var(--text-lg)" }}>
             TraderLabs
           </Link>
-          <Link href="/settings?tab=About" style={{ textDecoration: "none", fontSize: "var(--text-sm)", color: "var(--text-secondary)" }}>
-            Back to Settings
-          </Link>
+          {userId ? (
+            <Link href="/settings?tab=About" style={{ textDecoration: "none", fontSize: "var(--text-sm)", color: "var(--text-secondary)" }}>
+              Back to Settings
+            </Link>
+          ) : (
+            <Link href="/login" style={{ textDecoration: "none", fontSize: "var(--text-sm)", color: "var(--text-secondary)" }}>
+              Back to Login
+            </Link>
+          )}
         </div>
       </header>
 
