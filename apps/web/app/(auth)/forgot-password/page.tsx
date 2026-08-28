@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, useEffect } from "react";
 import Link from "next/link";
 import "../login/login.css";
 
@@ -9,6 +9,18 @@ export default function ForgotPasswordPage() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
   const [isDark, setIsDark] = useState(false); // Default to light mode, matching login page
+
+  useEffect(() => {
+    if (localStorage.getItem("auth-theme") === "dark") {
+      setIsDark(true);
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = !isDark;
+    setIsDark(newTheme);
+    localStorage.setItem("auth-theme", newTheme ? "dark" : "light");
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -71,7 +83,7 @@ export default function ForgotPasswordPage() {
           TraderLabs
         </Link>
         <div className="header-btns">
-          <button type="button" className={`header-btn ${isDark ? 'active' : ''}`} onClick={() => setIsDark(!isDark)}>
+          <button type="button" className={`header-btn ${isDark ? 'active' : ''}`} onClick={toggleTheme}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
             {isDark ? "Light Mode" : "Dark Mode"}
           </button>

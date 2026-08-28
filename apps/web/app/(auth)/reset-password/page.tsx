@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, FormEvent, Suspense } from "react";
+import { useState, FormEvent, Suspense, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import "../login/login.css";
@@ -175,7 +175,11 @@ function ResetPasswordForm({ isDark, setIsDark }: { isDark: boolean, setIsDark: 
           TraderLabs
         </Link>
         <div className="header-btns">
-          <button type="button" className={`header-btn ${isDark ? 'active' : ''}`} onClick={() => setIsDark(!isDark)}>
+          <button type="button" className={`header-btn ${isDark ? 'active' : ''}`} onClick={() => {
+            const newTheme = !isDark;
+            setIsDark(newTheme);
+            localStorage.setItem("auth-theme", newTheme ? "dark" : "light");
+          }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
             {isDark ? "Light Mode" : "Dark Mode"}
           </button>
@@ -236,6 +240,12 @@ function ResetPasswordForm({ isDark, setIsDark }: { isDark: boolean, setIsDark: 
 export default function ResetPasswordPage() {
   const [isDark, setIsDark] = useState(false);
   
+  useEffect(() => {
+    if (localStorage.getItem("auth-theme") === "dark") {
+      setIsDark(true);
+    }
+  }, []);
+
   return (
     <Suspense fallback={<div style={{ textAlign: 'center', color: '#a1a1aa' }}>Loading...</div>}>
       <ResetPasswordForm isDark={isDark} setIsDark={setIsDark} />

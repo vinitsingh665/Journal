@@ -58,7 +58,17 @@ export default function LoginPage() {
       .then((r) => r.json())
       .then((data) => { setIsSetup(!data.hasUser); setCheckingSetup(false); })
       .catch(() => { setIsSetup(true); setCheckingSetup(false); });
+      
+    if (localStorage.getItem("auth-theme") === "dark") {
+      setIsDark(true);
+    }
   }, []);
+
+  const toggleTheme = () => {
+    const newTheme = !isDark;
+    setIsDark(newTheme);
+    localStorage.setItem("auth-theme", newTheme ? "dark" : "light");
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -131,7 +141,7 @@ export default function LoginPage() {
             TraderLabs
           </div>
           <div className="header-btns">
-            <button className={`header-btn ${isDark ? 'active' : ''}`} onClick={() => setIsDark(!isDark)}>
+            <button className={`header-btn ${isDark ? 'active' : ''}`} onClick={toggleTheme}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
               {isDark ? "Light Mode" : "Dark Mode"}
             </button>
