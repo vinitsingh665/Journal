@@ -33,7 +33,8 @@ export async function GET() {
     return NextResponse.json({ 
       success: true, 
       data: users,
-      currentUserRole: currentUser.role
+      currentUserRole: currentUser.role,
+      currentUserId: currentUserId
     });
   } catch (err) {
     console.error('Failed to fetch users:', err);

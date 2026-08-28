@@ -8,6 +8,7 @@ export default function AdminUsersPage() {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentUserRole, setCurrentUserRole] = useState<string>('USER');
+  const [currentUserId, setCurrentUserId] = useState<string>('');
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -27,6 +28,7 @@ export default function AdminUsersPage() {
       if (data.success) {
         setUsers(data.data);
         setCurrentUserRole(data.currentUserRole);
+        setCurrentUserId(data.currentUserId);
       }
       setLoading(false);
     } catch(e) {
@@ -94,7 +96,7 @@ export default function AdminUsersPage() {
                 </div>
               </td>
               <td style={{ padding: "16px 24px 16px 0", textAlign: "right" }}>
-                {currentUserRole === 'ADMIN' ? (
+                {currentUserRole === 'ADMIN' && user.id !== currentUserId ? (
                   <select 
                     disabled={updatingId === user.id}
                     value={user.role || 'USER'}
@@ -111,21 +113,21 @@ export default function AdminUsersPage() {
                       outline: "none"
                     }}
                   >
-                    <option value="USER">User</option>
-                    <option value="MEMBER">Member</option>
-                    <option value="ADMIN">Admin</option>
+                    <option value="USER" style={{ backgroundColor: "#09090b", color: "#f4f4f5" }}>User</option>
+                    <option value="MEMBER" style={{ backgroundColor: "#09090b", color: "#f4f4f5" }}>Member</option>
+                    <option value="ADMIN" style={{ backgroundColor: "#09090b", color: "#f4f4f5" }}>Admin</option>
                   </select>
                 ) : (
                   <span style={{ 
                     backgroundColor: "rgba(255,255,255,0.05)", 
                     border: "1px solid #27272a", 
-                    color: "#a1a1aa", 
+                    color: user.id === currentUserId ? "#3b82f6" : "#a1a1aa", 
                     padding: "6px 12px", 
                     borderRadius: 6, 
                     fontSize: 12, 
-                    fontWeight: 500 
+                    fontWeight: 600 
                   }}>
-                    {user.role || 'USER'}
+                    {user.id === currentUserId ? `${user.role || 'USER'} (You)` : (user.role || 'USER')}
                   </span>
                 )}
               </td>
