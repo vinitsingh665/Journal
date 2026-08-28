@@ -47,9 +47,9 @@ If the user wants to EXIT an existing open trade:
 Intent: "EXIT_TRADE"
 Extract: symbol (must match one of their open trades), exitPrice (null if they say "at current price" or "market"), quantity (null if they say "fully" or don't specify, meaning full exit).
 
-If the user wants to UPDATE an existing open trade (like trailing a stop loss or changing a target):
+If the user wants to UPDATE an existing open trade (like trailing a stop loss, changing a target, or updating their thesis/notes):
 Intent: "UPDATE_TRADE"
-Extract: symbol, stopLoss, target.
+Extract: symbol, stopLoss, target, thesis, notes, reasonForEntry, setup, strategy, confidence.
 
 If the user wants to OPEN the EDIT FORM for a specific trade (e.g. "Edit my Reliance trade", "Open edit form for TCS"):
 Intent: "EDIT_TRADE"
@@ -276,10 +276,22 @@ export async function POST(req: NextRequest) {
         const updates: any = {};
         if (parsed.data.stopLoss) updates.stopLoss = parsed.data.stopLoss;
         if (parsed.data.target) updates.target = parsed.data.target;
+        if (parsed.data.thesis) updates.thesis = parsed.data.thesis;
+        if (parsed.data.notes) updates.notes = parsed.data.notes;
+        if (parsed.data.reasonForEntry) updates.reasonForEntry = parsed.data.reasonForEntry;
+        if (parsed.data.setup) updates.setup = parsed.data.setup;
+        if (parsed.data.strategy) updates.strategy = parsed.data.strategy;
+        if (parsed.data.confidence) updates.confidence = Number(parsed.data.confidence);
         
         if (Object.keys(updates).length > 0) {
           await prisma.trade.update({ where: { id: trade.id }, data: updates });
-          return NextResponse.json({ success: true, message: `Updated ${trade.symbol} parameters.` });
+          return NextResponse.json({ success: true, message: `Successfully updated ${trade.symbol}.` });
+        } else {
+          return NextResponse.json({ success: true, data: {
+            intent: "ASK_CLARIFICATION",
+            message: `What exactly would you like to update for your ${trade.symbol} trade?`,
+            data: parsed.data
+          }});
         }
       }
     }

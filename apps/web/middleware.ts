@@ -15,18 +15,23 @@ export async function middleware(request: NextRequest) {
       return NextResponse.rewrite(new URL("/expired", request.url));
     }
 
-    const payload = await verifySharedToken(token);
+    try {
+      const verifyRes = await fetch(new URL(`/api/shared/verify-link?token=${token}`, request.url));
+      const payload = await verifyRes.json();
 
-    if (!payload || !payload.userId) {
-      // Invalid or expired token
+      if (!payload || !payload.valid || !payload.userId) {
+        return NextResponse.rewrite(new URL("/expired", request.url));
+      }
+
+      // Rewrite internally to the standard shared route
+      const restOfPath = segments.slice(2).join("/");
+      const targetPath = `/shared/${payload.userId}${restOfPath ? `/${restOfPath}` : ""}`;
+      
+      return NextResponse.rewrite(new URL(targetPath, request.url));
+    } catch (e) {
+      console.error(e);
       return NextResponse.rewrite(new URL("/expired", request.url));
     }
-
-    // Rewrite internally to the standard shared route
-    const restOfPath = segments.slice(2).join("/");
-    const targetPath = `/shared/${payload.userId}${restOfPath ? `/${restOfPath}` : ""}`;
-    
-    return NextResponse.rewrite(new URL(targetPath, request.url));
   }
 
   return NextResponse.next();

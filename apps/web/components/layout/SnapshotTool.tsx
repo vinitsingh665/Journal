@@ -57,19 +57,24 @@ export default function SnapshotTool({ userId }: { userId?: string }) {
             await navigator.clipboard.writeText(publicUrl);
             setNotification("Link copied! It will expire in 24 hours.");
             setTimeout(() => setNotification(null), 4000);
+            setIsCapturing(false);
+            return;
           } else if (action === "tweet") {
             const tweetText = encodeURIComponent(`Check out my trading performance on TraderLabs! 📈📊\n${publicUrl}`);
             window.open(`https://twitter.com/intent/tweet?text=${tweetText}`, "_blank");
+            
+            // Continue below to capture image
           }
         } catch (e) {
           console.error(e);
           alert("Error generating temporary link.");
+          setIsCapturing(false);
+          return;
         }
-        setIsCapturing(false);
-        return;
       }
 
-      // For download, copy, and newtab, we still use html2canvas to generate an image
+      // Capture image for download, copy, and tweet
+      setNotification(action === "tweet" ? "Generating snapshot for tweet..." : "Capturing snapshot...");
       const element = document.querySelector(".app-content") as HTMLElement || document.body;
       
       const canvas = await html2canvas(element, { 
@@ -89,22 +94,29 @@ export default function SnapshotTool({ userId }: { userId?: string }) {
         link.href = imgData;
         link.download = `TraderLabs_Snapshot_${new Date().toISOString().split('T')[0]}.png`;
         link.click();
-      } else if (action === "copy") {
+      } else if (action === "copy" || action === "tweet") {
         canvas.toBlob(async (blob) => {
           if (blob) {
             try {
               await navigator.clipboard.write([
                 new ClipboardItem({ "image/png": blob })
               ]);
-              setNotification("Snapshot copied to clipboard!");
-              setTimeout(() => setNotification(null), 3000);
+              if (action === "tweet") {
+                setNotification("Image copied! Go to the Twitter tab and press Ctrl+V to paste.");
+                setTimeout(() => setNotification(null), 8000);
+              } else {
+                setNotification("Snapshot copied to clipboard!");
+                setTimeout(() => setNotification(null), 3000);
+              }
             } catch (err) {
-              console.error("Failed to copy image: ", err);
-              setNotification("Failed to copy image to clipboard.");
-              setTimeout(() => setNotification(null), 3000);
+              console.error(err);
+              setNotification(action === "tweet" 
+                ? "Failed to copy image. You might need to allow clipboard permissions." 
+                : "Failed to copy image. Please try again.");
+              setTimeout(() => setNotification(null), 4000);
             }
           }
-        }, "image/png");
+        }, "image/png", 1.0);
       }
     } catch (e) {
       console.error("Failed to capture snapshot:", e);
