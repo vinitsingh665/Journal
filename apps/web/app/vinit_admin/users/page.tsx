@@ -2,20 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 
-const usersData = [
-  { name: "Vinay Singh", username: "@vinay", email: "vinnis7.kushwaha@gmail.com", dateJoined: "Aug 12, 2026", status: "Active" },
-  { name: "Jitender Kumar", username: "@jeet", email: "kumarjitu9999@gmail.com", dateJoined: "Aug 3, 2026", status: "Active" },
-  { name: "Arun Arun", username: "@arunkumar", email: "arun01051994me@gmail.com", dateJoined: "Jun 30, 2026", status: "Active" },
-  { name: "md touseef attar", username: "@touseefattar53gmail", email: "touseefattar53@gmail.com", dateJoined: "May 17, 2026", status: "Active" },
-  { name: "Swinglify AI Analyst", username: "@swinglifyai", email: "ai@swinglify.online", dateJoined: "Mar 28, 2026", status: "Active" },
-  { name: "Vinit Singh", username: "@swinglify", email: "vinits.7kushwaha@gmail.com", dateJoined: "Mar 27, 2026", status: "Active" },
-  { name: "ayush bhutt", username: "@axel", email: "ayushs.93singh@gmail.com", dateJoined: "Mar 26, 2026", status: "Active" },
-  { name: "Vinit Singh", username: "@vinit", email: "vinitsingh665@gmail.com", dateJoined: "Mar 26, 2026", status: "Active" },
-  { name: "Dr. Momo", username: "@vinit1", email: "drmomotales@gmail.com", dateJoined: "Mar 26, 2026", status: "Active" },
-];
-
 export default function AdminUsersPage() {
   const [timeStr, setTimeStr] = useState("");
+  const [usersData, setUsersData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const updateTime = () => {
@@ -25,6 +15,24 @@ export default function AdminUsersPage() {
     updateTime();
     const interval = setInterval(updateTime, 1000);
     return () => clearInterval(interval);
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      const res = await fetch('/api/admin/users');
+      const data = await res.json();
+      if (data.success) {
+        setUsersData(data.data);
+      }
+      setLoading(false);
+    } catch(e) {
+      console.error(e);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
   }, []);
 
   return (
@@ -47,7 +55,6 @@ export default function AdminUsersPage() {
             <img src="https://api.dicebear.com/7.x/notionists/svg?seed=Admin&backgroundColor=f87171" alt="Admin" style={{ width: "100%", height: "100%" }} />
           </div>
           <span style={{ fontSize: 14, fontWeight: 500 }}>Super Admin</span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a1a1aa" strokeWidth="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
         </div>
       </div>
 
@@ -63,7 +70,6 @@ export default function AdminUsersPage() {
           <thead>
             <tr style={{ borderBottom: "1px solid #27272a", textAlign: "left", color: "#71717a", fontSize: 11, letterSpacing: "0.05em" }}>
               <th style={{ padding: "0 24px 16px 24px", fontWeight: 600 }}>NAME</th>
-              <th style={{ padding: "0 24px 16px 0", fontWeight: 600 }}>USERNAME</th>
               <th style={{ padding: "0 24px 16px 0", fontWeight: 600 }}>EMAIL</th>
               <th style={{ padding: "0 24px 16px 0", fontWeight: 600 }}>DATE JOINED</th>
               <th style={{ padding: "0 24px 16px 0", fontWeight: 600 }}>STATUS</th>
@@ -71,16 +77,17 @@ export default function AdminUsersPage() {
             </tr>
           </thead>
           <tbody>
-            {usersData.map((user, idx) => (
-              <tr key={idx} style={{ borderBottom: idx === usersData.length - 1 ? "none" : "1px solid #27272a" }}>
-                <td style={{ padding: "16px 24px", fontSize: 14, fontWeight: 500 }}>{user.name}</td>
-                <td style={{ padding: "16px 24px 16px 0", fontSize: 13, color: "#818cf8" }}>{user.username}</td>
-                <td style={{ padding: "16px 24px 16px 0", fontSize: 13, color: "#a1a1aa" }}>{user.email}</td>
-                <td style={{ padding: "16px 24px 16px 0", fontSize: 13, color: "#a1a1aa" }}>{user.dateJoined}</td>
+            {loading ? (
+              <tr><td colSpan={5} style={{ padding: "32px", textAlign: "center", color: "#a1a1aa" }}>Loading users...</td></tr>
+            ) : usersData.map((user, idx) => (
+              <tr key={user.id} style={{ borderBottom: idx === usersData.length - 1 ? "none" : "1px solid #27272a" }}>
+                <td style={{ padding: "16px 24px", fontSize: 14, fontWeight: 500, color: "#f4f4f5" }}>{user.name}</td>
+                <td style={{ padding: "16px 24px 16px 0", fontSize: 13, color: "#a1a1aa" }}>{user.email || "No Email"}</td>
+                <td style={{ padding: "16px 24px 16px 0", fontSize: 13, color: "#a1a1aa" }}>{new Date(user.createdAt).toLocaleDateString()}</td>
                 <td style={{ padding: "16px 24px 16px 0" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 500 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 500, color: "#10b981" }}>
                     <div style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: "#10b981" }}></div>
-                    {user.status}
+                    Active
                   </div>
                 </td>
                 <td style={{ padding: "16px 24px 16px 0", textAlign: "right" }}>
@@ -90,11 +97,14 @@ export default function AdminUsersPage() {
                     fontSize: 12, fontWeight: 500, cursor: "pointer",
                     transition: "background 0.2s"
                   }}>
-                    Edit Username
+                    Manage
                   </button>
                 </td>
               </tr>
             ))}
+            {!loading && usersData.length === 0 && (
+              <tr><td colSpan={5} style={{ padding: "32px", textAlign: "center", color: "#a1a1aa" }}>No users found.</td></tr>
+            )}
           </tbody>
         </table>
       </div>

@@ -3,20 +3,13 @@
 import React, { useState, useEffect } from "react";
 import { Mail, Bug, CheckCircle2, Square, Circle } from "lucide-react";
 
-const feedbackData = [
-  { name: "vinay singh1", email: "vinaysingh@gmail.com", title: "Support: business", desc: "i wanna buy this website for my personal project.", type: "contact", date: "8/4/2026" },
-  { name: "tinku", email: "tinku@tinku.com", title: "Support: general", desc: "mein hoon tinku", type: "contact", date: "6/10/2026" },
-  { name: "expire", email: "expire@gmail.com", title: "Support: feature", desc: "yeh toh expire ho gaya", type: "contact", date: "4/15/2026" },
-  { name: "younamebug", email: "bug@gmail.com", title: "Bug: bug don't have title", desc: "actual reproduce", type: "bug", date: "3/28/2026" },
-  { name: "contact", email: "vi@gmail.com", title: "Support: business", desc: "what are you doing business man", type: "contact", date: "3/28/2026" },
-  { name: "yourname", email: "vinit@gmail.com", title: "Bug: bug title", desc: "actual behavior", type: "bug", date: "3/28/2026" },
-  { name: "vinitbug", email: "vinitsingh@gmail.com", title: "Bug: buggg", desc: "bug", type: "bug", date: "3/28/2026" },
-  { name: "vinit", email: "vinitsingh@gmail.com", title: "Support: general", desc: "hi", type: "contact", date: "3/28/2026" },
-  { name: "rrg", email: "vinits.7kushwaha@gmail.com", title: "Support: general", desc: "fffu", type: "contact", date: "3/28/2026" },
-];
-
 export default function AdminFeedbackPage() {
   const [timeStr, setTimeStr] = useState("");
+  const [feedback, setFeedback] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Filter state
+  const [filter, setFilter] = useState("all");
 
   useEffect(() => {
     const updateTime = () => {
@@ -27,6 +20,54 @@ export default function AdminFeedbackPage() {
     const interval = setInterval(updateTime, 1000);
     return () => clearInterval(interval);
   }, []);
+
+  const fetchFeedback = async () => {
+    try {
+      const res = await fetch('/api/admin/feedback');
+      const data = await res.json();
+      if (data.success) {
+        setFeedback(data.data);
+      }
+      setLoading(false);
+    } catch(e) {
+      console.error(e);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchFeedback();
+  }, []);
+
+  const handleResolve = async (id: string) => {
+    try {
+      const res = await fetch('/api/admin/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, action: 'resolve' })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setFeedback(prev => prev.map(f => f.id === id ? { ...f, status: 'resolved' } : f));
+      }
+    } catch (e) {
+      console.error('Failed to resolve', e);
+    }
+  };
+
+  const bugsCount = feedback.filter(f => f.type === 'bug').length;
+  const contactsCount = feedback.filter(f => f.type === 'contact').length;
+  const resolvedCount = feedback.filter(f => f.status === 'resolved').length;
+  const notResolvedCount = feedback.filter(f => f.status === 'new').length;
+
+  const filteredFeedback = feedback.filter(f => {
+    if (filter === 'all') return true;
+    if (filter === 'bugs') return f.type === 'bug';
+    if (filter === 'contact') return f.type === 'contact';
+    if (filter === 'resolved') return f.status === 'resolved';
+    if (filter === 'not_resolved') return f.status === 'new';
+    return true;
+  });
 
   return (
     <div style={{ flex: 1, overflowY: "auto", padding: "24px 40px", backgroundColor: "#09090b" }}>
@@ -48,7 +89,6 @@ export default function AdminFeedbackPage() {
             <img src="https://api.dicebear.com/7.x/notionists/svg?seed=Admin&backgroundColor=f87171" alt="Admin" style={{ width: "100%", height: "100%" }} />
           </div>
           <span style={{ fontSize: 14, fontWeight: 500 }}>Super Admin</span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a1a1aa" strokeWidth="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
         </div>
       </div>
 
@@ -60,33 +100,33 @@ export default function AdminFeedbackPage() {
 
       {/* Pills Filter */}
       <div style={{ display: "flex", gap: 12, marginBottom: 32 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, backgroundColor: "#312e81", border: "1px solid #4338ca", padding: "6px 16px", borderRadius: 20 }}>
-          <span style={{ fontSize: 13, fontWeight: 600, color: "#fff" }}>All</span>
-          <span style={{ fontSize: 11, fontWeight: 600, color: "#818cf8", backgroundColor: "rgba(0,0,0,0.2)", padding: "2px 6px", borderRadius: 10 }}>11</span>
+        <div onClick={() => setFilter("all")} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 8, backgroundColor: filter === "all" ? "#312e81" : "transparent", border: filter === "all" ? "1px solid #4338ca" : "1px solid #27272a", padding: "6px 16px", borderRadius: 20 }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: filter === "all" ? "#fff" : "#a1a1aa" }}>All</span>
+          <span style={{ fontSize: 11, fontWeight: 600, color: filter === "all" ? "#818cf8" : "#71717a", backgroundColor: filter === "all" ? "rgba(0,0,0,0.2)" : "rgba(255,255,255,0.05)", padding: "2px 6px", borderRadius: 10 }}>{feedback.length}</span>
         </div>
         
-        <div style={{ display: "flex", alignItems: "center", gap: 8, backgroundColor: "transparent", border: "1px solid #27272a", padding: "6px 16px", borderRadius: 20 }}>
-          <Bug size={14} color="#a3e635" />
-          <span style={{ fontSize: 13, fontWeight: 600, color: "#a1a1aa" }}>Bugs</span>
-          <span style={{ fontSize: 11, fontWeight: 600, color: "#71717a", backgroundColor: "rgba(255,255,255,0.05)", padding: "2px 6px", borderRadius: 10 }}>4</span>
+        <div onClick={() => setFilter("bugs")} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 8, backgroundColor: filter === "bugs" ? "#312e81" : "transparent", border: filter === "bugs" ? "1px solid #4338ca" : "1px solid #27272a", padding: "6px 16px", borderRadius: 20 }}>
+          <Bug size={14} color={filter === "bugs" ? "#fff" : "#a3e635"} />
+          <span style={{ fontSize: 13, fontWeight: 600, color: filter === "bugs" ? "#fff" : "#a1a1aa" }}>Bugs</span>
+          <span style={{ fontSize: 11, fontWeight: 600, color: filter === "bugs" ? "#818cf8" : "#71717a", backgroundColor: filter === "bugs" ? "rgba(0,0,0,0.2)" : "rgba(255,255,255,0.05)", padding: "2px 6px", borderRadius: 10 }}>{bugsCount}</span>
         </div>
         
-        <div style={{ display: "flex", alignItems: "center", gap: 8, backgroundColor: "transparent", border: "1px solid #27272a", padding: "6px 16px", borderRadius: 20 }}>
-          <Square size={12} color="#f4f4f5" />
-          <span style={{ fontSize: 13, fontWeight: 600, color: "#a1a1aa" }}>Contact</span>
-          <span style={{ fontSize: 11, fontWeight: 600, color: "#71717a", backgroundColor: "rgba(255,255,255,0.05)", padding: "2px 6px", borderRadius: 10 }}>7</span>
+        <div onClick={() => setFilter("contact")} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 8, backgroundColor: filter === "contact" ? "#312e81" : "transparent", border: filter === "contact" ? "1px solid #4338ca" : "1px solid #27272a", padding: "6px 16px", borderRadius: 20 }}>
+          <Square size={12} color={filter === "contact" ? "#fff" : "#f4f4f5"} />
+          <span style={{ fontSize: 13, fontWeight: 600, color: filter === "contact" ? "#fff" : "#a1a1aa" }}>Contact</span>
+          <span style={{ fontSize: 11, fontWeight: 600, color: filter === "contact" ? "#818cf8" : "#71717a", backgroundColor: filter === "contact" ? "rgba(0,0,0,0.2)" : "rgba(255,255,255,0.05)", padding: "2px 6px", borderRadius: 10 }}>{contactsCount}</span>
         </div>
         
-        <div style={{ display: "flex", alignItems: "center", gap: 8, backgroundColor: "transparent", border: "1px solid #27272a", padding: "6px 16px", borderRadius: 20 }}>
-          <CheckCircle2 size={14} color="#10b981" />
-          <span style={{ fontSize: 13, fontWeight: 600, color: "#a1a1aa" }}>Resolved</span>
-          <span style={{ fontSize: 11, fontWeight: 600, color: "#71717a", backgroundColor: "rgba(255,255,255,0.05)", padding: "2px 6px", borderRadius: 10 }}>11</span>
+        <div onClick={() => setFilter("resolved")} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 8, backgroundColor: filter === "resolved" ? "#312e81" : "transparent", border: filter === "resolved" ? "1px solid #4338ca" : "1px solid #27272a", padding: "6px 16px", borderRadius: 20 }}>
+          <CheckCircle2 size={14} color={filter === "resolved" ? "#fff" : "#10b981"} />
+          <span style={{ fontSize: 13, fontWeight: 600, color: filter === "resolved" ? "#fff" : "#a1a1aa" }}>Resolved</span>
+          <span style={{ fontSize: 11, fontWeight: 600, color: filter === "resolved" ? "#818cf8" : "#71717a", backgroundColor: filter === "resolved" ? "rgba(0,0,0,0.2)" : "rgba(255,255,255,0.05)", padding: "2px 6px", borderRadius: 10 }}>{resolvedCount}</span>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 8, backgroundColor: "transparent", border: "1px solid #27272a", padding: "6px 16px", borderRadius: 20 }}>
-          <Circle size={10} color="#ef4444" fill="#ef4444" />
-          <span style={{ fontSize: 13, fontWeight: 600, color: "#a1a1aa" }}>Not Resolved</span>
-          <span style={{ fontSize: 11, fontWeight: 600, color: "#71717a", backgroundColor: "rgba(255,255,255,0.05)", padding: "2px 6px", borderRadius: 10 }}>0</span>
+        <div onClick={() => setFilter("not_resolved")} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 8, backgroundColor: filter === "not_resolved" ? "#312e81" : "transparent", border: filter === "not_resolved" ? "1px solid #4338ca" : "1px solid #27272a", padding: "6px 16px", borderRadius: 20 }}>
+          <Circle size={10} color={filter === "not_resolved" ? "#fff" : "#ef4444"} fill={filter === "not_resolved" ? "#fff" : "#ef4444"} />
+          <span style={{ fontSize: 13, fontWeight: 600, color: filter === "not_resolved" ? "#fff" : "#a1a1aa" }}>Not Resolved</span>
+          <span style={{ fontSize: 11, fontWeight: 600, color: filter === "not_resolved" ? "#818cf8" : "#71717a", backgroundColor: filter === "not_resolved" ? "rgba(0,0,0,0.2)" : "rgba(255,255,255,0.05)", padding: "2px 6px", borderRadius: 10 }}>{notResolvedCount}</span>
         </div>
       </div>
 
@@ -104,41 +144,55 @@ export default function AdminFeedbackPage() {
             </tr>
           </thead>
           <tbody>
-            {feedbackData.map((item, idx) => (
-              <tr key={idx} style={{ borderBottom: idx === feedbackData.length - 1 ? "none" : "1px solid #27272a" }}>
+            {loading ? (
+              <tr><td colSpan={6} style={{ padding: "32px", textAlign: "center", color: "#a1a1aa" }}>Loading tickets...</td></tr>
+            ) : filteredFeedback.map((item, idx) => (
+              <tr key={item.id} style={{ borderBottom: idx === filteredFeedback.length - 1 ? "none" : "1px solid #27272a" }}>
                 <td style={{ padding: "16px 24px" }}>
-                  <span style={{ border: "1px solid rgba(16, 185, 129, 0.3)", color: "#10b981", fontSize: 10, fontWeight: 600, padding: "4px 8px", borderRadius: 4 }}>RESOLVED</span>
+                  {item.status === 'resolved' ? (
+                    <span style={{ border: "1px solid rgba(16, 185, 129, 0.3)", color: "#10b981", fontSize: 10, fontWeight: 600, padding: "4px 8px", borderRadius: 4 }}>RESOLVED</span>
+                  ) : (
+                    <span style={{ border: "1px solid rgba(249, 115, 22, 0.3)", color: "#f97316", fontSize: 10, fontWeight: 600, padding: "4px 8px", borderRadius: 4 }}>NEW</span>
+                  )}
                 </td>
                 <td style={{ padding: "16px 24px 16px 0" }}>
-                  <div style={{ fontSize: 14, fontWeight: 500, color: "#f4f4f5" }}>{item.name}</div>
-                  <div style={{ fontSize: 12, color: "#71717a" }}>{item.email}</div>
+                  <div style={{ fontSize: 14, fontWeight: 500, color: "#f4f4f5" }}>{item.senderName}</div>
+                  <div style={{ fontSize: 12, color: "#71717a" }}>{item.senderEmail}</div>
                 </td>
                 <td style={{ padding: "16px 24px 16px 0", maxWidth: 280 }}>
                   <div style={{ fontSize: 14, fontWeight: 600, color: "#f4f4f5", display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-                    {item.type === "contact" ? <Mail size={14} color="#a1a1aa" /> : <Bug size={14} color="#a3e635" />} 
-                    {item.title}
+                    {item.type === 'contact' ? <Mail size={14} color="#a1a1aa" /> : <Bug size={14} color="#a3e635" />} 
+                    {item.subject}
                   </div>
-                  <div style={{ fontSize: 13, color: "#a1a1aa", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.desc}</div>
+                  <div style={{ fontSize: 13, color: "#a1a1aa", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.body}</div>
                 </td>
                 <td style={{ padding: "16px 24px 16px 0" }}>
-                  {item.type === "contact" ? (
+                  {item.type === 'contact' ? (
                     <span style={{ backgroundColor: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#f4f4f5", fontSize: 11, fontWeight: 500, padding: "4px 8px", borderRadius: 4 }}>contact</span>
                   ) : (
                     <span style={{ backgroundColor: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239, 68, 68, 0.2)", color: "#f87171", fontSize: 11, fontWeight: 500, padding: "4px 8px", borderRadius: 4 }}>bug</span>
                   )}
                 </td>
-                <td style={{ padding: "16px 24px 16px 0", fontSize: 13, color: "#a1a1aa" }}>{item.date}</td>
+                <td style={{ padding: "16px 24px 16px 0", fontSize: 13, color: "#a1a1aa" }}>{new Date(item.createdAt).toLocaleDateString()}</td>
                 <td style={{ padding: "16px 24px 16px 0", textAlign: "right" }}>
-                  <button style={{ 
-                    backgroundColor: "transparent", border: "1px solid #27272a", 
-                    color: "#f4f4f5", padding: "6px 12px", borderRadius: 6, 
-                    fontSize: 12, fontWeight: 500, cursor: "pointer",
-                  }}>
-                    View
-                  </button>
+                  {item.status === 'new' ? (
+                    <button 
+                      onClick={() => handleResolve(item.id)}
+                      style={{ backgroundColor: "rgba(16, 185, 129, 0.1)", border: "1px solid rgba(16, 185, 129, 0.2)", color: "#10b981", fontSize: 12, fontWeight: 600, padding: "6px 12px", borderRadius: 6, cursor: "pointer" }}
+                    >
+                      Resolve
+                    </button>
+                  ) : (
+                    <button style={{ backgroundColor: "transparent", border: "1px solid #27272a", color: "#f4f4f5", padding: "6px 12px", borderRadius: 6, fontSize: 12, fontWeight: 500, cursor: "pointer" }}>
+                      View
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}
+            {!loading && filteredFeedback.length === 0 && (
+              <tr><td colSpan={6} style={{ padding: "32px", textAlign: "center", color: "#a1a1aa" }}>No tickets found matching the filter.</td></tr>
+            )}
           </tbody>
         </table>
       </div>

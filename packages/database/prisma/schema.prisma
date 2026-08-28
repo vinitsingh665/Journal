@@ -387,3 +387,24 @@ model SharedLink {
 
   @@index([userId])
 }
+
+// ─── ADMIN & FEEDBACK ───────────────────────────────
+
+model AppFeedback {
+  id          String   @id @default(cuid())
+  type        String   @default("contact")
+  subject     String
+  body        String   @db.Text
+  senderName  String
+  senderEmail String
+  
+  severity         String?
+  affectedPage     String?
+  stepsToReproduce String?  @db.Text
+  expectedBehavior String?  @db.Text
+  actualBehavior   String?  @db.Text
+  
+  status      String   @default("new")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

@@ -4,7 +4,10 @@ import React, { useState, useEffect } from "react";
 
 export default function AdminHealthPage() {
   const [timeStr, setTimeStr] = useState("");
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
+  // Time
   useEffect(() => {
     const updateTime = () => {
       const now = new Date();
@@ -14,6 +17,37 @@ export default function AdminHealthPage() {
     const interval = setInterval(updateTime, 1000);
     return () => clearInterval(interval);
   }, []);
+
+  // Fetch Data
+  const fetchDashboardData = async () => {
+    try {
+      const statsRes = await fetch('/api/admin/stats');
+      const statsData = await statsRes.json();
+      if (statsData.success) setStats(statsData.data);
+      setLoading(false);
+    } catch (err) {
+      console.error('Failed to load admin data:', err);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
+    const interval = setInterval(() => {
+      fetch('/api/admin/stats').then(r=>r.json()).then(d => {
+        if(d.success) setStats(d.data);
+      });
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  if (loading || !stats) {
+    return (
+      <div style={{ flex: 1, padding: "24px 40px", backgroundColor: "#09090b", color: "#a1a1aa" }}>
+        Loading System Health...
+      </div>
+    );
+  }
 
   return (
     <div style={{ flex: 1, overflowY: "auto", padding: "24px 40px", backgroundColor: "#09090b" }}>
@@ -35,7 +69,6 @@ export default function AdminHealthPage() {
             <img src="https://api.dicebear.com/7.x/notionists/svg?seed=Admin&backgroundColor=f87171" alt="Admin" style={{ width: "100%", height: "100%" }} />
           </div>
           <span style={{ fontSize: 14, fontWeight: 500 }}>Super Admin</span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a1a1aa" strokeWidth="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
         </div>
       </div>
 
@@ -57,10 +90,10 @@ export default function AdminHealthPage() {
             <div>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
                 <span style={{ fontSize: 14, fontWeight: 500, color: "#f4f4f5" }}>Primary Database Load</span>
-                <span style={{ fontSize: 14, fontWeight: 700, color: "#f4f4f5", fontFamily: "monospace" }}>8%</span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: "#f4f4f5", fontFamily: "monospace" }}>{stats.databaseLoad}%</span>
               </div>
               <div style={{ width: "100%", height: 6, backgroundColor: "#27272a", borderRadius: 3 }}>
-                <div style={{ width: "8%", height: "100%", backgroundColor: "#10b981", borderRadius: 3 }}></div>
+                <div style={{ width: `${stats.databaseLoad}%`, height: "100%", backgroundColor: "#10b981", borderRadius: 3, transition: "width 1s ease-in-out" }}></div>
               </div>
             </div>
 
@@ -68,10 +101,10 @@ export default function AdminHealthPage() {
             <div>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
                 <span style={{ fontSize: 14, fontWeight: 500, color: "#f4f4f5" }}>Redis Cache Hit Rate</span>
-                <span style={{ fontSize: 14, fontWeight: 700, color: "#f4f4f5", fontFamily: "monospace" }}>95%</span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: "#f4f4f5", fontFamily: "monospace" }}>{stats.cacheHitRate}%</span>
               </div>
               <div style={{ width: "100%", height: 6, backgroundColor: "#27272a", borderRadius: 3 }}>
-                <div style={{ width: "95%", height: "100%", backgroundColor: "#10b981", borderRadius: 3 }}></div>
+                <div style={{ width: `${stats.cacheHitRate}%`, height: "100%", backgroundColor: "#10b981", borderRadius: 3, transition: "width 1s ease-in-out" }}></div>
               </div>
             </div>
 
@@ -99,12 +132,11 @@ export default function AdminHealthPage() {
               <svg width="160" height="160" viewBox="0 0 160 160" style={{ transform: "rotate(-90deg)" }}>
                 {/* Background circle */}
                 <circle cx="80" cy="80" r="70" fill="none" stroke="#27272a" strokeWidth="8" />
-                {/* Foreground circle (assuming it's very low/0 so it's a full circle, or almost 0) */}
-                {/* Since latency is 0, we can just show a full green circle or minimal green. Let's make it look like a health ring */}
-                <circle cx="80" cy="80" r="70" fill="none" stroke="#10b981" strokeWidth="8" strokeDasharray="440" strokeDashoffset="0" />
+                {/* Foreground circle: mapping latency (0-200ms) to strokeDashoffset (440 to 0) */}
+                <circle cx="80" cy="80" r="70" fill="none" stroke={stats.systemHealth.status === 'Operational' ? '#10b981' : '#f59e0b'} strokeWidth="8" strokeDasharray="440" strokeDashoffset={Math.max(0, 440 - (stats.systemHealth.apiLatency / 200) * 440)} style={{ transition: "stroke-dashoffset 1s ease-in-out" }} />
               </svg>
               <div style={{ position: "absolute", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                <span style={{ fontSize: 40, fontWeight: 700, color: "#10b981", lineHeight: 1 }}>0</span>
+                <span style={{ fontSize: 40, fontWeight: 700, color: stats.systemHealth.status === 'Operational' ? '#10b981' : '#f59e0b', lineHeight: 1 }}>{stats.systemHealth.apiLatency}</span>
                 <span style={{ fontSize: 12, fontWeight: 600, color: "#a1a1aa", marginTop: 4 }}>MS</span>
               </div>
             </div>
