@@ -50,7 +50,7 @@ export async function POST(req: Request) {
     // Send email
     const resend = new Resend(process.env.RESEND_API_KEY);
     await resend.emails.send({
-      from: 'TraderLabs Security <onboarding@resend.dev>',
+      from: 'TraderLabs Security <noreply@traderlabs.in>',
       to: user.email!,
       subject: 'Reset your TraderLabs password',
       html: `
