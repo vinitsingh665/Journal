@@ -110,7 +110,7 @@ export default function AdminOverviewPage() {
           <h1 style={{ fontSize: 28, fontWeight: 700, margin: "0 0 8px 0" }}>Overview</h1>
           <p style={{ color: "#a1a1aa", margin: 0, fontSize: 14 }}>Live platform metrics and user feedback.</p>
         </div>
-        <Link href="/vinit_admin/users" style={{ 
+        <Link href="/admin/users" style={{ 
           display: "flex", alignItems: "center", gap: 8, 
           backgroundColor: "transparent", border: "1px solid #3f3f46", 
           color: "#f4f4f5", padding: "8px 16px", borderRadius: 8, textDecoration: "none",
@@ -181,7 +181,7 @@ export default function AdminOverviewPage() {
         <div style={{ backgroundColor: "#000", border: "1px solid #27272a", borderRadius: 12, padding: "24px 0" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0 24px", marginBottom: 24 }}>
             <h2 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>User Inbox</h2>
-            <Link href="/vinit_admin/feedback" style={{ color: "#818cf8", fontSize: 13, textDecoration: "none", fontWeight: 500 }}>View full inbox →</Link>
+            <Link href="/admin/feedback" style={{ color: "#818cf8", fontSize: 13, textDecoration: "none", fontWeight: 500 }}>View full inbox →</Link>
           </div>
 
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
@@ -248,7 +248,7 @@ export default function AdminOverviewPage() {
           <div style={{ backgroundColor: "#000", border: "1px solid #27272a", borderRadius: 12, padding: 24 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
               <h2 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>System Vitals</h2>
-              <Link href="/vinit_admin/health" style={{ color: "#818cf8", fontSize: 13, textDecoration: "none", fontWeight: 500 }}>Details →</Link>
+              <Link href="/admin/health" style={{ color: "#818cf8", fontSize: 13, textDecoration: "none", fontWeight: 500 }}>Details →</Link>
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>

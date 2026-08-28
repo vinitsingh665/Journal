@@ -9,10 +9,10 @@ export function AdminSidebar() {
   const pathname = usePathname();
 
   const navItems = [
-    { name: "Overview", href: "/vinit_admin", icon: LayoutDashboard },
-    { name: "Users", href: "/vinit_admin/users", icon: Users },
-    { name: "Feedback", href: "/vinit_admin/feedback", icon: Mail },
-    { name: "System Health", href: "/vinit_admin/health", icon: ActivitySquare },
+    { name: "Overview", href: "/admin", icon: LayoutDashboard },
+    { name: "Users", href: "/admin/users", icon: Users },
+    { name: "Feedback", href: "/admin/feedback", icon: Mail },
+    { name: "System Health", href: "/admin/health", icon: ActivitySquare },
   ];
 
   return (
