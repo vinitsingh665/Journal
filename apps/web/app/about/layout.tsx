@@ -17,7 +17,7 @@ export default function AboutLayout({ children }: { children: React.ReactNode })
           <Link href="/" style={{ textDecoration: "none", color: "var(--text-primary)", fontWeight: 800, fontSize: "var(--text-lg)" }}>
             TraderLabs
           </Link>
-          <Link href="/settings" style={{ textDecoration: "none", fontSize: "var(--text-sm)", color: "var(--text-secondary)" }}>
+          <Link href="/settings?tab=About" style={{ textDecoration: "none", fontSize: "var(--text-sm)", color: "var(--text-secondary)" }}>
             Back to Settings
           </Link>
         </div>

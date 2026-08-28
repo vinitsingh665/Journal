@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useTheme } from "@/components/layout/ThemeProvider";
 
 interface SettingsClientProps {
@@ -13,7 +13,8 @@ interface SettingsClientProps {
 export default function SettingsClient({ user, initialSettings }: SettingsClientProps) {
   const router = useRouter();
   const { theme, setTheme, accent, setAccent } = useTheme();
-  const [activeTab, setActiveTab] = useState("General");
+  const searchParams = useSearchParams();
+  const [activeTab, setActiveTab] = useState(searchParams?.get("tab") || "General");
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
