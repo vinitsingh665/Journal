@@ -101,6 +101,13 @@ export default function AiAssistant() {
             router.push("/trades/new");
           }
         }, 1500);
+      } else if (data.data?.intent === "EDIT_TRADE") {
+        setMessages([...newMessages, { role: "assistant", content: data.data.message || "Redirecting you to the edit form..." }]);
+        setTimeout(() => {
+          setIsOpen(false);
+          setMessages([]);
+          router.push(`/trades/${data.data.tradeId}`);
+        }, 1500);
       } else if (data.data?.intent === "CREATE_MISTAKE") {
         setMessages([...newMessages, { role: "assistant", content: "Got all the details! Redirecting you to log the mistake..." }]);
         sessionStorage.setItem("aiMistakePrefill", JSON.stringify(data.data.data));

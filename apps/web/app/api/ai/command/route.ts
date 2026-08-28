@@ -47,9 +47,13 @@ If the user wants to EXIT an existing open trade:
 Intent: "EXIT_TRADE"
 Extract: symbol (must match one of their open trades), exitPrice (null if they say "at current price" or "market"), quantity (null if they say "fully" or don't specify, meaning full exit).
 
-If the user wants to UPDATE an existing trade (like trailing a stop loss or changing a target):
+If the user wants to UPDATE an existing open trade (like trailing a stop loss or changing a target):
 Intent: "UPDATE_TRADE"
 Extract: symbol, stopLoss, target.
+
+If the user wants to OPEN the EDIT FORM for a specific trade (e.g. "Edit my Reliance trade", "Open edit form for TCS"):
+Intent: "EDIT_TRADE"
+Extract: tradeId (match this from the provided recent trades context based on the symbol the user mentions).
 
 If the user wants to ADD MORE quantity to an existing open trade (e.g. "Buy 50 more Reliance"):
 Intent: "ADD_EXECUTION"
@@ -73,10 +77,11 @@ Extract: symbol, exchange.
 
 Respond ONLY with valid JSON matching this schema:
 {
-  "intent": "ASK_CLARIFICATION" | "CREATE_FORM_FILL" | "EXIT_TRADE" | "UPDATE_TRADE" | "ADD_EXECUTION" | "CREATE_MISTAKE" | "CALCULATE_RISK" | "EXPORT_SCREENSHOT" | "EXPORT_PDF" | "GET_QUOTE",
+  "intent": "ASK_CLARIFICATION" | "CREATE_FORM_FILL" | "EXIT_TRADE" | "UPDATE_TRADE" | "ADD_EXECUTION" | "CREATE_MISTAKE" | "CALCULATE_RISK" | "EXPORT_SCREENSHOT" | "EXPORT_PDF" | "GET_QUOTE" | "EDIT_TRADE",
   "message": string | null,
   "data": {
     "symbol": string | null,
+    "tradeId": string | null,
     "exchange": string | null,
     "side": "BUY" | "SELL" | null,
     "quantity": number | null,
@@ -128,9 +133,20 @@ export async function POST(req: NextRequest) {
       ? `\n\nUser's current OPEN trades:\n${openTrades.map(t => `- ${t.symbol} (${t.direction}), Open Qty: ${t.direction === "LONG" ? t.totalBuyQty - t.totalSellQty : t.totalSellQty - t.totalBuyQty}`).join("\n")}`
       : "\n\nUser has no open trades currently.";
 
+    const recentTrades = await prisma.trade.findMany({
+      where: { userId },
+      orderBy: { entryTime: "desc" },
+      take: 10,
+      select: { id: true, symbol: true, status: true }
+    });
+
+    const recentTradesContext = recentTrades.length > 0
+      ? `\n\nUser's recent 10 trades (use these IDs if they want to edit a trade):\n${recentTrades.map(t => `- ID: ${t.id} | Symbol: ${t.symbol} | Status: ${t.status}`).join("\n")}`
+      : "";
+
     const completion = await groq.chat.completions.create({
       messages: [
-        { role: "system", content: SYSTEM_PROMPT + openTradesContext },
+        { role: "system", content: SYSTEM_PROMPT + openTradesContext + recentTradesContext },
         ...chatHistory
       ],
       model: "openai/gpt-oss-120b",
@@ -265,6 +281,23 @@ export async function POST(req: NextRequest) {
           await prisma.trade.update({ where: { id: trade.id }, data: updates });
           return NextResponse.json({ success: true, message: `Updated ${trade.symbol} parameters.` });
         }
+      }
+    }
+
+    // Auto-Execution Logic for EDIT_TRADE
+    if (parsed.intent === "EDIT_TRADE") {
+      if (parsed.data.tradeId) {
+        return NextResponse.json({ success: true, data: {
+          intent: "EDIT_TRADE",
+          tradeId: parsed.data.tradeId,
+          message: "Redirecting you to the edit form..."
+        }});
+      } else {
+        return NextResponse.json({ success: true, data: {
+          intent: "ASK_CLARIFICATION",
+          message: "Which trade would you like to edit? Please specify the symbol.",
+          data: parsed.data
+        }});
       }
     }
 
