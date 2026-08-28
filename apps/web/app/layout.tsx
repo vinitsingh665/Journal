@@ -6,10 +6,45 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"], variable: '--font-sans' });
 
 export const metadata: Metadata = {
-  title: "Trade Journal — Plan. Execute. Review. Improve.",
+  metadataBase: new URL("https://traderlabs.in"),
+  title: {
+    default: "TraderLabs — Plan. Execute. Review. Improve.",
+    template: "%s | TraderLabs",
+  },
   description:
-    "A premium trading journal for Indian equity and swing traders. Track trades, analyze performance, and improve your trading systematically.",
-  keywords: "trading journal, stock trading, swing trading, Indian equity, trade analysis",
+    "A premium trading journal for Indian equity, crypto, and swing traders. Track trades, analyze performance, calculate risk, and improve your trading systematically.",
+  keywords: ["trading journal", "stock trading", "swing trading", "crypto trading", "Indian equity", "trade analysis", "risk calculator", "TraderLabs"],
+  authors: [{ name: "TraderLabs" }],
+  creator: "TraderLabs",
+  publisher: "TraderLabs",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  openGraph: {
+    title: "TraderLabs — Your Ultimate Trading Journal",
+    description: "Track trades, analyze performance, and improve your edge with our premium trading journal.",
+    url: "https://traderlabs.in",
+    siteName: "TraderLabs",
+    images: [
+      {
+        url: "/og-image.png", // Will default to nothing if not present, but good practice
+        width: 1200,
+        height: 630,
+        alt: "TraderLabs Dashboard Preview",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "TraderLabs — Your Ultimate Trading Journal",
+    description: "Track trades, analyze performance, and improve your edge.",
+    creator: "@TraderLabs",
+    images: ["/og-image.png"],
+  },
   verification: {
     google: "6lVkmBYmvNlsNtkw6uCbljw7ct5Nhs00TUk3xPBrLjk",
   },
