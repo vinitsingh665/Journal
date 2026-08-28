@@ -51,7 +51,12 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [checkingSetup, setCheckingSetup] = useState(true);
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("auth-theme") === "dark";
+    }
+    return false;
+  });
 
   useEffect(() => {
     fetch("/api/auth/check")
@@ -59,9 +64,6 @@ export default function LoginPage() {
       .then((data) => { setIsSetup(!data.hasUser); setCheckingSetup(false); })
       .catch(() => { setIsSetup(true); setCheckingSetup(false); });
       
-    if (localStorage.getItem("auth-theme") === "dark") {
-      setIsDark(true);
-    }
   }, []);
 
   const toggleTheme = () => {
@@ -101,7 +103,7 @@ export default function LoginPage() {
 
   if (checkingSetup) {
     return (
-      <div data-theme={isDark ? "dark" : "light"} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: 'var(--bg-primary)' }}>
+      <div suppressHydrationWarning data-theme={isDark ? "dark" : "light"} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: 'var(--bg-primary)' }}>
         <p style={{ color: "var(--text-muted)" }}>Loading...</p>
       </div>
     );
@@ -111,7 +113,7 @@ export default function LoginPage() {
 
   return (
     <GoogleOAuthProvider clientId={clientId}>
-      <div className={`login-page-root ${isDark ? "dark" : ""}`} data-theme={isDark ? "dark" : "light"}>
+      <div suppressHydrationWarning className={`login-page-root ${isDark ? "dark" : ""}`} data-theme={isDark ? "dark" : "light"}>
 
         {/* Advanced Background Chart */}
         <div className="advanced-chart">

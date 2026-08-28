@@ -142,7 +142,7 @@ function ResetPasswordForm({ isDark, setIsDark }: { isDark: boolean, setIsDark: 
   })();
 
   return (
-    <div className={`login-page-root ${isDark ? "dark" : ""}`} data-theme={isDark ? "dark" : "light"}>
+    <div suppressHydrationWarning className={`login-page-root ${isDark ? "dark" : ""}`} data-theme={isDark ? "dark" : "light"}>
       {/* Advanced Background Chart */}
       <div className="advanced-chart">
         <div className="chart-grid"></div>
@@ -238,12 +238,13 @@ function ResetPasswordForm({ isDark, setIsDark }: { isDark: boolean, setIsDark: 
 }
 
 export default function ResetPasswordPage() {
-  const [isDark, setIsDark] = useState(false);
-  
-  useEffect(() => {
-    if (localStorage.getItem("auth-theme") === "dark") {
-      setIsDark(true);
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("auth-theme") === "dark";
     }
+    return false;
+  });
+  
   }, []);
 
   return (

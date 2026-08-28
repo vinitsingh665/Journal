@@ -8,12 +8,13 @@ export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
-  const [isDark, setIsDark] = useState(false); // Default to light mode, matching login page
-
-  useEffect(() => {
-    if (localStorage.getItem("auth-theme") === "dark") {
-      setIsDark(true);
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("auth-theme") === "dark";
     }
+    return false;
+  });
+
   }, []);
 
   const toggleTheme = () => {
@@ -50,7 +51,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className={`login-page-root ${isDark ? "dark" : ""}`} data-theme={isDark ? "dark" : "light"}>
+    <div suppressHydrationWarning className={`login-page-root ${isDark ? "dark" : ""}`} data-theme={isDark ? "dark" : "light"}>
       {/* Advanced Background Chart */}
       <div className="advanced-chart">
         <div className="chart-grid"></div>
