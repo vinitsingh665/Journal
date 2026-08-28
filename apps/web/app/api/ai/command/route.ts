@@ -67,9 +67,13 @@ If the user wants to download or export the current page as a PDF:
 Intent: "EXPORT_PDF"
 Extract: nothing required.
 
+If the user just asks for the current price or quote of a stock/crypto:
+Intent: "GET_QUOTE"
+Extract: symbol, exchange.
+
 Respond ONLY with valid JSON matching this schema:
 {
-  "intent": "ASK_CLARIFICATION" | "CREATE_FORM_FILL" | "EXIT_TRADE" | "UPDATE_TRADE" | "ADD_EXECUTION" | "CREATE_MISTAKE" | "CALCULATE_RISK" | "EXPORT_SCREENSHOT" | "EXPORT_PDF",
+  "intent": "ASK_CLARIFICATION" | "CREATE_FORM_FILL" | "EXIT_TRADE" | "UPDATE_TRADE" | "ADD_EXECUTION" | "CREATE_MISTAKE" | "CALCULATE_RISK" | "EXPORT_SCREENSHOT" | "EXPORT_PDF" | "GET_QUOTE",
   "message": string | null,
   "data": {
     "symbol": string | null,
@@ -328,6 +332,24 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: true, message: `Successfully added ${addQty} shares to ${trade.symbol} at ₹${entryPrice}` });
       } else {
         return NextResponse.json({ error: `You don't have an open trade for ${parsed.data.symbol} to add to.` }, { status: 400 });
+      }
+    }
+
+    // Auto-Execution Logic for GET_QUOTE
+    if (parsed.intent === "GET_QUOTE" && parsed.data.symbol) {
+      const quote = await fetchStockQuote(parsed.data.symbol, parsed.data.exchange || "NSE");
+      if (quote && quote.regularMarketPrice) {
+        return NextResponse.json({ success: true, data: {
+          intent: "GET_QUOTE",
+          message: `The live market price of ${parsed.data.symbol} is ₹${quote.regularMarketPrice}.`,
+          data: parsed.data
+        }});
+      } else {
+        return NextResponse.json({ success: true, data: {
+          intent: "GET_QUOTE",
+          message: `I couldn't fetch the live price for ${parsed.data.symbol}. Please check the symbol and exchange.`,
+          data: parsed.data
+        }});
       }
     }
 

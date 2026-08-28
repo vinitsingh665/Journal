@@ -85,6 +85,9 @@ export default function AiAssistant() {
       if (data.intent === "ASK_CLARIFICATION" || data.data?.intent === "ASK_CLARIFICATION") {
         const msg = data.message || data.data?.message;
         setMessages([...newMessages, { role: "assistant", content: msg }]);
+      } else if (data.intent === "GET_QUOTE" || data.data?.intent === "GET_QUOTE") {
+        const msg = data.message || data.data?.message;
+        setMessages([...newMessages, { role: "assistant", content: msg }]);
       } else if (data.data?.intent === "CREATE_FORM_FILL") {
         const msg = data.data?.message || "Got all the details! Redirecting you to create the trade...";
         setMessages([...newMessages, { role: "assistant", content: msg }]);
