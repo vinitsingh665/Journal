@@ -165,7 +165,6 @@ export default function Sidebar({ userName = "Trader", tradingStyle = "Swing Tra
           <button
             onClick={handleLogout}
             className="sidebar-link w-full text-left"
-            style={{ color: 'var(--negative)', marginTop: '8px' }}
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
