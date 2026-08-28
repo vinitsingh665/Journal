@@ -9,15 +9,15 @@ export default function NotFound() {
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(3);
   
-  // Game constants
-  const PADDLE_WIDTH = 100;
+  // Game variables that will be calculated dynamically
+  let PADDLE_WIDTH = 100;
   const PADDLE_HEIGHT = 12;
-  const BALL_RADIUS = 8;
-  const BRICK_ROW_COUNT = 5;
-  const BRICK_COLUMN_COUNT = 8;
-  const BRICK_PADDING = 10;
-  const BRICK_OFFSET_TOP = 60;
-  const BRICK_OFFSET_LEFT = 30;
+  const BALL_RADIUS = 5;
+  let BRICK_ROW_COUNT = 12;
+  let BRICK_COLUMN_COUNT = 15;
+  const BRICK_PADDING = 2;
+  const BRICK_OFFSET_TOP = 80;
+  let BRICK_OFFSET_LEFT = 0;
 
   useEffect(() => {
     if (gameState !== "playing") return;
@@ -28,12 +28,17 @@ export default function NotFound() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Adjust canvas size
-    canvas.width = Math.min(window.innerWidth - 40, 800);
-    canvas.height = Math.min(window.innerHeight - 300, 600);
+    // Full screen canvas
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
-    const BRICK_WIDTH = (canvas.width - BRICK_OFFSET_LEFT * 2 - BRICK_PADDING * (BRICK_COLUMN_COUNT - 1)) / BRICK_COLUMN_COUNT;
-    const BRICK_HEIGHT = 20;
+    PADDLE_WIDTH = Math.max(80, canvas.width * 0.15);
+    BRICK_COLUMN_COUNT = Math.floor(canvas.width / 35);
+    BRICK_ROW_COUNT = Math.floor(canvas.height * 0.4 / 17); // Take up top 40% of screen
+
+    const BRICK_WIDTH = (canvas.width - BRICK_PADDING * (BRICK_COLUMN_COUNT + 1)) / BRICK_COLUMN_COUNT;
+    const BRICK_HEIGHT = 15;
+    BRICK_OFFSET_LEFT = (canvas.width - (BRICK_COLUMN_COUNT * (BRICK_WIDTH + BRICK_PADDING))) / 2;
 
     let x = canvas.width / 2;
     let y = canvas.height - 30;
@@ -48,14 +53,20 @@ export default function NotFound() {
     let rightPressed = false;
     let leftPressed = false;
 
-    // Bricks array
     const bricks: { x: number, y: number, status: number, color: string }[][] = [];
-    const colors = ["#ef4444", "#f97316", "#eab308", "#22c55e", "#3b82f6"];
     
+    // Create a cool pattern or just rows of colors
+    const getBrickColor = (c: number, r: number) => {
+      const hue = (r / BRICK_ROW_COUNT) * 60 + 15; // Orange to yellow gradient
+      return `hsl(${hue}, 90%, 55%)`;
+    };
+
     for (let c = 0; c < BRICK_COLUMN_COUNT; c++) {
       bricks[c] = [];
       for (let r = 0; r < BRICK_ROW_COUNT; r++) {
-        bricks[c][r] = { x: 0, y: 0, status: 1, color: colors[r] };
+        // Randomly skip some bricks for a fragmented look like the screenshot, or just solid
+        const status = Math.random() > 0.1 ? 1 : 0; 
+        bricks[c][r] = { x: 0, y: 0, status, color: getBrickColor(c, r) };
       }
     }
 
@@ -153,10 +164,11 @@ export default function NotFound() {
     };
 
     const drawText = () => {
-      ctx.font = "bold 120px Inter, sans-serif";
-      ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
+      ctx.font = "bold 20vw Inter, sans-serif";
+      ctx.fillStyle = "rgba(255, 255, 255, 0.03)";
       ctx.textAlign = "center";
-      ctx.fillText("404", canvas.width / 2, canvas.height / 2 + 40);
+      ctx.textBaseline = "middle";
+      ctx.fillText("404", canvas.width / 2, canvas.height / 2);
     };
 
     const draw = () => {
@@ -234,23 +246,34 @@ export default function NotFound() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center p-4 text-white overflow-hidden relative">
+    <div className="fixed inset-0 bg-[#0a0a0a] flex flex-col items-center justify-center text-white overflow-hidden">
       {/* Background decorations */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-500/10 blur-[120px] rounded-full"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/10 blur-[120px] rounded-full"></div>
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-orange-500/10 blur-[120px] rounded-full"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/10 blur-[120px] rounded-full"></div>
       </div>
 
-      <div className="z-10 text-center max-w-3xl w-full">
+      <div className="z-10 absolute inset-0 w-full h-full">
         {gameState === "start" && (
-          <div className="mb-8 animate-fade-in-up">
-            <h1 className="text-7xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">404</h1>
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm z-30">
+            <h1 className="text-7xl font-bold mb-4 bg-gradient-to-r from-orange-400 to-yellow-500 bg-clip-text text-transparent animate-pulse">404</h1>
             <h2 className="text-2xl font-semibold mb-2">Lost in the Markets?</h2>
-            <p className="text-gray-400 mb-6">The page you're looking for doesn't exist, but don't let a bad trade ruin your day. Take a break and play some Brickmania!</p>
+            <p className="text-gray-400 mb-8 max-w-md text-center">The page you're looking for doesn't exist, but don't let a bad trade ruin your day. Take a break and play some Brickmania!</p>
+            <button 
+              onClick={startGame}
+              className="group relative px-8 py-4 bg-orange-600 hover:bg-orange-500 text-white rounded-full font-bold text-xl transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(249,115,22,0.5)] flex items-center gap-3"
+            >
+              <span>▶</span> Play Brickmania
+            </button>
+            <p className="mt-6 text-gray-400 text-sm">Use Mouse, Touch, or Arrow Keys</p>
+            
+            <Link href="/" className="mt-8 text-gray-500 hover:text-white transition-colors flex items-center gap-2">
+              <span>←</span> Return to Dashboard
+            </Link>
           </div>
         )}
 
-        <div className="relative mx-auto rounded-xl overflow-hidden border border-gray-800 shadow-2xl bg-gray-900/50 backdrop-blur-sm" style={{ width: 'fit-content' }}>
+        <div className="relative w-full h-full overflow-hidden bg-gray-900/20">
           
           {/* Game Header */}
           <div className="absolute top-0 left-0 w-full p-4 flex justify-between items-center text-sm font-medium z-20 pointer-events-none">
@@ -262,19 +285,7 @@ export default function NotFound() {
              </div>
           </div>
 
-          {/* Overlays */}
-          {gameState === "start" && (
-            <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm">
-              <button 
-                onClick={startGame}
-                className="group relative px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-bold text-xl transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] flex items-center gap-3"
-              >
-                <span>▶</span> Play Brickmania
-              </button>
-              <p className="mt-6 text-gray-400 text-sm">Use Mouse, Touch, or Arrow Keys</p>
-            </div>
-          )}
-
+          {/* Game Over / Win Overlays */}
           {gameState === "gameover" && (
             <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in">
               <h2 className="text-4xl font-bold text-red-500 mb-2">GAME OVER</h2>
@@ -312,17 +323,15 @@ export default function NotFound() {
           {/* Canvas */}
           <canvas 
             ref={canvasRef} 
-            className="block cursor-none touch-none"
-            style={{ width: '800px', height: '600px', maxWidth: '100%', maxHeight: '70vh' }}
+            className="block cursor-none touch-none w-full h-full"
           />
         </div>
-
-        {gameState !== "start" && (
-          <div className="mt-8">
-            <Link href="/" className="text-gray-400 hover:text-white transition-colors flex items-center justify-center gap-2">
-              <span>←</span> Skip game and return to dashboard
-            </Link>
-          </div>
+        
+        {/* Exit Button During Game */}
+        {gameState === "playing" && (
+          <Link href="/" className="absolute bottom-4 right-4 z-40 text-gray-500 hover:text-white transition-colors bg-black/50 px-4 py-2 rounded-full text-sm backdrop-blur-md">
+            Exit Game
+          </Link>
         )}
       </div>
     </div>
