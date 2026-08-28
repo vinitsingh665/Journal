@@ -60,7 +60,7 @@ export default function SnapshotTool({ userId }: { userId?: string }) {
             setIsCapturing(false);
             return;
           } else if (action === "tweet") {
-            const tweetText = encodeURIComponent(`Check out my trading performance on TraderLabs! 📈📊\n${publicUrl}`);
+            const tweetText = encodeURIComponent(`Check out my trading performance on traderlabs.in! 📈📊\n${publicUrl}`);
             window.open(`https://twitter.com/intent/tweet?text=${tweetText}`, "_blank");
             
             // Continue below to capture image
