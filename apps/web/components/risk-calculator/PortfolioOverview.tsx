@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { formatINR, cn } from "@/lib/utils";
 
 interface PortfolioOverviewProps {
@@ -8,7 +9,13 @@ interface PortfolioOverviewProps {
 }
 
 export function PortfolioOverview({ state, portfolio, setters }: PortfolioOverviewProps) {
-  const [showSettingsModal, setShowSettingsModal] = React.useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const { capital, maxPortfolioRiskPct } = state;
   const { 
     maxRiskBudget, 
@@ -113,7 +120,7 @@ export function PortfolioOverview({ state, portfolio, setters }: PortfolioOvervi
         </div>
       </div>
 
-      {showSettingsModal && (
+      {showSettingsModal && mounted && createPortal(
         <div className="fixed inset-0 bg-black/50 backdrop-blur-md z-[100] flex items-center justify-center p-4">
           <div className="relative w-full max-w-md bg-gradient-to-b from-[#1E293B] to-[#0F172A] border border-white/10 rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.6)] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             {/* Subtle top glare */}
@@ -190,7 +197,8 @@ export function PortfolioOverview({ state, portfolio, setters }: PortfolioOvervi
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
