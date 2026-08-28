@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTheme } from "@/components/layout/ThemeProvider";
+import { Activity } from "lucide-react";
 
 interface SettingsClientProps {
   user: { name?: string | null; email?: string | null; isGuest?: boolean };
@@ -968,63 +969,52 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
 
         </div>
       ) : activeTab === "About" ? (
-        <div className="settings-grid">
-          <div className="settings-section">
-            <div>
-              <h2 className="settings-row-title" style={{ marginBottom: "var(--space-2)", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-secondary)" }}>HELP & FEEDBACK</h2>
-              <p className="settings-row-desc" style={{ marginBottom: "var(--space-4)" }}>Get in touch or report an issue.</p>
-              
-              <div className="card card-body">
-                <a href="/about/contact" className="settings-row" style={{ textDecoration: "none", color: "inherit", cursor: "pointer" }}>
-                  <div className="settings-row-text">
-                    <div className="settings-row-title">Contact Support</div>
-                    <div className="settings-row-desc">Need help? We're here for you.</div>
-                  </div>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-muted"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                </a>
-                <a href="/about/bug-report" className="settings-row" style={{ textDecoration: "none", color: "inherit", cursor: "pointer" }}>
-                  <div className="settings-row-text">
-                    <div className="settings-row-title">Report a Bug</div>
-                    <div className="settings-row-desc">Help us improve by reporting issues.</div>
-                  </div>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-muted"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                </a>
-              </div>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", paddingTop: "var(--space-12)", paddingBottom: "var(--space-12)" }}>
+          {/* Logo */}
+          <div style={{ 
+            background: "#f97316", 
+            width: 72, 
+            height: 72, 
+            borderRadius: 20, 
+            display: "flex", 
+            alignItems: "center", 
+            justifyContent: "center",
+            marginBottom: "var(--space-6)"
+          }}>
+            <div style={{ background: "white", borderRadius: 8, padding: 8 }}>
+              <Activity color="#f97316" size={32} strokeWidth={3} />
             </div>
           </div>
           
-          <div className="settings-section">
-            <div>
-              <h2 className="settings-row-title" style={{ marginBottom: "var(--space-2)", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-secondary)" }}>LEGAL & UPDATES</h2>
-              <p className="settings-row-desc" style={{ marginBottom: "var(--space-4)" }}>Important information about TraderLabs.</p>
-              
-              <div className="card card-body">
-                <a href="/about/terms" className="settings-row" style={{ textDecoration: "none", color: "inherit", cursor: "pointer" }}>
-                  <div className="settings-row-text">
-                    <div className="settings-row-title">Terms of Service</div>
-                    <div className="settings-row-desc">Rules and guidelines for using our platform.</div>
-                  </div>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-muted"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                </a>
-                <a href="/about/privacy" className="settings-row" style={{ textDecoration: "none", color: "inherit", cursor: "pointer" }}>
-                  <div className="settings-row-text">
-                    <div className="settings-row-title">Privacy Policy</div>
-                    <div className="settings-row-desc">How we protect your data.</div>
-                  </div>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-muted"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                </a>
-                <a href="/about/changelog" className="settings-row" style={{ textDecoration: "none", color: "inherit", cursor: "pointer" }}>
-                  <div className="settings-row-text">
-                    <div className="settings-row-title" style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      Changelog
-                      <span className="badge badge-long">New</span>
-                    </div>
-                    <div className="settings-row-desc">See what's new in TraderLabs.</div>
-                  </div>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-muted"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                </a>
-              </div>
-            </div>
+          {/* App Name */}
+          <h2 style={{ fontSize: "var(--text-3xl)", fontWeight: 800, margin: 0, marginBottom: "var(--space-4)" }}>TraderLabs</h2>
+          
+          {/* Version Badge */}
+          <div style={{ 
+            border: "1px solid rgba(255, 255, 255, 0.1)", 
+            background: "rgba(255, 255, 255, 0.03)",
+            padding: "4px 16px",
+            borderRadius: 8,
+            marginBottom: "var(--space-10)"
+          }}>
+            <span style={{ color: "#f97316", fontWeight: 700, fontFamily: "monospace", fontSize: "14px" }}>v1.3.0</span>
+          </div>
+
+          {/* Action Buttons */}
+          <div style={{ display: "flex", gap: "var(--space-4)", marginBottom: "var(--space-12)" }}>
+            <a href="/about/contact" className="card card-body" style={{ textDecoration: "none", color: "inherit", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: "12px 24px", minWidth: 160 }}>
+              <span style={{ fontWeight: 700 }}>Contact Support</span>
+            </a>
+            <a href="/about/bug-report" className="card card-body" style={{ textDecoration: "none", color: "inherit", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: "12px 24px", minWidth: 160 }}>
+              <span style={{ fontWeight: 700 }}>Report a Bug</span>
+            </a>
+          </div>
+
+          {/* Links */}
+          <div style={{ display: "flex", gap: "var(--space-6)" }}>
+            <a href="/about/terms" className="text-muted" style={{ textDecoration: "none", fontSize: "var(--text-sm)", transition: "color 0.2s" }}>Terms of Service</a>
+            <a href="/about/privacy" className="text-muted" style={{ textDecoration: "none", fontSize: "var(--text-sm)", transition: "color 0.2s" }}>Privacy Policy</a>
+            <a href="/about/changelog" className="text-muted" style={{ textDecoration: "none", fontSize: "var(--text-sm)", transition: "color 0.2s" }}>Changelog</a>
           </div>
         </div>
       ) : null}
