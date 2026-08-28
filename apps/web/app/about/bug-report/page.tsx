@@ -1,30 +1,103 @@
+"use client";
+
 export default function BugReportPage() {
   return (
-    <div style={{ animation: "fadeIn 0.3s ease-out" }}>
-      <h1 style={{ fontSize: "var(--text-3xl)", fontWeight: 800, marginBottom: "var(--space-2)" }}>Report a Bug</h1>
-      <p style={{ color: "var(--text-secondary)", marginBottom: "var(--space-8)", fontSize: "var(--text-lg)" }}>
-        Found something that isn't working right? Let us know so we can fix it immediately. Your feedback helps us improve TraderLabs for everyone.
-      </p>
-
-      <div className="card card-body" style={{ marginBottom: "var(--space-6)" }}>
-        <h2 style={{ fontSize: "var(--text-xl)", fontWeight: 700, marginBottom: "var(--space-4)" }}>How to report a bug</h2>
-        <p style={{ color: "var(--text-secondary)", marginBottom: "var(--space-4)", lineHeight: 1.6 }}>
-          To help us resolve the issue quickly, please send us an email with the following details:
+    <div style={{ animation: "fadeIn 0.3s ease-out", display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <div style={{ textAlign: "center", marginBottom: "var(--space-8)" }}>
+        <h1 style={{ fontSize: "var(--text-3xl)", fontWeight: 800, marginBottom: "var(--space-2)" }}>Report a Bug 🐛</h1>
+        <p style={{ color: "var(--text-secondary)", fontSize: "var(--text-sm)", maxWidth: 500, margin: "0 auto" }}>
+          Found something broken? Help us fix it by providing details below.
         </p>
-        <ul style={{ color: "var(--text-secondary)", lineHeight: 1.8, paddingLeft: "var(--space-4)", marginBottom: "var(--space-6)" }}>
-          <li><strong>What happened:</strong> A brief description of the issue.</li>
-          <li><strong>How to reproduce:</strong> Steps you took before the bug occurred.</li>
-          <li><strong>Expected result:</strong> What you expected to happen instead.</li>
-          <li><strong>Screenshots:</strong> If applicable, attach a screenshot of the error.</li>
-        </ul>
-        <a 
-          href="mailto:bugs@traderlabs.in?subject=Bug Report - [Short Description here]" 
-          className="btn btn-secondary"
-          style={{ display: "inline-flex", textDecoration: "none", color: "var(--color-negative)", borderColor: "rgba(239, 68, 68, 0.2)" }}
+      </div>
+
+      <div style={{ 
+        background: "var(--bg-secondary)", 
+        border: "1px solid var(--border-secondary)", 
+        borderRadius: "var(--radius-lg)", 
+        padding: "var(--space-6)", 
+        width: "100%", 
+        maxWidth: 700
+      }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-4)", marginBottom: "var(--space-4)" }}>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label" style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-muted)" }}>YOUR NAME (OPTIONAL)</label>
+            <input className="form-input" placeholder="e.g. Rahul Sharma" style={{ background: "var(--bg-primary)", borderColor: "var(--border-secondary)" }} />
+          </div>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label" style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-muted)" }}>EMAIL (REQUIRED FOR UPDATES)</label>
+            <input className="form-input" placeholder="you@example.com" style={{ background: "var(--bg-primary)", borderColor: "var(--border-secondary)" }} />
+          </div>
+        </div>
+
+        <div className="form-group" style={{ marginBottom: "var(--space-4)" }}>
+          <label className="form-label" style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-muted)" }}>BUG TITLE</label>
+          <input className="form-input" placeholder="e.g. Chart not loading on Markets page" style={{ background: "var(--bg-primary)", borderColor: "var(--border-secondary)" }} />
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-4)", marginBottom: "var(--space-4)" }}>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label" style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-muted)" }}>SEVERITY</label>
+            <select className="form-select" style={{ background: "var(--bg-primary)", borderColor: "var(--border-secondary)" }}>
+              <option>Low — Minor visual issue</option>
+              <option>Medium — Feature partially broken</option>
+              <option>High — Feature completely broken</option>
+              <option>Critical — App crashing / Data loss</option>
+            </select>
+          </div>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label" style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-muted)" }}>AFFECTED PAGE</label>
+            <select className="form-select" style={{ background: "var(--bg-primary)", borderColor: "var(--border-secondary)" }}>
+              <option>Select page...</option>
+              <option>Dashboard</option>
+              <option>Journal</option>
+              <option>Analytics</option>
+              <option>Settings</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="form-group" style={{ marginBottom: "var(--space-4)" }}>
+          <label className="form-label" style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-muted)" }}>STEPS TO REPRODUCE</label>
+          <textarea 
+            className="form-input form-textarea" 
+            placeholder="1. Go to Markets page 2. Click on RELIANCE 3. Scroll down to chart section 4. Chart shows blank" 
+            style={{ background: "var(--bg-primary)", borderColor: "var(--border-secondary)", minHeight: 140 }}
+          ></textarea>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-4)", marginBottom: "var(--space-6)" }}>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label" style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-muted)" }}>EXPECTED BEHAVIOR</label>
+            <textarea 
+              className="form-input form-textarea" 
+              placeholder="What should happen?" 
+              style={{ background: "var(--bg-primary)", borderColor: "var(--border-secondary)", minHeight: 80 }}
+            ></textarea>
+          </div>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label" style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-muted)" }}>ACTUAL BEHAVIOR</label>
+            <textarea 
+              className="form-input form-textarea" 
+              placeholder="What actually happened?" 
+              style={{ background: "var(--bg-primary)", borderColor: "var(--border-secondary)", minHeight: 80 }}
+            ></textarea>
+          </div>
+        </div>
+
+        <button 
+          className="btn btn-primary" 
+          style={{ 
+            background: "#f97316", // Accent orange
+            color: "#fff", 
+            border: "none",
+            padding: "10px 24px",
+            fontWeight: 600
+          }}
+          onClick={(e) => e.preventDefault()}
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 8 }}><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-          Email bugs@traderlabs.in
-        </a>
+          Submit Bug Report
+        </button>
       </div>
     </div>
   );
