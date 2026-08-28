@@ -124,7 +124,7 @@ export function PortfolioOverview({ state, portfolio, setters }: PortfolioOvervi
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={() => setShowSettingsModal(false)}></div>
           
-          <div className="bg-surface/95 backdrop-blur-xl border border-border-secondary rounded-2xl w-full max-w-md shadow-2xl overflow-hidden relative animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-card backdrop-blur-xl border border-border-secondary rounded-2xl w-full max-w-md shadow-2xl overflow-hidden relative animate-in fade-in zoom-in-95 duration-200">
             {/* Premium Header */}
             <div className="p-6 border-b border-border-secondary/50 bg-gradient-to-r from-primary/10 to-transparent relative">
               <button 
