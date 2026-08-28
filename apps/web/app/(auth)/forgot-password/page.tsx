@@ -15,8 +15,6 @@ export default function ForgotPasswordPage() {
     return false;
   });
 
-  }, []);
-
   const toggleTheme = () => {
     const newTheme = !isDark;
     setIsDark(newTheme);

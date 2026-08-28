@@ -245,8 +245,6 @@ export default function ResetPasswordPage() {
     return false;
   });
   
-  }, []);
-
   return (
     <Suspense fallback={
       <div data-theme={isDark ? "dark" : "light"} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: 'var(--bg-primary)' }}>
