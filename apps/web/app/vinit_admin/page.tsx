@@ -2,13 +2,14 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Users, Mail, Bell, Activity, UserCog, Bug, BarChart3 } from "lucide-react";
+import { Users, Mail, Bell, Activity, UserCog, Bug, BarChart3, X } from "lucide-react";
 
 export default function AdminOverviewPage() {
   const [timeStr, setTimeStr] = useState("");
   const [stats, setStats] = useState<any>(null);
   const [feedback, setFeedback] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedTicket, setSelectedTicket] = useState<any>(null);
 
   // Time
   useEffect(() => {
@@ -50,7 +51,8 @@ export default function AdminOverviewPage() {
     return () => clearInterval(interval);
   }, []);
 
-  const handleResolve = async (id: string) => {
+  const handleResolve = async (id: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
     try {
       const res = await fetch('/api/admin/feedback', {
         method: 'POST',
@@ -60,6 +62,9 @@ export default function AdminOverviewPage() {
       const data = await res.json();
       if (data.success) {
         setFeedback(prev => prev.map(f => f.id === id ? { ...f, status: 'resolved' } : f));
+        if (selectedTicket && selectedTicket.id === id) {
+          setSelectedTicket({ ...selectedTicket, status: 'resolved' });
+        }
       }
     } catch (e) {
       console.error('Failed to resolve', e);
@@ -77,7 +82,7 @@ export default function AdminOverviewPage() {
   const pendingFeedback = feedback.filter(f => f.status === 'new').length;
 
   return (
-    <div style={{ flex: 1, overflowY: "auto", padding: "24px 40px", backgroundColor: "#09090b" }}>
+    <div style={{ flex: 1, overflowY: "auto", padding: "24px 40px", backgroundColor: "#09090b", position: "relative" }}>
       
       {/* Top Navbar Area */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: 24, borderBottom: "1px solid #27272a", marginBottom: 32 }}>
@@ -190,7 +195,7 @@ export default function AdminOverviewPage() {
             </thead>
             <tbody>
               {feedback.slice(0,4).map((item) => (
-                <tr key={item.id} style={{ borderBottom: "1px solid #27272a" }}>
+                <tr key={item.id} style={{ borderBottom: "1px solid #27272a", cursor: "pointer", transition: "background 0.2s" }} onClick={() => setSelectedTicket(item)} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.02)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}>
                   <td style={{ padding: "16px 24px" }}>
                     {item.status === 'resolved' ? (
                       <span style={{ border: "1px solid rgba(16, 185, 129, 0.3)", color: "#10b981", fontSize: 10, fontWeight: 600, padding: "4px 8px", borderRadius: 4 }}>RESOLVED</span>
@@ -211,13 +216,18 @@ export default function AdminOverviewPage() {
                   <td style={{ padding: "16px 24px 16px 0", textAlign: "right" }}>
                     {item.status === 'new' ? (
                       <button 
-                        onClick={() => handleResolve(item.id)}
-                        style={{ backgroundColor: "rgba(16, 185, 129, 0.1)", border: "1px solid rgba(16, 185, 129, 0.2)", color: "#10b981", fontSize: 12, fontWeight: 600, padding: "6px 12px", borderRadius: 6, cursor: "pointer" }}
+                        onClick={(e) => handleResolve(item.id, e)}
+                        style={{ backgroundColor: "rgba(16, 185, 129, 0.1)", border: "1px solid rgba(16, 185, 129, 0.2)", color: "#10b981", fontSize: 12, fontWeight: 600, padding: "6px 12px", borderRadius: 6, cursor: "pointer", zIndex: 10, position: "relative" }}
                       >
                         Resolve
                       </button>
                     ) : (
-                      <Link href="/vinit_admin/feedback" style={{ color: "#a1a1aa", fontSize: 13, textDecoration: "none" }}>View</Link>
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); setSelectedTicket(item); }}
+                        style={{ backgroundColor: "transparent", border: "1px solid #27272a", color: "#f4f4f5", padding: "6px 12px", borderRadius: 6, fontSize: 12, fontWeight: 500, cursor: "pointer" }}
+                      >
+                        View
+                      </button>
                     )}
                   </td>
                 </tr>
@@ -296,6 +306,92 @@ export default function AdminOverviewPage() {
         </div>
 
       </div>
+
+      {/* Ticket Modal */}
+      {selectedTicket && (
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.6)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+          <div style={{ backgroundColor: "#09090b", border: "1px solid #27272a", borderRadius: 12, width: "100%", maxWidth: 600, maxHeight: "90vh", overflowY: "auto" }}>
+            {/* Modal Header */}
+            <div style={{ padding: "24px", borderBottom: "1px solid #27272a", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                {selectedTicket.type === 'bug' ? (
+                  <div style={{ backgroundColor: "rgba(239, 68, 68, 0.1)", padding: 8, borderRadius: 8 }}><Bug size={20} color="#ef4444" /></div>
+                ) : (
+                  <div style={{ backgroundColor: "rgba(255, 255, 255, 0.05)", padding: 8, borderRadius: 8 }}><Mail size={20} color="#a1a1aa" /></div>
+                )}
+                <div>
+                  <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>{selectedTicket.subject}</h3>
+                  <div style={{ fontSize: 13, color: "#a1a1aa", marginTop: 4 }}>From {selectedTicket.senderName} ({selectedTicket.senderEmail})</div>
+                </div>
+              </div>
+              <button onClick={() => setSelectedTicket(null)} style={{ background: "transparent", border: "none", color: "#a1a1aa", cursor: "pointer" }}><X size={20} /></button>
+            </div>
+            
+            {/* Modal Body */}
+            <div style={{ padding: "24px" }}>
+              <div style={{ display: "flex", gap: 12, marginBottom: 24 }}>
+                <span style={{ backgroundColor: "rgba(255,255,255,0.05)", padding: "4px 12px", borderRadius: 4, fontSize: 12, color: "#a1a1aa" }}>{new Date(selectedTicket.createdAt).toLocaleString()}</span>
+                {selectedTicket.status === 'resolved' ? (
+                  <span style={{ border: "1px solid rgba(16, 185, 129, 0.3)", color: "#10b981", fontSize: 12, fontWeight: 600, padding: "4px 12px", borderRadius: 4 }}>RESOLVED</span>
+                ) : (
+                  <span style={{ border: "1px solid rgba(249, 115, 22, 0.3)", color: "#f97316", fontSize: 12, fontWeight: 600, padding: "4px 12px", borderRadius: 4 }}>NEW</span>
+                )}
+              </div>
+
+              {selectedTicket.type === 'bug' && (
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24, backgroundColor: "rgba(255,255,255,0.02)", padding: 16, borderRadius: 8, border: "1px solid #27272a" }}>
+                  <div>
+                    <div style={{ fontSize: 11, color: "#71717a", fontWeight: 600, marginBottom: 4 }}>SEVERITY</div>
+                    <div style={{ fontSize: 14, color: "#f4f4f5" }}>{selectedTicket.severity || 'N/A'}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 11, color: "#71717a", fontWeight: 600, marginBottom: 4 }}>AFFECTED PAGE</div>
+                    <div style={{ fontSize: 14, color: "#f4f4f5" }}>{selectedTicket.affectedPage || 'N/A'}</div>
+                  </div>
+                </div>
+              )}
+
+              <div style={{ marginBottom: 24 }}>
+                <div style={{ fontSize: 11, color: "#71717a", fontWeight: 600, marginBottom: 8, letterSpacing: "0.05em" }}>MESSAGE / STEPS TO REPRODUCE</div>
+                <div style={{ fontSize: 14, color: "#f4f4f5", lineHeight: 1.6, whiteSpace: "pre-wrap", backgroundColor: "rgba(255,255,255,0.02)", padding: 16, borderRadius: 8, border: "1px solid #27272a" }}>
+                  {selectedTicket.body}
+                </div>
+              </div>
+
+              {selectedTicket.type === 'bug' && (
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 }}>
+                  <div>
+                    <div style={{ fontSize: 11, color: "#71717a", fontWeight: 600, marginBottom: 8, letterSpacing: "0.05em" }}>EXPECTED BEHAVIOR</div>
+                    <div style={{ fontSize: 14, color: "#f4f4f5", lineHeight: 1.6, whiteSpace: "pre-wrap", backgroundColor: "rgba(255,255,255,0.02)", padding: 16, borderRadius: 8, border: "1px solid #27272a" }}>
+                      {selectedTicket.expectedBehavior || 'N/A'}
+                    </div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 11, color: "#71717a", fontWeight: 600, marginBottom: 8, letterSpacing: "0.05em" }}>ACTUAL BEHAVIOR</div>
+                    <div style={{ fontSize: 14, color: "#f4f4f5", lineHeight: 1.6, whiteSpace: "pre-wrap", backgroundColor: "rgba(255,255,255,0.02)", padding: 16, borderRadius: 8, border: "1px solid #27272a" }}>
+                      {selectedTicket.actualBehavior || 'N/A'}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+            </div>
+            
+            {/* Modal Footer */}
+            <div style={{ padding: "16px 24px", borderTop: "1px solid #27272a", display: "flex", justifyContent: "flex-end", gap: 12 }}>
+              <button onClick={() => setSelectedTicket(null)} style={{ background: "transparent", border: "1px solid #3f3f46", color: "#f4f4f5", padding: "8px 16px", borderRadius: 6, fontSize: 13, fontWeight: 500, cursor: "pointer" }}>Close</button>
+              {selectedTicket.status === 'new' && (
+                <button 
+                  onClick={() => handleResolve(selectedTicket.id)}
+                  style={{ backgroundColor: "#10b981", border: "none", color: "#000", padding: "8px 16px", borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: "pointer" }}
+                >
+                  Mark as Resolved
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
