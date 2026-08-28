@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { NAV_ITEMS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
@@ -104,6 +104,17 @@ const ICONS: Record<string, React.ReactNode> = {
 
 export default function Sidebar({ userName = "Trader", tradingStyle = "Swing Trader", avatar = null }: { userName?: string, tradingStyle?: string, avatar?: string | null }) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      router.push('/login');
+      router.refresh();
+    } catch (e) {
+      console.error('Logout failed', e);
+    }
+  };
 
   return (
     <aside className="sidebar" id="sidebar">
@@ -151,18 +162,32 @@ export default function Sidebar({ userName = "Trader", tradingStyle = "Swing Tra
 
       {/* Footer */}
       <div className="sidebar-footer">
-        <div className="sidebar-user">
-          <div className="sidebar-avatar" style={{ overflow: "hidden", border: avatar ? "1px solid var(--border-secondary)" : "none" }}>
-            {avatar ? (
-              <img src={avatar} alt="Profile Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-            ) : (
-              userName.charAt(0).toUpperCase()
-            )}
+        <div className="sidebar-user" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div className="sidebar-avatar" style={{ overflow: "hidden", border: avatar ? "1px solid var(--border-secondary)" : "none" }}>
+              {avatar ? (
+                <img src={avatar} alt="Profile Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              ) : (
+                userName.charAt(0).toUpperCase()
+              )}
+            </div>
+            <div className="sidebar-user-info">
+              <span className="sidebar-user-name">{userName}</span>
+              <span className="sidebar-user-role">{tradingStyle}</span>
+            </div>
           </div>
-          <div className="sidebar-user-info">
-            <span className="sidebar-user-name">{userName}</span>
-            <span className="sidebar-user-role">{tradingStyle}</span>
-          </div>
+          
+          <button 
+            onClick={handleLogout}
+            className="text-muted hover:text-text-primary transition-colors p-2 rounded-md hover:bg-border-secondary/50"
+            title="Log Out"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+          </button>
         </div>
       </div>
     </aside>
