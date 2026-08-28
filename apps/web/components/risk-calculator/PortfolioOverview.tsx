@@ -162,8 +162,9 @@ export function PortfolioOverview({ state, portfolio, setters }: PortfolioOvervi
                         setters.setCashOnly(!state.cashOnly);
                       }
                     }}
+                    style={{ minWidth: "44px", width: "44px", height: "24px", flexShrink: 0 }}
                     className={cn(
-                      "relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors",
+                      "relative inline-flex items-center rounded-full transition-colors",
                       state.cashOnly ? "bg-primary" : "bg-border-secondary"
                     )}
                   >
