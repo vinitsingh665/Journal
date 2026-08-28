@@ -100,7 +100,11 @@ export default function LoginPage() {
   };
 
   if (checkingSetup) {
-    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#fff' }}><p style={{ color: "#9CA3AF" }}>Loading...</p></div>;
+    return (
+      <div data-theme={isDark ? "dark" : "light"} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: 'var(--bg-primary)' }}>
+        <p style={{ color: "var(--text-muted)" }}>Loading...</p>
+      </div>
+    );
   }
 
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";

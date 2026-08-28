@@ -247,7 +247,11 @@ export default function ResetPasswordPage() {
   }, []);
 
   return (
-    <Suspense fallback={<div style={{ textAlign: 'center', color: '#a1a1aa' }}>Loading...</div>}>
+    <Suspense fallback={
+      <div data-theme={isDark ? "dark" : "light"} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: 'var(--bg-primary)' }}>
+        <p style={{ color: "var(--text-muted)" }}>Loading...</p>
+      </div>
+    }>
       <ResetPasswordForm isDark={isDark} setIsDark={setIsDark} />
     </Suspense>
   );
