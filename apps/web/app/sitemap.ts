@@ -3,19 +3,19 @@ import { MetadataRoute } from 'next'
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {
-      url: 'https://traderlabs.in',
+      url: 'https://www.traderlabs.in',
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 1,
     },
     {
-      url: 'https://traderlabs.in/login',
+      url: 'https://www.traderlabs.in/login',
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.8,
     },
     {
-      url: 'https://traderlabs.in/signup',
+      url: 'https://www.traderlabs.in/signup',
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.8,

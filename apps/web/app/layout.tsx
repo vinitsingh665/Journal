@@ -6,7 +6,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"], variable: '--font-sans' });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://traderlabs.in"),
+  metadataBase: new URL("https://www.traderlabs.in"),
   title: {
     default: "TraderLabs — Plan. Execute. Review. Improve.",
     template: "%s | TraderLabs",
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "TraderLabs — Your Ultimate Trading Journal",
     description: "Track trades, analyze performance, and improve your edge with our premium trading journal.",
-    url: "https://traderlabs.in",
+    url: "https://www.traderlabs.in",
     siteName: "TraderLabs",
     images: [
       {

@@ -16,6 +16,6 @@ export default function robots(): MetadataRoute.Robots {
         '/shared/*', // Publicly shared links are not indexed by default to protect privacy
       ],
     },
-    sitemap: 'https://traderlabs.in/sitemap.xml',
+    sitemap: 'https://www.traderlabs.in/sitemap.xml',
   }
 }
