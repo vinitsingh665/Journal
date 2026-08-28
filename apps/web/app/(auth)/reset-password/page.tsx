@@ -142,7 +142,7 @@ function ResetPasswordForm({ isDark, setIsDark }: { isDark: boolean, setIsDark: 
   })();
 
   return (
-    <div className={`login-page-root ${isDark ? "dark" : ""}`}>
+    <div className={`login-page-root ${isDark ? "dark" : ""}`} data-theme={isDark ? "dark" : "light"}>
       {/* Advanced Background Chart */}
       <div className="advanced-chart">
         <div className="chart-grid"></div>

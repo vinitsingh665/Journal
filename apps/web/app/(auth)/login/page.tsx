@@ -107,7 +107,7 @@ export default function LoginPage() {
 
   return (
     <GoogleOAuthProvider clientId={clientId}>
-      <div className={`login-page-root ${isDark ? "dark" : ""}`}>
+      <div className={`login-page-root ${isDark ? "dark" : ""}`} data-theme={isDark ? "dark" : "light"}>
 
         {/* Advanced Background Chart */}
         <div className="advanced-chart">
