@@ -59,10 +59,6 @@ If the user wants to ADD MORE quantity to an existing open trade (e.g. "Buy 50 m
 Intent: "ADD_EXECUTION"
 Extract: symbol, side (BUY/SELL), price (null if market), quantity.
 
-If the user wants to DELETE an existing trade completely (e.g. "Delete my Reliance trade", "Remove my last TCS trade"):
-Intent: "DELETE_TRADE"
-Extract: symbol (must match one of their recent or open trades).
-
 If the user wants to calculate risk or position size for a trade:
 Intent: "CALCULATE_RISK"
 Extract: symbol, side (BUY/SELL), price (entry), stopLoss, target, riskPercent.
@@ -79,22 +75,9 @@ If the user just asks for the current price or quote of a stock/crypto:
 Intent: "GET_QUOTE"
 Extract: symbol, exchange.
 
-If the user asks a general question about how to use the app, where to find a setting, or how to navigate the website (e.g. "how do I change my capital?", "where is the risk calculator?", "how to close a trade", "how to delete a trade"):
-Intent: "APP_NAVIGATION_GUIDE"
-Extract: nothing required. But in the "message" field of the JSON, you MUST provide a helpful natural language guide based on this Knowledge Base:
-- Default Trading Capital / Total Capital: Change it in Settings -> Trading tab -> Risk Management.
-- Profile (Name, Avatar, Bio): Change it in Settings -> General tab.
-- Risk Calculator: Accessible from the sidebar, helps size positions based on capital and risk.
-- Import Trades: Go to Dashboard -> Import to upload CSV files from brokers.
-- Export Data: Use the export options on the dashboard.
-- Close/Exit a Trade: You can ask the AI to "close my [Symbol] trade", or do it manually by opening the trade details page, clicking 'Add Execution', and adding a reverse execution (e.g., SELL if it was a LONG trade) for the full quantity. Do NOT mention any 'Exit Trade' button, as it does not exist.
-- Edit a Trade: Click on a trade to open its details page, then click the Edit button.
-- Delete a Trade: You can ask the AI to "delete my [Symbol] trade", or do it manually by going to the Trades page, selecting the checkbox next to the trade, and clicking Delete.
-- If it's a feature not explicitly listed, use your best logical guess based on standard trade journal apps.
-
 Respond ONLY with valid JSON matching this schema:
 {
-  "intent": "ASK_CLARIFICATION" | "CREATE_FORM_FILL" | "EXIT_TRADE" | "UPDATE_TRADE" | "ADD_EXECUTION" | "CREATE_MISTAKE" | "CALCULATE_RISK" | "EXPORT_SCREENSHOT" | "EXPORT_PDF" | "GET_QUOTE" | "EDIT_TRADE" | "APP_NAVIGATION_GUIDE" | "DELETE_TRADE",
+  "intent": "ASK_CLARIFICATION" | "CREATE_FORM_FILL" | "EXIT_TRADE" | "UPDATE_TRADE" | "ADD_EXECUTION" | "CREATE_MISTAKE" | "CALCULATE_RISK" | "EXPORT_SCREENSHOT" | "EXPORT_PDF" | "GET_QUOTE" | "EDIT_TRADE",
   "message": string | null,
   "data": {
     "symbol": string | null,
@@ -177,15 +160,7 @@ export async function POST(req: NextRequest) {
     const parsed = JSON.parse(responseContent);
 
     // Auto-Execution Logic for EXIT
-    if (parsed.intent === "EXIT_TRADE") {
-      if (!parsed.data.symbol) {
-        return NextResponse.json({ success: true, data: {
-          intent: "ASK_CLARIFICATION",
-          message: "Which trade would you like to exit? Please specify the symbol.",
-          data: parsed.data
-        }});
-      }
-
+    if (parsed.intent === "EXIT_TRADE" && parsed.data.symbol) {
       const trade = openTrades.find((t) => t.symbol.toUpperCase() === parsed.data.symbol.toUpperCase());
       
       if (trade) {
@@ -295,15 +270,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Auto-Execution Logic for UPDATE
-    if (parsed.intent === "UPDATE_TRADE") {
-      if (!parsed.data.symbol) {
-        return NextResponse.json({ success: true, data: {
-          intent: "ASK_CLARIFICATION",
-          message: "Which trade would you like to update? Please specify the symbol.",
-          data: parsed.data
-        }});
-      }
-
+    if (parsed.intent === "UPDATE_TRADE" && parsed.data.symbol) {
       const trade = openTrades.find((t) => t.symbol.toUpperCase() === parsed.data.symbol.toUpperCase());
       if (trade) {
         const updates: any = {};
@@ -347,15 +314,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Auto-Execution Logic for ADD_EXECUTION
-    if (parsed.intent === "ADD_EXECUTION") {
-      if (!parsed.data.symbol) {
-        return NextResponse.json({ success: true, data: {
-          intent: "ASK_CLARIFICATION",
-          message: "Which trade would you like to add more quantity to? Please specify the symbol.",
-          data: parsed.data
-        }});
-      }
-
+    if (parsed.intent === "ADD_EXECUTION" && parsed.data.symbol) {
       const trade = openTrades.find((t) => t.symbol.toUpperCase() === parsed.data.symbol.toUpperCase());
       if (trade) {
         let entryPrice = parsed.data.price;
@@ -418,36 +377,6 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: true, message: `Successfully added ${addQty} shares to ${trade.symbol} at ₹${entryPrice}` });
       } else {
         return NextResponse.json({ error: `You don't have an open trade for ${parsed.data.symbol} to add to.` }, { status: 400 });
-      }
-    }
-
-    // Auto-Execution Logic for DELETE_TRADE
-    if (parsed.intent === "DELETE_TRADE") {
-      if (!parsed.data.symbol) {
-        return NextResponse.json({ success: true, data: {
-          intent: "ASK_CLARIFICATION",
-          message: "Which trade would you like me to delete? Please specify the symbol.",
-          data: parsed.data
-        }});
-      }
-
-      const trade = openTrades.find((t) => t.symbol.toUpperCase() === parsed.data.symbol.toUpperCase()) || 
-                    recentTrades.find((t) => t.symbol.toUpperCase() === parsed.data.symbol.toUpperCase());
-      
-      if (trade) {
-        await prisma.$transaction(async (tx) => {
-          await tx.execution.updateMany({ where: { tradeId: trade.id }, data: { tradeId: null } });
-          await tx.tradeMistake.deleteMany({ where: { tradeId: trade.id } });
-          await tx.screenshot.deleteMany({ where: { tradeId: trade.id } });
-          await tx.trade.delete({ where: { id: trade.id } });
-        });
-        return NextResponse.json({ success: true, message: `Successfully deleted your ${trade.symbol} trade.` });
-      } else {
-        return NextResponse.json({ success: true, data: {
-          intent: "ASK_CLARIFICATION",
-          message: `I couldn't find a recent trade for ${parsed.data.symbol} to delete.`,
-          data: parsed.data
-        }});
       }
     }
 
