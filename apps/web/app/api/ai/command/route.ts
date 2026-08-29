@@ -75,7 +75,7 @@ If the user just asks for the current price or quote of a stock/crypto:
 Intent: "GET_QUOTE"
 Extract: symbol, exchange.
 
-If the user asks a general question about how to use the app, where to find a setting, or how to navigate the website (e.g. "how do I change my capital?", "where is the risk calculator?"):
+If the user asks a general question about how to use the app, where to find a setting, or how to navigate the website (e.g. "how do I change my capital?", "where is the risk calculator?", "how to close a trade", "how to delete a trade"):
 Intent: "APP_NAVIGATION_GUIDE"
 Extract: nothing required. But in the "message" field of the JSON, you MUST provide a helpful natural language guide based on this Knowledge Base:
 - Default Trading Capital / Total Capital: Change it in Settings -> Trading tab -> Risk Management.
@@ -83,6 +83,8 @@ Extract: nothing required. But in the "message" field of the JSON, you MUST prov
 - Risk Calculator: Accessible from the sidebar, helps size positions based on capital and risk.
 - Import Trades: Go to Dashboard -> Import to upload CSV files from brokers.
 - Export Data: Use the export options on the dashboard.
+- Close/Exit a Trade: You can ask the AI to "close my Reliance trade", or do it manually by clicking the trade in your Dashboard/Trades page and adding an exit execution.
+- Edit/Delete a Trade: Click on a trade to open its details page. To edit, click the Edit button. To delete, use the delete option/button inside the edit menu or on the trade page.
 - If it's a feature not explicitly listed, use your best logical guess based on standard trade journal apps.
 
 Respond ONLY with valid JSON matching this schema:
