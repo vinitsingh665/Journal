@@ -5,6 +5,8 @@ import { formatINR, formatPercent } from "@/lib/utils";
 interface KpiCardsProps {
   totalPnl: number;
   todayPnl: number;
+  totalCapital: number;
+  availableCapital: number;
   totalInvestment: number;
   totalRisk: number;
   winRate: number;
@@ -16,6 +18,8 @@ interface KpiCardsProps {
 export default function KpiCards({
   totalPnl,
   todayPnl,
+  totalCapital,
+  availableCapital,
   totalInvestment,
   totalRisk,
   winRate,
@@ -24,6 +28,32 @@ export default function KpiCards({
   todayReturnPercent,
 }: KpiCardsProps) {
   const kpis = [
+    {
+      label: "Total Capital",
+      value: formatINR(totalCapital, { compact: true }),
+      change: null,
+      positive: true,
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4" />
+          <path d="M4 6v12c0 1.1.9 2 2 2h14v-4H6a2 2 0 0 1-2-2z" />
+          <path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4v-4h-4z" />
+        </svg>
+      ),
+      accentColor: "#3B82F6",
+    },
+    {
+      label: "Available Capital",
+      value: formatINR(availableCapital, { compact: true }),
+      change: totalCapital > 0 ? formatPercent((availableCapital / totalCapital) * 100) : null,
+      positive: true,
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+        </svg>
+      ),
+      accentColor: "#10B981",
+    },
     {
       label: "Total P&L",
       value: formatINR(totalPnl, { compact: true, showSign: true }),
@@ -55,7 +85,7 @@ export default function KpiCards({
       accentColor: todayPnl >= 0 ? "#10B981" : "#EF4444",
     },
     {
-      label: "Total Investment",
+      label: "Deployed Capital",
       value: formatINR(totalInvestment, { compact: true }),
       change: null,
       positive: true,

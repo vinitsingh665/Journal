@@ -23,6 +23,7 @@ export interface PlannerTrade {
   tradeCapital?: number; // Snapshot of the trade capital used
   sector: string;
   status: "OPEN" | "PLANNED";
+  fixedQuantity?: number;
 }
 
 export function useRiskEngine(userId?: string) {
@@ -94,7 +95,51 @@ export function useRiskEngine(userId?: string) {
         console.error("Failed to load templates:", err);
       }
     };
+
+    const fetchSettings = async () => {
+      try {
+        const res = await fetch("/api/user");
+        if (res.ok) {
+          const data = await res.json();
+          let currentCapital = capital;
+          if (data.user?.settings?.defaultCapital) {
+            currentCapital = data.user.settings.defaultCapital;
+            setCapital(currentCapital);
+            setTradeCapital(currentCapital);
+          }
+          if (data.user?.trades && data.user.trades.length > 0) {
+            const mappedOpenTrades: PlannerTrade[] = data.user.trades.map((t: any) => ({
+              id: t.id,
+              symbol: t.symbol,
+              exchange: t.exchange || "NSE",
+              direction: t.direction as "LONG" | "SHORT",
+              entry: t.avgEntryPrice,
+              stop: t.stopLoss || 0,
+              target: t.target || 0,
+              riskPct: 0,
+              tradeCapital: currentCapital,
+              fixedQuantity: t.totalBuyQty - t.totalSellQty,
+              sector: t.strategy || "Unclassified",
+              status: "OPEN"
+            }));
+            
+            setTrades(prev => {
+               const existingIds = new Set(prev.map(x => x.id));
+               const newTrades = mappedOpenTrades.filter(x => !existingIds.has(x.id));
+               return [...newTrades, ...prev];
+            });
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load user settings:", err);
+      }
+    };
+
     fetchTemplates();
+    if (!userId) {
+      // only fetch settings if not in shared view
+      fetchSettings();
+    }
   }, [userId]);
 
   // Derived: Global Risk Wallet
@@ -139,16 +184,27 @@ export function useRiskEngine(userId?: string) {
   // Derived: Portfolio Planner Metrics
   const enrichedTrades = useMemo(() => {
     return trades.map(trade => {
-      const tc = trade.tradeCapital || capital;
-      const riskAmount = tc * (trade.riskPct / 100);
-      const riskPerShare = trade.direction === "LONG" ? trade.entry - trade.stop : trade.stop - trade.entry;
-      const quantity = riskPerShare > 0 ? Math.floor(riskAmount / riskPerShare) : 0;
-      const rewardPerShare = trade.direction === "LONG" ? trade.target - trade.entry : trade.entry - trade.target;
+      const riskPerShare = trade.direction === "LONG" ? Math.max(0, trade.entry - trade.stop) : Math.max(0, trade.stop - trade.entry);
+      
+      let quantity = 0;
+      let actualRiskAmount = 0;
+      
+      if (trade.fixedQuantity !== undefined) {
+        quantity = trade.fixedQuantity;
+        actualRiskAmount = quantity * riskPerShare;
+      } else {
+        const tc = trade.tradeCapital || capital;
+        const riskAmount = tc * (trade.riskPct / 100);
+        quantity = riskPerShare > 0 ? Math.floor(riskAmount / riskPerShare) : 0;
+        actualRiskAmount = riskAmount;
+      }
+
+      const rewardPerShare = trade.direction === "LONG" ? Math.max(0, trade.target - trade.entry) : Math.max(0, trade.entry - trade.target);
       const rr = riskPerShare > 0 ? rewardPerShare / riskPerShare : 0;
       const capitalDeployed = quantity * trade.entry;
       return {
         ...trade,
-        riskAmount,
+        riskAmount: actualRiskAmount,
         riskPerShare,
         quantity,
         rewardPerShare,

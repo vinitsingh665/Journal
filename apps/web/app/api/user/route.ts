@@ -2,6 +2,27 @@ import { NextResponse } from "next/server";
 import { getCurrentUser, clearSessionCookie } from "@/lib/auth";
 import prisma from "@repo/database";
 
+export async function GET(req: Request) {
+  try {
+    const userId = await getCurrentUser();
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { 
+        settings: true,
+        trades: {
+          where: { status: { in: ["OPEN", "PARTIAL"] }, isArchived: false }
+        }
+      }
+    });
+    return NextResponse.json({ user });
+  } catch (error) {
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
+
 export async function PUT(req: Request) {
   try {
     const userId = await getCurrentUser();
@@ -15,7 +36,7 @@ export async function PUT(req: Request) {
     }
 
     const body = await req.json();
-    const { name, tradingStyle, about, avatar } = body;
+    const { name, tradingStyle, about, avatar, defaultCapital } = body;
 
     if (!name) {
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
@@ -26,19 +47,21 @@ export async function PUT(req: Request) {
       data: { name },
     });
 
-    if (tradingStyle !== undefined || about !== undefined || avatar !== undefined) {
+    if (tradingStyle !== undefined || about !== undefined || avatar !== undefined || defaultCapital !== undefined) {
       await prisma.userSettings.upsert({
         where: { userId },
         update: { 
           ...(tradingStyle !== undefined && { tradingStyle }),
           ...(about !== undefined && { about }),
-          ...(avatar !== undefined && { avatar })
+          ...(avatar !== undefined && { avatar }),
+          ...(defaultCapital !== undefined && { defaultCapital: Number(defaultCapital) })
         },
         create: {
           userId,
           tradingStyle: tradingStyle || "Swing Trader",
           about: about || "",
-          avatar: avatar || ""
+          avatar: avatar || "",
+          defaultCapital: defaultCapital !== undefined ? Number(defaultCapital) : 500000
         }
       });
     }

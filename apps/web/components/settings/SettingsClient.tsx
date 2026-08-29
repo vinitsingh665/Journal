@@ -99,6 +99,7 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
   const [syncDevices, setSyncDevices] = useState(false);
 
   // Additional settings states
+  const [defaultCapital, setDefaultCapital] = useState(initialSettings?.defaultCapital || 500000);
   const [defaultRisk, setDefaultRisk] = useState("1.0");
   const [defaultRR, setDefaultRR] = useState("2.0");
   const [maxDailyLoss, setMaxDailyLoss] = useState("5000");
@@ -124,7 +125,7 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ name, tradingStyle, about, avatar }),
+        body: JSON.stringify({ name, tradingStyle, about, avatar, defaultCapital: Number(defaultCapital) }),
       });
 
       if (res.ok) {
@@ -622,6 +623,13 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
                 <p className="settings-row-desc" style={{ marginBottom: "var(--space-4)" }}>Configure your default risk parameters.</p>
 
                 <div className="card card-body" style={{ display: "flex", flexDirection: "column" }}>
+                  <div className="settings-row">
+                    <div className="settings-row-text">
+                      <div className="settings-row-title">Default Trading Capital</div>
+                      <div className="settings-row-desc">Your total available trading capital.</div>
+                    </div>
+                    <input type="number" className="form-input" style={{ width: 120 }} value={defaultCapital} onChange={e => setDefaultCapital(e.target.value)} disabled={isGuest} />
+                  </div>
                   <div className="settings-row">
                     <div className="settings-row-text">
                       <div className="settings-row-title">Default Risk per Trade (%)</div>
