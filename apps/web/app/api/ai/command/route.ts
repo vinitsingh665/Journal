@@ -177,7 +177,15 @@ export async function POST(req: NextRequest) {
     const parsed = JSON.parse(responseContent);
 
     // Auto-Execution Logic for EXIT
-    if (parsed.intent === "EXIT_TRADE" && parsed.data.symbol) {
+    if (parsed.intent === "EXIT_TRADE") {
+      if (!parsed.data.symbol) {
+        return NextResponse.json({ success: true, data: {
+          intent: "ASK_CLARIFICATION",
+          message: "Which trade would you like to exit? Please specify the symbol.",
+          data: parsed.data
+        }});
+      }
+
       const trade = openTrades.find((t) => t.symbol.toUpperCase() === parsed.data.symbol.toUpperCase());
       
       if (trade) {
@@ -287,7 +295,15 @@ export async function POST(req: NextRequest) {
     }
 
     // Auto-Execution Logic for UPDATE
-    if (parsed.intent === "UPDATE_TRADE" && parsed.data.symbol) {
+    if (parsed.intent === "UPDATE_TRADE") {
+      if (!parsed.data.symbol) {
+        return NextResponse.json({ success: true, data: {
+          intent: "ASK_CLARIFICATION",
+          message: "Which trade would you like to update? Please specify the symbol.",
+          data: parsed.data
+        }});
+      }
+
       const trade = openTrades.find((t) => t.symbol.toUpperCase() === parsed.data.symbol.toUpperCase());
       if (trade) {
         const updates: any = {};
@@ -331,7 +347,15 @@ export async function POST(req: NextRequest) {
     }
 
     // Auto-Execution Logic for ADD_EXECUTION
-    if (parsed.intent === "ADD_EXECUTION" && parsed.data.symbol) {
+    if (parsed.intent === "ADD_EXECUTION") {
+      if (!parsed.data.symbol) {
+        return NextResponse.json({ success: true, data: {
+          intent: "ASK_CLARIFICATION",
+          message: "Which trade would you like to add more quantity to? Please specify the symbol.",
+          data: parsed.data
+        }});
+      }
+
       const trade = openTrades.find((t) => t.symbol.toUpperCase() === parsed.data.symbol.toUpperCase());
       if (trade) {
         let entryPrice = parsed.data.price;
@@ -398,7 +422,15 @@ export async function POST(req: NextRequest) {
     }
 
     // Auto-Execution Logic for DELETE_TRADE
-    if (parsed.intent === "DELETE_TRADE" && parsed.data.symbol) {
+    if (parsed.intent === "DELETE_TRADE") {
+      if (!parsed.data.symbol) {
+        return NextResponse.json({ success: true, data: {
+          intent: "ASK_CLARIFICATION",
+          message: "Which trade would you like me to delete? Please specify the symbol.",
+          data: parsed.data
+        }});
+      }
+
       const trade = openTrades.find((t) => t.symbol.toUpperCase() === parsed.data.symbol.toUpperCase()) || 
                     recentTrades.find((t) => t.symbol.toUpperCase() === parsed.data.symbol.toUpperCase());
       
@@ -409,7 +441,7 @@ export async function POST(req: NextRequest) {
           await tx.screenshot.deleteMany({ where: { tradeId: trade.id } });
           await tx.trade.delete({ where: { id: trade.id } });
         });
-        return NextResponse.json({ success: true, message: `Successfully deleted trade for ${trade.symbol}.` });
+        return NextResponse.json({ success: true, message: `Successfully deleted your ${trade.symbol} trade.` });
       } else {
         return NextResponse.json({ success: true, data: {
           intent: "ASK_CLARIFICATION",
