@@ -8,8 +8,8 @@ interface TradeInputsFormProps {
 }
 
 export function TradeInputsForm({ state, setters, current }: TradeInputsFormProps) {
-  const { capital, defaultTradeRiskPct, entry, stop, target, direction, slippagePct, winRatePct } = state;
-  const { setCapital, setDefaultTradeRiskPct, setEntry, setStop, setTarget, setDirection, setSlippagePct, setWinRatePct } = setters;
+  const { tradeCapital, defaultTradeRiskPct, entry, stop, target, direction, slippagePct, winRatePct } = state;
+  const { setTradeCapital, setDefaultTradeRiskPct, setEntry, setStop, setTarget, setDirection, setSlippagePct, setWinRatePct } = setters;
 
   const [searchResults, setSearchResults] = React.useState<any[]>([]);
   const [isSearching, setIsSearching] = React.useState(false);
@@ -67,16 +67,17 @@ export function TradeInputsForm({ state, setters, current }: TradeInputsFormProp
 
       <div className="grid grid-cols-1 gap-5">
         <div>
-          <label className="block text-xs font-semibold text-secondary mb-1">Account / Capital</label>
+          <label className="block text-xs font-semibold text-secondary mb-1">Trade Capital</label>
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted">₹</span>
             <input 
               type="number" 
               className="form-input pl-8 w-full font-mono text-sm" 
-              value={capital}
-              onChange={(e) => setCapital(Number(e.target.value))}
+              value={tradeCapital === 0 ? "" : tradeCapital}
+              onChange={(e) => setTradeCapital(Number(e.target.value))}
             />
           </div>
+          <p className="text-[10px] text-muted mt-1">Capital allocated for this trade. Can differ from your total Trading Capital.</p>
         </div>
 
 
@@ -169,7 +170,7 @@ export function TradeInputsForm({ state, setters, current }: TradeInputsFormProp
                     return;
                   }
                   const newAmount = Number(e.target.value);
-                  const newPct = capital > 0 ? (newAmount / capital) * 100 : 0;
+                  const newPct = tradeCapital > 0 ? (newAmount / tradeCapital) * 100 : 0;
                   setDefaultTradeRiskPct(newPct);
                 }}
               />
@@ -185,7 +186,7 @@ export function TradeInputsForm({ state, setters, current }: TradeInputsFormProp
               <input 
                 type="number" 
                 className="form-input pl-7 w-full font-mono text-sm" 
-                value={entry}
+                value={entry === 0 ? "" : entry}
                 onChange={(e) => setEntry(Number(e.target.value))}
               />
             </div>
@@ -197,7 +198,7 @@ export function TradeInputsForm({ state, setters, current }: TradeInputsFormProp
               <input 
                 type="number" 
                 className="form-input pl-7 w-full font-mono text-sm" 
-                value={stop}
+                value={stop === 0 ? "" : stop}
                 onChange={(e) => setStop(Number(e.target.value))}
               />
             </div>
@@ -212,7 +213,7 @@ export function TradeInputsForm({ state, setters, current }: TradeInputsFormProp
               <input 
                 type="number" 
                 className="form-input pl-7 w-full font-mono text-sm" 
-                value={target}
+                value={target === 0 ? "" : target}
                 onChange={(e) => setTarget(Number(e.target.value))}
               />
             </div>
@@ -224,7 +225,7 @@ export function TradeInputsForm({ state, setters, current }: TradeInputsFormProp
                 type="number" 
                 step="0.05"
                 className="form-input w-full font-mono text-sm pr-6" 
-                value={slippagePct}
+                value={slippagePct === 0 ? "" : slippagePct}
                 onChange={(e) => setSlippagePct(Number(e.target.value))}
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted text-xs">%</span>
@@ -238,7 +239,7 @@ export function TradeInputsForm({ state, setters, current }: TradeInputsFormProp
             <input 
               type="number" 
               className="form-input w-full font-mono text-sm pr-6" 
-              value={winRatePct}
+              value={winRatePct === 0 ? "" : winRatePct}
               onChange={(e) => setWinRatePct(Number(e.target.value))}
             />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted text-xs">%</span>

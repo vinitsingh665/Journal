@@ -20,6 +20,7 @@ export interface PlannerTrade {
   stop: number;
   target: number;
   riskPct: number; // Individual trade risk %
+  tradeCapital?: number; // Snapshot of the trade capital used
   sector: string;
   status: "OPEN" | "PLANNED";
 }
@@ -27,6 +28,7 @@ export interface PlannerTrade {
 export function useRiskEngine(userId?: string) {
   // Global Settings
   const [capital, setCapital] = useState<number>(500000);
+  const [tradeCapital, setTradeCapital] = useState<number>(500000);
   const [maxPortfolioRiskPct, setMaxPortfolioRiskPct] = useState<number>(1.5);
   const [cashOnly, setCashOnly] = useState<boolean>(false);
   
@@ -98,8 +100,8 @@ export function useRiskEngine(userId?: string) {
   // Derived: Global Risk Wallet
   const maxRiskBudget = capital * (maxPortfolioRiskPct / 100);
 
-  // Derived: Current Trade
-  const tradeRiskAmount = capital * (defaultTradeRiskPct / 100);
+  // Derived: Current Trade (uses tradeCapital for per-trade sizing)
+  const tradeRiskAmount = tradeCapital * (defaultTradeRiskPct / 100);
   
   const currentRiskPerShare = direction === "LONG" 
     ? Math.max(0, entry - stop) 
@@ -110,14 +112,14 @@ export function useRiskEngine(userId?: string) {
     : 0;
 
   if (cashOnly && entry > 0) {
-    const maxSharesByCapital = Math.floor(capital / entry);
+    const maxSharesByCapital = Math.floor(tradeCapital / entry);
     if (currentPositionSize > maxSharesByCapital) {
       currentPositionSize = maxSharesByCapital;
     }
   }
 
   const currentCapitalDeployed = currentPositionSize * entry;
-  const currentCapitalUtilizationPct = capital > 0 ? (currentCapitalDeployed / capital) * 100 : 0;
+  const currentCapitalUtilizationPct = tradeCapital > 0 ? (currentCapitalDeployed / tradeCapital) * 100 : 0;
 
   const currentExecutionRisk = currentRiskPerShare + (entry * (slippagePct / 100));
   const currentMaxExecutionLoss = currentPositionSize * currentExecutionRisk;
@@ -137,7 +139,8 @@ export function useRiskEngine(userId?: string) {
   // Derived: Portfolio Planner Metrics
   const enrichedTrades = useMemo(() => {
     return trades.map(trade => {
-      const riskAmount = capital * (trade.riskPct / 100);
+      const tc = trade.tradeCapital || capital;
+      const riskAmount = tc * (trade.riskPct / 100);
       const riskPerShare = trade.direction === "LONG" ? trade.entry - trade.stop : trade.stop - trade.entry;
       const quantity = riskPerShare > 0 ? Math.floor(riskAmount / riskPerShare) : 0;
       const rewardPerShare = trade.direction === "LONG" ? trade.target - trade.entry : trade.entry - trade.target;
@@ -185,6 +188,7 @@ export function useRiskEngine(userId?: string) {
       stop,
       target,
       riskPct: defaultTradeRiskPct,
+      tradeCapital, // Save the snapshot
       sector,
       status: "PLANNED"
     };
@@ -215,6 +219,7 @@ export function useRiskEngine(userId?: string) {
     setExchange(trade.exchange);
     if (trade.sector) setSector(trade.sector);
     setDefaultTradeRiskPct(trade.riskPct);
+    if (trade.tradeCapital) setTradeCapital(trade.tradeCapital);
     setEntry(trade.entry);
     setStop(trade.stop);
     if (trade.target) setTarget(trade.target);
@@ -301,13 +306,13 @@ export function useRiskEngine(userId?: string) {
   return {
     state: {
       isCalculatorOpen,
-      capital, maxPortfolioRiskPct, defaultTradeRiskPct, cashOnly,
+      capital, tradeCapital, maxPortfolioRiskPct, defaultTradeRiskPct, cashOnly,
       symbol, exchange, sector,
       entry, stop, target, direction, slippagePct, winRatePct,
       trades, savedTemplates
     },
     setters: {
-      setCapital, setMaxPortfolioRiskPct, setDefaultTradeRiskPct, setCashOnly,
+      setCapital, setTradeCapital, setMaxPortfolioRiskPct, setDefaultTradeRiskPct, setCashOnly,
       setSymbol, setExchange, setSector,
       setEntry, setStop, setTarget, setDirection, setSlippagePct, setWinRatePct
     },

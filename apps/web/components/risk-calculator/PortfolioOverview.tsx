@@ -8,7 +8,6 @@ interface PortfolioOverviewProps {
 }
 
 export function PortfolioOverview({ state, portfolio, setters }: PortfolioOverviewProps) {
-  const [showSettingsModal, setShowSettingsModal] = React.useState(false);
   const { capital, maxPortfolioRiskPct } = state;
   const { 
     maxRiskBudget, 
@@ -31,33 +30,74 @@ export function PortfolioOverview({ state, portfolio, setters }: PortfolioOvervi
           PORTFOLIO RISK OVERVIEW
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-muted"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
         </h2>
-        <div className="flex gap-2">
-          <button 
-            onClick={() => setShowSettingsModal(true)}
-            className="btn btn-secondary btn-sm bg-transparent border-border-secondary"
-          >
-             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-             Risk Rules
-          </button>
-          <button 
-            onClick={() => setShowSettingsModal(true)}
-            className="btn btn-secondary btn-sm bg-transparent border-border-secondary"
-          >
-             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-             Advanced
-          </button>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 px-3 py-1.5 rounded-lg bg-surface border border-border-secondary">
+            <span className="text-sm font-bold tracking-wider text-secondary uppercase">CASH ONLY</span>
+            <style dangerouslySetInnerHTML={{ __html: `
+              .toggle-track { 
+                width: 36px; height: 20px; border-radius: 9999px; padding: 2px; 
+                cursor: pointer; border: none; position: relative;
+                display: inline-flex; align-items: center; flex-shrink: 0;
+                transition: background-color 0.3s ease;
+              }
+              .toggle-track.off { background-color: #3f3f46; }
+              .toggle-track.on { background-color: #8B5CF6; }
+              .toggle-knob {
+                width: 16px; height: 16px; border-radius: 9999px; 
+                background: #fff; display: block;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+              }
+              .toggle-track.off .toggle-knob { transform: translateX(0px); }
+              .toggle-track.on .toggle-knob { transform: translateX(16px); }
+            `}} />
+            <button 
+              onClick={() => {
+                if (setters?.setCashOnly) {
+                  setters.setCashOnly(!state.cashOnly);
+                }
+              }}
+              className={`toggle-track ${state.cashOnly ? "on" : "off"}`}
+              title="No Leverage - Caps position size to total available capital"
+            >
+              <span className="toggle-knob" />
+            </button>
+          </div>
         </div>
       </div>
 
       <div className="grid grid-cols-7 gap-4 mb-6">
         <div>
-          <div className="text-xs text-secondary font-semibold mb-1">Trading Capital</div>
-          <div className="text-lg font-bold font-mono">{formatINR(capital)}</div>
+          <div className="text-xs text-secondary font-semibold mb-1" title="Remaining capital after deducting all planned trades">Unallocated Capital</div>
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm">₹</span>
+            <input 
+              type="number"
+              value={Math.max(0, capital - portfolio.totalCapitalDeployed) === 0 ? "" : Math.max(0, capital - portfolio.totalCapitalDeployed)}
+              onChange={(e) => {
+                const newUnallocated = Number(e.target.value);
+                if (setters?.setCapital) setters.setCapital(newUnallocated + portfolio.totalCapitalDeployed);
+              }}
+              className="form-input pl-8 w-full font-mono text-sm font-bold"
+            />
+          </div>
+          <div className="text-[10px] text-muted mt-1">Total Account: {formatINR(capital)}</div>
         </div>
         <div>
           <div className="text-xs text-secondary font-semibold mb-1">Max Portfolio Risk</div>
-          <div className="text-lg font-bold font-mono text-primary">{maxPortfolioRiskPct.toFixed(2)}%</div>
-          <div className="text-xs text-muted">{formatINR(maxRiskBudget)}</div>
+          <div className="relative">
+            <input 
+              type="number"
+              step="0.1"
+              value={maxPortfolioRiskPct}
+              onChange={(e) => {
+                if (setters?.setMaxPortfolioRiskPct) setters.setMaxPortfolioRiskPct(Number(e.target.value));
+              }}
+              className="form-input pr-8 w-full font-mono text-sm font-bold text-primary"
+            />
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted text-sm">%</span>
+          </div>
+          <div className="text-[10px] text-muted mt-1">{formatINR(maxRiskBudget)}</div>
         </div>
         <div>
           <div className="text-xs text-secondary font-semibold mb-1">Current Portfolio Risk (Open)</div>
@@ -95,10 +135,14 @@ export function PortfolioOverview({ state, portfolio, setters }: PortfolioOvervi
       </div>
 
       <div className="mb-4">
-        <div className="flex justify-between text-xs text-muted mb-2 font-mono">
+        <div className="flex justify-between text-xs text-muted mb-2 font-mono relative">
           <span>0%</span>
-          <span style={{ position: "absolute", left: `${openWidth}%`, transform: "translateX(-50%)", color: "var(--color-positive)" }}>{openRiskPct.toFixed(2)}% (Open)</span>
-          <span style={{ position: "absolute", left: `${openWidth + plannedWidth}%`, transform: "translateX(-50%)", color: "#EAB308" }}>{totalPortfolioRiskPct.toFixed(2)}% (Total)</span>
+          {openRiskPct > 0 && (
+            <span style={{ position: "absolute", left: `${openWidth}%`, transform: "translateX(-50%)", color: "var(--color-positive)" }}>{openRiskPct.toFixed(2)}% (Open)</span>
+          )}
+          {plannedRiskPct > 0 && (
+            <span style={{ position: "absolute", left: `${openWidth + plannedWidth}%`, transform: "translateX(-50%)", color: "#EAB308" }}>{totalPortfolioRiskPct.toFixed(2)}% (Total)</span>
+          )}
           <span className="text-negative">{maxPortfolioRiskPct.toFixed(2)}% (Max)</span>
         </div>
         <div className="settings-progress-bar-bg relative" style={{ height: 8, background: "rgba(255, 255, 255, 0.05)" }}>
@@ -120,85 +164,6 @@ export function PortfolioOverview({ state, portfolio, setters }: PortfolioOvervi
         </div>
       </div>
 
-      {showSettingsModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-card border border-border-secondary rounded-3xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="p-6 border-b border-border-secondary bg-gradient-to-r from-primary/5 to-transparent">
-              <h2 className="text-xl font-bold text-text-primary">Advanced Risk Rules</h2>
-              <p className="text-secondary text-sm mt-1">Configure your global portfolio risk constraints.</p>
-            </div>
-            
-            <div className="p-6 space-y-6">
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-muted mb-2">Max Portfolio Risk (%)</label>
-                <div className="relative">
-                  <input 
-                    type="number" 
-                    step="0.1"
-                    min="0.1"
-                    max="100"
-                    value={maxPortfolioRiskPct}
-                    onChange={(e) => {
-                      if (setters?.setMaxPortfolioRiskPct) {
-                        setters.setMaxPortfolioRiskPct(Number(e.target.value));
-                      }
-                    }}
-                    className="form-input w-full rounded-xl px-4 py-3 pr-8 text-text-primary font-mono text-lg font-bold"
-                  />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted font-bold">%</span>
-                </div>
-                <p className="text-xs text-secondary mt-2">Maximum allowed open risk across all positions. The standard recommendation is 1.5% to 2.0%.</p>
-              </div>
-
-              <div className="pt-4 border-t border-border-secondary">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="text-sm font-semibold text-text-primary">Cash Only (No Leverage)</div>
-                    <div className="text-xs text-secondary mt-1 max-w-[280px]">Automatically cap position size so it never exceeds your total available capital.</div>
-                  </div>
-                  <style dangerouslySetInnerHTML={{ __html: `
-                    .toggle-track { 
-                      width: 52px; height: 28px; border-radius: 9999px; padding: 2px; 
-                      cursor: pointer; border: none; position: relative;
-                      display: inline-flex; align-items: center; flex-shrink: 0;
-                      transition: background-color 0.3s ease;
-                    }
-                    .toggle-track.off { background-color: #3f3f46; }
-                    .toggle-track.on { background-color: #8B5CF6; }
-                    .toggle-knob {
-                      width: 24px; height: 24px; border-radius: 9999px; 
-                      background: #fff; display: block;
-                      box-shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
-                      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                    }
-                    .toggle-track.off .toggle-knob { transform: translateX(0px); }
-                    .toggle-track.on .toggle-knob { transform: translateX(24px); }
-                  `}} />
-                  <button 
-                    onClick={() => {
-                      if (setters?.setCashOnly) {
-                        setters.setCashOnly(!state.cashOnly);
-                      }
-                    }}
-                    className={`toggle-track ${state.cashOnly ? "on" : "off"}`}
-                  >
-                    <span className="toggle-knob" />
-                  </button>
-                </div>
-              </div>
-            </div>
-            
-            <div className="p-6 pt-0 flex justify-end">
-              <button 
-                onClick={() => setShowSettingsModal(false)}
-                className="btn btn-primary px-6 py-2 rounded-xl"
-              >
-                Save Settings
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
