@@ -59,6 +59,10 @@ If the user wants to ADD MORE quantity to an existing open trade (e.g. "Buy 50 m
 Intent: "ADD_EXECUTION"
 Extract: symbol, side (BUY/SELL), price (null if market), quantity.
 
+If the user wants to DELETE an existing trade completely (e.g. "Delete my Reliance trade", "Remove my last TCS trade"):
+Intent: "DELETE_TRADE"
+Extract: symbol (must match one of their recent or open trades).
+
 If the user wants to calculate risk or position size for a trade:
 Intent: "CALCULATE_RISK"
 Extract: symbol, side (BUY/SELL), price (entry), stopLoss, target, riskPercent.
@@ -85,12 +89,12 @@ Extract: nothing required. But in the "message" field of the JSON, you MUST prov
 - Export Data: Use the export options on the dashboard.
 - Close/Exit a Trade: You can ask the AI to "close my [Symbol] trade", or do it manually by opening the trade details page, clicking 'Add Execution', and adding a reverse execution (e.g., SELL if it was a LONG trade) for the full quantity. Do NOT mention any 'Exit Trade' button, as it does not exist.
 - Edit a Trade: Click on a trade to open its details page, then click the Edit button.
-- Delete a Trade: Go to the Trades page. In the trade list, click the checkbox next to the trade you want to delete. A 'Delete' button will then appear on the right side. Click it to delete the trade.
+- Delete a Trade: You can ask the AI to "delete my [Symbol] trade", or do it manually by going to the Trades page, selecting the checkbox next to the trade, and clicking Delete.
 - If it's a feature not explicitly listed, use your best logical guess based on standard trade journal apps.
 
 Respond ONLY with valid JSON matching this schema:
 {
-  "intent": "ASK_CLARIFICATION" | "CREATE_FORM_FILL" | "EXIT_TRADE" | "UPDATE_TRADE" | "ADD_EXECUTION" | "CREATE_MISTAKE" | "CALCULATE_RISK" | "EXPORT_SCREENSHOT" | "EXPORT_PDF" | "GET_QUOTE" | "EDIT_TRADE" | "APP_NAVIGATION_GUIDE",
+  "intent": "ASK_CLARIFICATION" | "CREATE_FORM_FILL" | "EXIT_TRADE" | "UPDATE_TRADE" | "ADD_EXECUTION" | "CREATE_MISTAKE" | "CALCULATE_RISK" | "EXPORT_SCREENSHOT" | "EXPORT_PDF" | "GET_QUOTE" | "EDIT_TRADE" | "APP_NAVIGATION_GUIDE" | "DELETE_TRADE",
   "message": string | null,
   "data": {
     "symbol": string | null,
@@ -390,6 +394,28 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: true, message: `Successfully added ${addQty} shares to ${trade.symbol} at ₹${entryPrice}` });
       } else {
         return NextResponse.json({ error: `You don't have an open trade for ${parsed.data.symbol} to add to.` }, { status: 400 });
+      }
+    }
+
+    // Auto-Execution Logic for DELETE_TRADE
+    if (parsed.intent === "DELETE_TRADE" && parsed.data.symbol) {
+      const trade = openTrades.find((t) => t.symbol.toUpperCase() === parsed.data.symbol.toUpperCase()) || 
+                    recentTrades.find((t) => t.symbol.toUpperCase() === parsed.data.symbol.toUpperCase());
+      
+      if (trade) {
+        await prisma.$transaction(async (tx) => {
+          await tx.execution.updateMany({ where: { tradeId: trade.id }, data: { tradeId: null } });
+          await tx.tradeMistake.deleteMany({ where: { tradeId: trade.id } });
+          await tx.screenshot.deleteMany({ where: { tradeId: trade.id } });
+          await tx.trade.delete({ where: { id: trade.id } });
+        });
+        return NextResponse.json({ success: true, message: `Successfully deleted trade for ${trade.symbol}.` });
+      } else {
+        return NextResponse.json({ success: true, data: {
+          intent: "ASK_CLARIFICATION",
+          message: `I couldn't find a recent trade for ${parsed.data.symbol} to delete.`,
+          data: parsed.data
+        }});
       }
     }
 
