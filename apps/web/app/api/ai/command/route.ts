@@ -75,9 +75,19 @@ If the user just asks for the current price or quote of a stock/crypto:
 Intent: "GET_QUOTE"
 Extract: symbol, exchange.
 
+If the user asks a general question about how to use the app, where to find a setting, or how to navigate the website (e.g. "how do I change my capital?", "where is the risk calculator?"):
+Intent: "APP_NAVIGATION_GUIDE"
+Extract: nothing required. But in the "message" field of the JSON, you MUST provide a helpful natural language guide based on this Knowledge Base:
+- Default Trading Capital / Total Capital: Change it in Settings -> Trading tab -> Risk Management.
+- Profile (Name, Avatar, Bio): Change it in Settings -> General tab.
+- Risk Calculator: Accessible from the sidebar, helps size positions based on capital and risk.
+- Import Trades: Go to Dashboard -> Import to upload CSV files from brokers.
+- Export Data: Use the export options on the dashboard.
+- If it's a feature not explicitly listed, use your best logical guess based on standard trade journal apps.
+
 Respond ONLY with valid JSON matching this schema:
 {
-  "intent": "ASK_CLARIFICATION" | "CREATE_FORM_FILL" | "EXIT_TRADE" | "UPDATE_TRADE" | "ADD_EXECUTION" | "CREATE_MISTAKE" | "CALCULATE_RISK" | "EXPORT_SCREENSHOT" | "EXPORT_PDF" | "GET_QUOTE" | "EDIT_TRADE",
+  "intent": "ASK_CLARIFICATION" | "CREATE_FORM_FILL" | "EXIT_TRADE" | "UPDATE_TRADE" | "ADD_EXECUTION" | "CREATE_MISTAKE" | "CALCULATE_RISK" | "EXPORT_SCREENSHOT" | "EXPORT_PDF" | "GET_QUOTE" | "EDIT_TRADE" | "APP_NAVIGATION_GUIDE",
   "message": string | null,
   "data": {
     "symbol": string | null,
