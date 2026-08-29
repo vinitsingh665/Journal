@@ -187,6 +187,7 @@ model Trade {
   tradePlan      TradePlan? @relation(fields: [tradePlanId], references: [id])
 
   executions     Execution[]
+  events         TradeEvent[]
   mistakes       TradeMistake[]
   screenshots    Screenshot[]
 
@@ -198,6 +199,22 @@ model Trade {
   @@index([status])
   @@index([entryTime])
   @@index([strategy])
+}
+
+// ─── TRADE EVENTS ───────────────────────────────────
+
+model TradeEvent {
+  id          String   @id @default(cuid())
+  tradeId     String
+  trade       Trade    @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  type        String
+  description String?
+  oldValue    String?
+  newValue    String?
+  createdAt   DateTime @default(now())
+
+  @@index([tradeId])
+  @@index([createdAt])
 }
 
 // ─── PRE-TRADE PLANNING ────────────────────────────

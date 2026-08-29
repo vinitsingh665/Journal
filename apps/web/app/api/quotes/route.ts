@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { fetchStockQuote, fetchMultipleQuotes } from "@/lib/yahoo-finance";
+import { prisma } from "@repo/database";
 
 // GET /api/quotes?symbols=RELIANCE,TCS,INFY&exchange=NSE
 export async function GET(request: NextRequest) {
@@ -20,8 +21,11 @@ export async function GET(request: NextRequest) {
   const symbols = symbolsParam.split(",").map((s) => s.trim().toUpperCase());
 
   try {
+    const userSettings = await prisma.userSettings.findUnique({ where: { userId } });
+    const baseCurrency = userSettings?.currency || "INR";
+
     if (symbols.length === 1) {
-      const quote = await fetchStockQuote(symbols[0], exchange);
+      const quote = await fetchStockQuote(symbols[0], exchange, baseCurrency);
       if (!quote) {
         return NextResponse.json(
           { error: `Failed to fetch quote for ${symbols[0]}` },
@@ -33,7 +37,8 @@ export async function GET(request: NextRequest) {
 
     // Multiple symbols
     const quotes = await fetchMultipleQuotes(
-      symbols.map((s) => ({ symbol: s, exchange }))
+      symbols.map((s) => ({ symbol: s, exchange })),
+      baseCurrency
     );
 
     const result: Record<string, ReturnType<typeof Object>> = {};
@@ -60,12 +65,15 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    const userSettings = await prisma.userSettings.findUnique({ where: { userId } });
+    const baseCurrency = userSettings?.currency || "INR";
+
     const { symbols } = await request.json();
     if (!symbols || !Array.isArray(symbols)) {
       return NextResponse.json({ error: "symbols array required" }, { status: 400 });
     }
 
-    const quotes = await fetchMultipleQuotes(symbols);
+    const quotes = await fetchMultipleQuotes(symbols, baseCurrency);
     
     const result: Record<string, any> = {};
     for (const [key, quote] of quotes) {

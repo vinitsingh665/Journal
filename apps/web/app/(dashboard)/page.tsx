@@ -45,7 +45,8 @@ export default async function DashboardPage() {
   let liveQuotes = new Map<string, { regularMarketPrice: number; regularMarketChange: number; regularMarketChangePercent: number }>();
 
   try {
-    const quotes = await fetchMultipleQuotes(uniqueSymbols);
+    const baseCurrency = userSettings?.currency || "INR";
+    const quotes = await fetchMultipleQuotes(uniqueSymbols, baseCurrency);
     liveQuotes = quotes;
   } catch (e) {
     console.error("Failed to fetch live quotes for dashboard:", e);

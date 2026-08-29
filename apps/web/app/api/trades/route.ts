@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@repo/database";
 import { getCurrentUser } from "@/lib/auth";
 import { generateFingerprint } from "@repo/trading-engine";
+import { fetchStockQuote } from "@/lib/yahoo-finance";
+import { formatINR } from "@/lib/utils";
 
 // Create a manual trade
 export async function POST(request: NextRequest) {
@@ -11,8 +13,11 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    const userSettings = await prisma.userSettings.findUnique({ where: { userId } });
+    const baseCurrency = userSettings?.currency || "INR";
+
     const body = await request.json();
-    const {
+    let {
       symbol,
       exchange = "NSE",
       side,
@@ -45,9 +50,45 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (baseCurrency === "INR" && ["NASDAQ", "NYSE", "CRYPTO"].includes(exchange.toUpperCase())) {
+      const quote = await fetchStockQuote("USDINR=X", "FOREX");
+      if (!quote || !quote.regularMarketPrice) {
+        return NextResponse.json(
+          { error: "Failed to fetch live exchange rate for USD to INR conversion. Please try again." },
+          { status: 500 }
+        );
+      }
+      const rate = quote.regularMarketPrice;
+      price = price * rate;
+      if (exitPrice) exitPrice = exitPrice * rate;
+      if (stopLoss) stopLoss = stopLoss * rate;
+      if (target) target = target * rate;
+      
+      const conversionNote = `Auto-converted from USD to INR at exchange rate ₹${rate.toFixed(2)}`;
+      notes = notes ? `${notes}\n\n${conversionNote}` : conversionNote;
+    }
+
     const execTime = executionTime ? new Date(executionTime) : new Date();
     const direction = side === "BUY" ? "LONG" : "SHORT";
     const totalValue = quantity * price;
+
+    // Capital check
+    const totalCapital = userSettings?.defaultCapital || 500000;
+    const openTrades = await prisma.trade.findMany({
+      where: { userId, isArchived: false, status: { in: ["OPEN", "PARTIAL"] } },
+    });
+    const openInvestment = openTrades.reduce(
+      (sum, t) => sum + t.avgEntryPrice * t.totalBuyQty,
+      0
+    );
+    const availableCapital = totalCapital - openInvestment;
+
+    if (totalValue > availableCapital) {
+      return NextResponse.json(
+        { error: `Capital Exceeded: This trade requires ${formatINR(totalValue)} but your available capital is only ${formatINR(availableCapital)}.` },
+        { status: 400 }
+      );
+    }
 
     // Generate fingerprint for the execution
     const fingerprint = generateFingerprint({

@@ -287,7 +287,11 @@ export default function TradeForm({ userId, tradeId, initialData }: TradeFormPro
                           <div style={{ fontWeight: 600, fontSize: "var(--text-sm)" }}>{res.symbol} <span className="text-muted" style={{ fontSize: 10, fontWeight: 400 }}>{res.exchange}</span></div>
                           <div className="text-muted" style={{ fontSize: "var(--text-xs)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{res.name}</div>
                         </div>
-                        <div style={{ fontWeight: 600, color: "var(--color-primary)", marginLeft: 8 }}>{formatINR(res.price)}</div>
+                        <div style={{ fontWeight: 600, color: "var(--color-primary)", marginLeft: 8 }}>
+                          {["NASDAQ", "NYSE", "CRYPTO"].includes(form.exchange) || ["NASDAQ", "NYSE", "BINANCE", "COINBASE"].includes(res.exchange)
+                            ? new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(res.price)
+                            : formatINR(res.price)}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -446,9 +450,14 @@ export default function TradeForm({ userId, tradeId, initialData }: TradeFormPro
                   <div className="calc-result-item" style={{ background: parseFloat(form.exitPrice) >= parseFloat(form.price) ? "var(--color-positive-bg)" : "var(--color-negative-bg)" }}>
                     <span className="calc-result-label">Estimated P&L</span>
                     <span className="calc-result-value" style={{ color: parseFloat(form.exitPrice) >= parseFloat(form.price) ? "var(--color-positive)" : "var(--color-negative)" }}>
-                      {form.side === "BUY"
-                        ? formatINR((parseFloat(form.exitPrice) - parseFloat(form.price)) * (parseInt(form.quantity) || 0), { showSign: true })
-                        : formatINR((parseFloat(form.price) - parseFloat(form.exitPrice)) * (parseInt(form.quantity) || 0), { showSign: true })}
+                      {(() => {
+                        const pnl = form.side === "BUY"
+                          ? (parseFloat(form.exitPrice) - parseFloat(form.price)) * (parseInt(form.quantity) || 0)
+                          : (parseFloat(form.price) - parseFloat(form.exitPrice)) * (parseInt(form.quantity) || 0);
+                        return ["NASDAQ", "NYSE", "CRYPTO"].includes(form.exchange)
+                          ? new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", signDisplay: "always" }).format(pnl)
+                          : formatINR(pnl, { showSign: true });
+                      })()}
                     </span>
                   </div>
                 )}

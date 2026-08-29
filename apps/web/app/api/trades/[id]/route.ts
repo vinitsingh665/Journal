@@ -18,6 +18,7 @@ export async function GET(
     where: { id, userId },
     include: {
       executions: { orderBy: { executionTime: "asc" } },
+      events: { orderBy: { createdAt: "asc" } },
       mistakes: { include: { mistakeTag: true } },
       screenshots: true,
     },
@@ -227,6 +228,24 @@ export async function PUT(
       }
     }
 
+    const newEvents = [];
+    if (stopLoss !== undefined && existingTrade.stopLoss !== stopLoss) {
+      newEvents.push({
+        type: "STOP_LOSS_UPDATE",
+        description: stopLoss === null ? "Removed Stop Loss" : `Shifted Stop Loss from ${existingTrade.stopLoss || 'None'} to ${stopLoss}`,
+        oldValue: existingTrade.stopLoss?.toString() || null,
+        newValue: stopLoss?.toString() || null,
+      });
+    }
+    if (target !== undefined && existingTrade.target !== target) {
+      newEvents.push({
+        type: "TARGET_UPDATE",
+        description: target === null ? "Removed Target" : `Updated Target from ${existingTrade.target || 'None'} to ${target}`,
+        oldValue: existingTrade.target?.toString() || null,
+        newValue: target?.toString() || null,
+      });
+    }
+
     const updated = await prisma.trade.update({
       where: { id },
       data: {
@@ -262,6 +281,12 @@ export async function PUT(
         rMultiple,
       },
     });
+
+    if (newEvents.length > 0) {
+      await prisma.tradeEvent.createMany({
+        data: newEvents.map(e => ({ ...e, tradeId: id }))
+      });
+    }
 
     const serializedTrade = {
       ...updated,
@@ -324,10 +349,34 @@ export async function PATCH(
       }
     }
 
+    const newEvents = [];
+    if (updateData.stopLoss !== undefined && trade.stopLoss !== updateData.stopLoss) {
+      newEvents.push({
+        type: "STOP_LOSS_UPDATE",
+        description: updateData.stopLoss === null ? "Removed Stop Loss" : `Shifted Stop Loss from ${trade.stopLoss || 'None'} to ${updateData.stopLoss}`,
+        oldValue: trade.stopLoss?.toString() || null,
+        newValue: updateData.stopLoss?.toString() || null,
+      });
+    }
+    if (updateData.target !== undefined && trade.target !== updateData.target) {
+      newEvents.push({
+        type: "TARGET_UPDATE",
+        description: updateData.target === null ? "Removed Target" : `Updated Target from ${trade.target || 'None'} to ${updateData.target}`,
+        oldValue: trade.target?.toString() || null,
+        newValue: updateData.target?.toString() || null,
+      });
+    }
+
     const updated = await prisma.trade.update({
       where: { id },
       data: updateData,
     });
+
+    if (newEvents.length > 0) {
+      await prisma.tradeEvent.createMany({
+        data: newEvents.map(e => ({ ...e, tradeId: id }))
+      });
+    }
 
     return NextResponse.json(updated);
   } catch (error) {

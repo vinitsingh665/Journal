@@ -15,6 +15,15 @@ interface Execution {
   orderType: string | null;
 }
 
+interface TradeEvent {
+  id: string;
+  type: string;
+  description: string | null;
+  oldValue: string | null;
+  newValue: string | null;
+  createdAt: string;
+}
+
 interface TradeData {
   id: string;
   symbol: string;
@@ -49,6 +58,7 @@ interface TradeData {
   notes: string | null;
   postTradeReview: string | null;
   executions: Execution[];
+  events?: TradeEvent[];
   mistakes: { name: string; color: string | null }[];
   prevId: string | null;
   nextId: string | null;
@@ -617,7 +627,7 @@ export default function JournalDetail({ trade, isShared, sharedUserId }: { trade
           </div>
 
           {/* Trade Journey */}
-          {trade.executions.length > 0 && (
+          {(trade.executions.length > 0 || (trade.events && trade.events.length > 0)) && (
             <div className="card">
               <div className="card-header"><span className="card-title">Trade Journey</span></div>
               <div className="card-body">
@@ -625,58 +635,104 @@ export default function JournalDetail({ trade, isShared, sharedUserId }: { trade
                   <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)" }}>
                     {(() => {
                       let runningQty = 0;
-                      return trade.executions.map((exec, index) => {
-                        const isEntry = exec.side === entrySide;
-                        if (isEntry) {
-                          runningQty += exec.quantity;
+                      // Merge executions and events
+                      const journeyItems = [
+                        ...trade.executions.map(e => ({ type: 'EXECUTION', time: new Date(e.executionTime).getTime(), data: e })),
+                        ...(trade.events || []).map(e => ({ type: 'EVENT', time: new Date(e.createdAt).getTime(), data: e }))
+                      ].sort((a, b) => a.time - b.time);
+
+                      return journeyItems.map((item, index) => {
+                        let color = "#9ca3af";
+                        let title = "";
+                        let timeStr = "";
+
+                        if (item.type === 'EXECUTION') {
+                          const exec = item.data as Execution;
+                          const isEntry = exec.side === entrySide;
+                          if (isEntry) {
+                            runningQty += exec.quantity;
+                          } else {
+                            runningQty -= exec.quantity;
+                          }
+                          const isCompleteExit = !isEntry && runningQty <= 0;
+                          color = isCompleteExit ? "#9ca3af" : (exec.side === "BUY" ? "var(--color-positive)" : "var(--color-negative)");
+                          timeStr = `${formatDate(exec.executionTime)}, ${formatTime(exec.executionTime)}`;
+                          title = `${exec.side === entrySide ? "Bought" : "Sold"} ${exec.quantity} @ ${formatINR(exec.price)}`;
                         } else {
-                          runningQty -= exec.quantity;
+                          const ev = item.data as TradeEvent;
+                          color = "var(--accent-primary)";
+                          timeStr = `${formatDate(ev.createdAt)}, ${formatTime(ev.createdAt)}`;
+                          title = ev.description || "Updated Trade";
                         }
-                        const isCompleteExit = !isEntry && runningQty <= 0;
-                        const color = isCompleteExit ? "#9ca3af" : (exec.side === "BUY" ? "var(--color-positive)" : "var(--color-negative)");
                       
-                      return (
-                        <div key={exec.id} style={{ position: "relative" }}>
-                          {/* Connecting Line */}
-                          {index < trade.executions.length - 1 && (() => {
-                            const nextExec = trade.executions[index + 1];
+                        // Calculate next item color for connecting line
+                        let nextColor = "#9ca3af";
+                        if (index < journeyItems.length - 1) {
+                          const nextItem = journeyItems[index + 1];
+                          if (nextItem.type === 'EXECUTION') {
+                            const nextExec = nextItem.data as Execution;
                             const nextIsEntry = nextExec.side === entrySide;
                             const nextRunningQty = runningQty + (nextIsEntry ? nextExec.quantity : -nextExec.quantity);
                             const nextIsCompleteExit = !nextIsEntry && nextRunningQty <= 0;
-                            const nextColor = nextIsCompleteExit ? "#9ca3af" : (nextExec.side === "BUY" ? "var(--color-positive)" : "var(--color-negative)");
+                            nextColor = nextIsCompleteExit ? "#9ca3af" : (nextExec.side === "BUY" ? "var(--color-positive)" : "var(--color-negative)");
+                          } else {
+                            nextColor = "var(--accent-primary)";
+                          }
+                        }
 
-                            return (
-                              <div style={{
-                                position: "absolute",
-                                left: -20, // Center at -19 (width 2)
-                                top: 10, // Center of the dot (top 5 + height 5)
-                                bottom: "calc(-1 * var(--space-4) - 10px)",
-                                width: 2,
-                                background: nextColor,
-                                opacity: 0.5,
-                                zIndex: 0,
-                              }} />
-                            );
-                          })()}
+                      return (
+                        <div key={`${item.type}-${item.data.id}`} style={{ position: "relative" }}>
+                          {/* Connecting Line */}
+                          {index < journeyItems.length - 1 && (
+                            <div style={{
+                              position: "absolute",
+                              left: -20, // Center at -19 (width 2)
+                              top: 10, // Center of the dot (top 5 + height 5)
+                              bottom: "calc(-1 * var(--space-4) - 10px)",
+                              width: 2,
+                              background: nextColor,
+                              opacity: 0.5,
+                              zIndex: 0,
+                            }} />
+                          )}
                           
-                          {/* Dot */}
-                          <div style={{
-                            position: "absolute",
-                            left: -24,
-                            top: 5,
-                            width: 10,
-                            height: 10,
-                            borderRadius: "50%",
-                            background: color,
-                            zIndex: 1,
-                          }} />
+                          {/* Dot / Icon */}
+                          {item.type === 'EXECUTION' ? (
+                            <div style={{
+                              position: "absolute",
+                              left: -24,
+                              top: 5,
+                              width: 10,
+                              height: 10,
+                              borderRadius: "50%",
+                              background: color,
+                              zIndex: 1,
+                            }} />
+                          ) : (
+                            <div style={{
+                              position: "absolute",
+                              left: -26,
+                              top: 3,
+                              width: 14,
+                              height: 14,
+                              borderRadius: "50%",
+                              background: "var(--bg-primary)",
+                              border: `2px solid ${color}`,
+                              zIndex: 1,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center"
+                            }}>
+                              <div style={{ width: 4, height: 4, borderRadius: "50%", background: color }} />
+                            </div>
+                          )}
                           
                           <div>
                             <div style={{ fontSize: "var(--text-xs)", fontWeight: 600, color: color }}>
-                              {formatDate(exec.executionTime)}, {formatTime(exec.executionTime)}
+                              {timeStr}
                             </div>
                             <div style={{ fontSize: "var(--text-sm)", marginTop: 2 }}>
-                              {exec.side === entrySide ? "Bought" : "Sold"} {exec.quantity} @ {formatINR(exec.price)}
+                              {title}
                             </div>
                           </div>
                         </div>

@@ -22,12 +22,12 @@ export interface StockQuote {
  * Convert a raw symbol like "RELIANCE" to Yahoo Finance format "RELIANCE.NS"
  */
 export function toYahooSymbol(symbol: string, exchange: string = "NSE"): string {
-  // Already has suffix
-  if (symbol.includes(".")) return symbol;
+  // Already has suffix or is a FOREX symbol (e.g. USDINR=X)
+  if (symbol.includes(".") || symbol.includes("=")) return symbol;
   
   const ex = exchange.toUpperCase();
   
-  if (ex === "NASDAQ" || ex === "NYSE") return symbol;
+  if (ex === "NASDAQ" || ex === "NYSE" || ex === "FOREX") return symbol;
   
   if (ex === "CRYPTO") {
     let base = symbol;
@@ -48,7 +48,8 @@ export function toYahooSymbol(symbol: string, exchange: string = "NSE"): string 
  */
 export async function fetchStockQuote(
   symbol: string,
-  exchange: string = "NSE"
+  exchange: string = "NSE",
+  targetCurrency?: string
 ): Promise<StockQuote | null> {
   try {
     const yahooSymbol = toYahooSymbol(symbol, exchange);
@@ -68,7 +69,7 @@ export async function fetchStockQuote(
     const meta = data?.chart?.result?.[0]?.meta;
     if (!meta) return null;
 
-    return {
+    let quote = {
       symbol,
       regularMarketPrice: meta.regularMarketPrice ?? 0,
       regularMarketChange:
@@ -88,6 +89,31 @@ export async function fetchStockQuote(
       exchangeName: meta.exchangeName ?? exchange,
       lastUpdated: new Date().toISOString(),
     };
+
+    if (targetCurrency && quote.currency && quote.currency !== targetCurrency) {
+      try {
+        const rateSymbol = `${quote.currency}${targetCurrency}=X`;
+        const rateUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${rateSymbol}?interval=1d&range=1d`;
+        const rateRes = await fetch(rateUrl, { next: { revalidate: 3600 } });
+        if (rateRes.ok) {
+          const rateData = await rateRes.json();
+          const rate = rateData?.chart?.result?.[0]?.meta?.regularMarketPrice;
+          if (rate) {
+            quote.regularMarketPrice *= rate;
+            quote.regularMarketChange *= rate;
+            quote.regularMarketPreviousClose *= rate;
+            quote.regularMarketOpen *= rate;
+            quote.regularMarketDayHigh *= rate;
+            quote.regularMarketDayLow *= rate;
+            quote.currency = targetCurrency;
+          }
+        }
+      } catch (e) {
+        console.error("Failed to fetch exchange rate for quote:", e);
+      }
+    }
+
+    return quote;
   } catch (error) {
     console.error(`Failed to fetch quote for ${symbol}:`, error);
     return null;
@@ -98,7 +124,8 @@ export async function fetchStockQuote(
  * Fetch quotes for multiple symbols in batch
  */
 export async function fetchMultipleQuotes(
-  symbols: Array<{ symbol: string; exchange: string }>
+  symbols: Array<{ symbol: string; exchange: string }>,
+  targetCurrency?: string
 ): Promise<Map<string, StockQuote>> {
   const results = new Map<string, StockQuote>();
 
@@ -110,7 +137,7 @@ export async function fetchMultipleQuotes(
 
   for (const chunk of chunks) {
     const promises = chunk.map(async ({ symbol, exchange }) => {
-      const quote = await fetchStockQuote(symbol, exchange);
+      const quote = await fetchStockQuote(symbol, exchange, targetCurrency);
       if (quote) {
         results.set(`${symbol}:${exchange}`, quote);
       }

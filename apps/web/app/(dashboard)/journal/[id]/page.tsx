@@ -18,6 +18,7 @@ export default async function JournalDetailPage({
     where: { id, userId },
     include: {
       executions: { orderBy: { executionTime: "asc" } },
+      events: { orderBy: { createdAt: "asc" } },
       mistakes: { include: { mistakeTag: true } },
       screenshots: { orderBy: { createdAt: "desc" } },
     },
@@ -114,6 +115,14 @@ export default async function JournalDetailPage({
       executionTime: e.executionTime.toISOString(),
       totalCharges: e.totalCharges,
       orderType: e.orderType,
+    })),
+    events: trade.events.map((e) => ({
+      id: e.id,
+      type: e.type,
+      description: e.description,
+      oldValue: e.oldValue,
+      newValue: e.newValue,
+      createdAt: e.createdAt.toISOString(),
     })),
     mistakes: trade.mistakes.map((m) => ({
       name: m.mistakeTag.name,
