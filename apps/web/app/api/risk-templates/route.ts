@@ -29,7 +29,7 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { name, capital, maxPortfolioRiskPct, defaultTradeRiskPct, slippagePct, winRatePct } = body;
+    const { name, capital, maxPortfolioRiskPct, defaultTradeRiskPct, slippagePct, winRatePct, plannedTrades } = body;
 
     const template = await prisma.riskTemplate.create({
       data: {
@@ -40,6 +40,7 @@ export async function POST(req: Request) {
         defaultTradeRiskPct: Number(defaultTradeRiskPct),
         slippagePct: Number(slippagePct),
         winRatePct: Number(winRatePct),
+        plannedTrades: plannedTrades ? plannedTrades : null,
       },
     });
 

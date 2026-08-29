@@ -8,6 +8,7 @@ export interface RiskTemplate {
   defaultTradeRiskPct: number;
   slippagePct: number;
   winRatePct: number;
+  plannedTrades?: any[];
 }
 
 export interface PlannerTrade {
@@ -229,7 +230,11 @@ export function useRiskEngine(userId?: string) {
       maxPortfolioRiskPct,
       defaultTradeRiskPct,
       slippagePct,
-      winRatePct
+      winRatePct,
+      plannedTrades: {
+        trades,
+        currentInputs: { symbol, exchange, sector, entry, stop, target, direction }
+      }
     };
 
     try {
@@ -256,6 +261,28 @@ export function useRiskEngine(userId?: string) {
     setDefaultTradeRiskPct(t.defaultTradeRiskPct);
     setSlippagePct(t.slippagePct);
     setWinRatePct(t.winRatePct);
+    // Restore planned trades and current inputs
+    if (t.plannedTrades) {
+      const data = t.plannedTrades as any;
+      // Support both new format (object with trades + currentInputs) and old format (plain array)
+      if (Array.isArray(data)) {
+        setTrades(data);
+      } else if (data.trades && Array.isArray(data.trades)) {
+        setTrades(data.trades);
+        if (data.currentInputs) {
+          const ci = data.currentInputs;
+          if (ci.symbol) setSymbol(ci.symbol);
+          if (ci.exchange) setExchange(ci.exchange);
+          if (ci.sector) setSector(ci.sector);
+          if (ci.entry !== undefined) setEntry(ci.entry);
+          if (ci.stop !== undefined) setStop(ci.stop);
+          if (ci.target !== undefined) setTarget(ci.target);
+          if (ci.direction) setDirection(ci.direction);
+        }
+      }
+    } else {
+      setTrades([]);
+    }
     setIsCalculatorOpen(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
