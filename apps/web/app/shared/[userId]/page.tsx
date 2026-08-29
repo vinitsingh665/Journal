@@ -17,6 +17,12 @@ import { Suspense } from "react";
 import DashboardLoading from "../../(dashboard)/loading";
 
 async function SharedDashboardContent({ userId }: { userId: string }) {
+  // Fetch user settings for capital
+  const userSettings = await prisma.userSettings.findUnique({
+    where: { userId },
+  });
+  const totalCapital = userSettings?.defaultCapital || 500000;
+
   // Fetch all trades (excluding archived ones)
   const trades = await prisma.trade.findMany({
     where: { userId, isArchived: false },
@@ -204,6 +210,8 @@ async function SharedDashboardContent({ userId }: { userId: string }) {
       <KpiCards
         totalPnl={metrics.totalPnl}
         todayPnl={metrics.todayPnl}
+        totalCapital={totalCapital}
+        availableCapital={totalCapital - openInvestment}
         totalInvestment={openInvestment}
         totalRisk={totalRisk}
         winRate={metrics.winRate}
