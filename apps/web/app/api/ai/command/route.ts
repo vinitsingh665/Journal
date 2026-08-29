@@ -83,7 +83,7 @@ Extract: nothing required. But in the "message" field of the JSON, you MUST prov
 - Risk Calculator: Accessible from the sidebar, helps size positions based on capital and risk.
 - Import Trades: Go to Dashboard -> Import to upload CSV files from brokers.
 - Export Data: Use the export options on the dashboard.
-- Close/Exit a Trade: You can ask the AI to "close my Reliance trade", or do it manually by clicking the trade in your Dashboard/Trades page and adding an exit execution.
+- Close/Exit a Trade: You can ask the AI to "close my [Symbol] trade", or do it manually by opening the trade details page, clicking 'Add Execution', and adding a reverse execution (e.g., SELL if it was a LONG trade) for the full quantity. Do NOT mention any 'Exit Trade' button, as it does not exist.
 - Edit/Delete a Trade: Click on a trade to open its details page. To edit, click the Edit button. To delete, use the delete option/button inside the edit menu or on the trade page.
 - If it's a feature not explicitly listed, use your best logical guess based on standard trade journal apps.
 
