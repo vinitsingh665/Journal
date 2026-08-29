@@ -20,6 +20,11 @@ async function JournalContent() {
     orderBy: { entryTime: "desc" },
   });
 
+  const userSettings = await prisma.userSettings.findUnique({
+    where: { userId },
+  });
+  const baseCurrency = userSettings?.currency || "INR";
+
   // Fetch live prices for open positions
   const openTrades = trades.filter(
     (t) => t.status === "OPEN" || t.status === "PARTIAL"
@@ -39,7 +44,7 @@ async function JournalContent() {
 
   try {
     if (uniqueSymbols.length > 0) {
-      const quotes = await fetchMultipleQuotes(uniqueSymbols);
+      const quotes = await fetchMultipleQuotes(uniqueSymbols, baseCurrency);
       liveQuotes = quotes;
     }
   } catch (e) {
