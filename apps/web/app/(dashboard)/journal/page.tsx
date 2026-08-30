@@ -107,9 +107,13 @@ async function JournalContent() {
       color: m.mistakeTag.color,
     })),
     executionCount: t.executions.length,
-  };
+    };
   });
 
+  return <JournalList trades={serialized} />;
+}
+
+export default function JournalPage() {
   return (
     <>
       <div className="page-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
@@ -125,15 +129,9 @@ async function JournalContent() {
           </Link>
         </div>
       </div>
-      <JournalList trades={serialized} />
+      <Suspense fallback={<DashboardLoading />}>
+        <JournalContent />
+      </Suspense>
     </>
-  );
-}
-
-export default function JournalPage() {
-  return (
-    <Suspense fallback={<DashboardLoading />}>
-      <JournalContent />
-    </Suspense>
   );
 }

@@ -4,7 +4,10 @@ import { redirect } from "next/navigation";
 import { fetchMultipleQuotes, calculateUnrealizedPnl } from "@/lib/yahoo-finance";
 import CalendarView from "@/components/calendar/CalendarView";
 
-export default async function CalendarPage() {
+import { Suspense } from "react";
+import DashboardLoading from "../loading";
+
+async function CalendarContent() {
   const userId = await getCurrentUser();
   if (!userId) {
     redirect("/login");
@@ -72,4 +75,20 @@ export default async function CalendarPage() {
   });
 
   return <CalendarView initialTrades={serialized as any} />;
+}
+
+export default function CalendarPage() {
+  return (
+    <>
+      <div className="page-header" style={{ marginBottom: "var(--space-6)" }}>
+        <div>
+          <h1 className="page-title">Calendar</h1>
+          <p className="page-description text-muted">Review your daily performance and trading activity.</p>
+        </div>
+      </div>
+      <Suspense fallback={<DashboardLoading />}>
+        <CalendarContent />
+      </Suspense>
+    </>
+  );
 }

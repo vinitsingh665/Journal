@@ -76,6 +76,10 @@ async function AnalyticsContent() {
     };
   });
 
+  return <AnalyticsDashboard initialTrades={serializedTrades as any} />;
+}
+
+export default function AnalyticsPage() {
   return (
     <>
       <div className="page-header" style={{ marginBottom: "var(--space-6)" }}>
@@ -84,15 +88,9 @@ async function AnalyticsContent() {
           <p className="page-description text-muted">Deep dive into your trading performance.</p>
         </div>
       </div>
-      <AnalyticsDashboard initialTrades={serializedTrades as any} />
+      <Suspense fallback={<DashboardLoading />}>
+        <AnalyticsContent />
+      </Suspense>
     </>
-  );
-}
-
-export default function AnalyticsPage() {
-  return (
-    <Suspense fallback={<DashboardLoading />}>
-      <AnalyticsContent />
-    </Suspense>
   );
 }

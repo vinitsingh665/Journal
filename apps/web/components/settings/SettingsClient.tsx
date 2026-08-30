@@ -1003,7 +1003,7 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
               borderRadius: 8,
               marginBottom: "var(--space-10)"
             }}>
-              <span style={{ color: "var(--accent-primary)", fontWeight: 700, fontFamily: "monospace", fontSize: "14px" }}>v1.3.0</span>
+              <span style={{ color: "var(--accent-primary)", fontWeight: 700, fontFamily: "monospace", fontSize: "14px" }}>v1.4.0</span>
             </div>
 
             {/* Action Buttons */}

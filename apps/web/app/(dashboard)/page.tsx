@@ -15,7 +15,10 @@ import EquityCurve from "@/components/dashboard/EquityCurve";
 import PnlDistribution from "@/components/dashboard/PnlDistribution";
 import RecentTrades from "@/components/dashboard/RecentTrades";
 
-export default async function DashboardPage() {
+import { Suspense } from "react";
+import DashboardLoading from "./loading";
+
+async function DashboardContent() {
   const userId = await getCurrentUser();
   if (!userId) redirect("/login");
 
@@ -273,6 +276,22 @@ export default async function DashboardPage() {
           <RecentTrades trades={recentTrades} />
         </div>
       </div>
+    </>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <>
+      <div className="page-header" style={{ marginBottom: "var(--space-6)" }}>
+        <div>
+          <h1 className="page-title">Dashboard</h1>
+          <p className="page-description text-muted">Welcome back. Here's your performance overview.</p>
+        </div>
+      </div>
+      <Suspense fallback={<DashboardLoading />}>
+        <DashboardContent />
+      </Suspense>
     </>
   );
 }
