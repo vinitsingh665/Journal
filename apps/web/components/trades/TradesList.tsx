@@ -786,7 +786,10 @@ export default function TradesList({ trades }: { trades: Trade[] }) {
         <AddExecutionModal
           tradeId={selectedTrade.id}
           symbol={selectedTrade.symbol}
+          exchange={selectedTrade.exchange}
           direction={selectedTrade.direction}
+          currentPrice={chartData?.currentPrice || selectedTrade.avgEntryPrice}
+          openQty={selectedTrade.totalBuyQty - selectedTrade.totalSellQty}
           onClose={() => setShowAddExecution(false)}
         />
       )}

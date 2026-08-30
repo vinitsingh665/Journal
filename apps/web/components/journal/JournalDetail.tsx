@@ -530,9 +530,11 @@ export default function JournalDetail({ trade, isShared, sharedUserId }: { trade
               <span className="card-title">Trade Summary</span>
               <span className={cn(
                 "badge",
-                trade.status === "CLOSED" ? "badge-closed" : trade.status === "OPEN" ? "badge-open" : "badge-partial"
-              )}>
-                {trade.status === "CLOSED" ? "Closed" : trade.status === "OPEN" ? "Open" : "Partial"}
+                trade.status === "CLOSED" ? "badge-closed" :
+                trade.status === "OPEN" ? "badge-open" :
+                trade.status === "DELETED" ? "badge-closed" : "badge-partial"
+              )} style={trade.status === "DELETED" ? { background: "rgba(239, 68, 68, 0.15)", color: "#ef4444" } : undefined}>
+                {trade.status === "CLOSED" ? "Closed" : trade.status === "OPEN" ? "Open" : trade.status === "DELETED" ? "Deleted" : "Partial"}
               </span>
             </div>
             <div className="card-body" style={{ padding: 0 }}>
@@ -683,14 +685,14 @@ export default function JournalDetail({ trade, isShared, sharedUserId }: { trade
                       return (
                         <div key={`${item.type}-${item.data.id}`} style={{ position: "relative" }}>
                           {/* Connecting Line */}
-                          {index < journeyItems.length - 1 && (
+                          {(index < journeyItems.length - 1 || trade.status === "DELETED") && (
                             <div style={{
                               position: "absolute",
                               left: -20, // Center at -19 (width 2)
                               top: 10, // Center of the dot (top 5 + height 5)
                               bottom: "calc(-1 * var(--space-4) - 10px)",
                               width: 2,
-                              background: nextColor,
+                              background: index < journeyItems.length - 1 ? nextColor : "#ef4444",
                               opacity: 0.5,
                               zIndex: 0,
                             }} />
@@ -738,6 +740,32 @@ export default function JournalDetail({ trade, isShared, sharedUserId }: { trade
                         </div>
                       );
                     })})()}
+                    {/* Deleted marker */}
+                    {trade.status === "DELETED" && (
+                      <div style={{ position: "relative" }}>
+                        {/* Red dot */}
+                        <div style={{
+                          position: "absolute",
+                          left: -24,
+                          top: 5,
+                          width: 10,
+                          height: 10,
+                          borderRadius: "50%",
+                          background: "#ef4444",
+                          zIndex: 1,
+                        }} />
+                        <div>
+                          <div style={{ fontSize: "var(--text-xs)", fontWeight: 600, color: "#ef4444" }}>
+                            {trade.exitTime
+                              ? `${formatDate(trade.exitTime)}, ${formatTime(trade.exitTime)}`
+                              : "Date and time not recorded"}
+                          </div>
+                          <div style={{ fontSize: "var(--text-sm)", marginTop: 2 }}>
+                            Delete {trade.totalBuyQty - trade.totalSellQty} @ {trade.avgExitPrice ? formatINR(trade.avgExitPrice) : "—"}
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

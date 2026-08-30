@@ -5,6 +5,11 @@ import { fetchMultipleQuotes, calculateUnrealizedPnl } from "@/lib/yahoo-finance
 import JournalList from "@/components/journal/JournalList";
 
 async function SharedJournalContent({ userId }: { userId: string }) {
+  const userSettings = await prisma.userSettings.findUnique({
+    where: { userId },
+  });
+  const baseCurrency = userSettings?.currency || "INR";
+
   const trades = await prisma.trade.findMany({
     where: { userId },
     include: {
@@ -30,7 +35,7 @@ async function SharedJournalContent({ userId }: { userId: string }) {
 
   try {
     if (uniqueSymbols.length > 0) {
-      const quotes = await fetchMultipleQuotes(uniqueSymbols);
+      const quotes = await fetchMultipleQuotes(uniqueSymbols, baseCurrency);
       liveQuotes = quotes;
     }
   } catch (e) {

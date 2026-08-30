@@ -6,6 +6,11 @@ import { Suspense } from "react";
 import DashboardLoading from "../../../(dashboard)/loading";
 
 async function SharedCalendarContent({ userId }: { userId: string }) {
+  const userSettings = await prisma.userSettings.findUnique({
+    where: { userId },
+  });
+  const baseCurrency = userSettings?.currency || "INR";
+
   // Fetch ALL trades to group by Entry Date
   const trades = await prisma.trade.findMany({
     where: { userId },
@@ -39,7 +44,7 @@ async function SharedCalendarContent({ userId }: { userId: string }) {
   let liveQuotes = new Map<string, { regularMarketPrice: number }>();
   try {
     if (uniqueSymbols.length > 0) {
-      liveQuotes = await fetchMultipleQuotes(uniqueSymbols);
+      liveQuotes = await fetchMultipleQuotes(uniqueSymbols, baseCurrency);
     }
   } catch (e) {
     console.error("Failed to fetch live quotes for calendar:", e);

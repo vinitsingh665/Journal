@@ -22,6 +22,7 @@ async function SharedDashboardContent({ userId }: { userId: string }) {
     where: { userId },
   });
   const totalCapital = userSettings?.defaultCapital || 500000;
+  const baseCurrency = userSettings?.currency || "INR";
 
   // Fetch all trades (excluding archived ones)
   const trades = await prisma.trade.findMany({
@@ -45,7 +46,7 @@ async function SharedDashboardContent({ userId }: { userId: string }) {
   let liveQuotes = new Map<string, { regularMarketPrice: number; regularMarketChange: number; regularMarketChangePercent: number }>();
 
   try {
-    const quotes = await fetchMultipleQuotes(uniqueSymbols);
+    const quotes = await fetchMultipleQuotes(uniqueSymbols, baseCurrency);
     liveQuotes = quotes;
   } catch (e) {
     console.error("Failed to fetch live quotes for dashboard:", e);

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@repo/database";
 import { getCurrentUser } from "@/lib/auth";
+import { fetchStockQuote } from "@/lib/yahoo-finance";
 
 // GET /api/trades/[id] — Get single trade detail
 export async function GET(
@@ -60,10 +61,24 @@ export async function DELETE(
     // Delete in transaction: unlink executions, delete mistakes, delete trade
     await prisma.$transaction(async (tx) => {
       if (!hardDelete) {
-        // Soft delete: just mark it as archived
+        // Soft delete: mark as archived and deleted, record deletion time and price
+        const deletionTime = new Date();
+        let deletionPrice: number | null = null;
+        try {
+          const quote = await fetchStockQuote(trade.symbol, trade.exchange);
+          if (quote) deletionPrice = quote.regularMarketPrice;
+        } catch {
+          // silently fail — price is optional
+        }
+
         await tx.trade.update({
           where: { id },
-          data: { isArchived: true },
+          data: {
+            isArchived: true,
+            status: "DELETED",
+            exitTime: deletionTime,
+            avgExitPrice: deletionPrice,
+          },
         });
       } else {
         // Hard delete

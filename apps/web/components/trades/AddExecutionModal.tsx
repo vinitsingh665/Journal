@@ -7,11 +7,14 @@ import { EXCHANGES } from "@/lib/constants";
 interface AddExecutionModalProps {
   tradeId: string;
   symbol: string;
+  exchange: string;
   direction: string;
+  currentPrice?: number | null;
+  openQty: number;
   onClose: () => void;
 }
 
-export default function AddExecutionModal({ tradeId, symbol, direction, onClose }: AddExecutionModalProps) {
+export default function AddExecutionModal({ tradeId, symbol, exchange, direction, currentPrice, openQty, onClose }: AddExecutionModalProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -19,9 +22,13 @@ export default function AddExecutionModal({ tradeId, symbol, direction, onClose 
   const [form, setForm] = useState({
     side: direction === "LONG" ? "SELL" : "BUY", // Default to exit
     quantity: "",
-    price: "",
+    price: currentPrice ? Number(currentPrice.toFixed(2)).toString() : "",
     executionTime: new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16),
   });
+
+  const isCrypto = exchange === "CRYPTO";
+  const isExit = form.side === (direction === "LONG" ? "SELL" : "BUY");
+  const maxQty = isExit ? openQty : undefined;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,12 +36,18 @@ export default function AddExecutionModal({ tradeId, symbol, direction, onClose 
     setError("");
 
     try {
+      const quantity = isCrypto ? parseFloat(form.quantity) : parseInt(form.quantity, 10);
+      
+      if (isExit && quantity > openQty) {
+        throw new Error(`Cannot exit more than ${openQty} units`);
+      }
+
       const res = await fetch(`/api/trades/${tradeId}/executions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           side: form.side,
-          quantity: parseInt(form.quantity),
+          quantity,
           price: parseFloat(form.price),
           executionTime: form.executionTime,
         }),
@@ -98,8 +111,15 @@ export default function AddExecutionModal({ tradeId, symbol, direction, onClose 
                   placeholder="100"
                   value={form.quantity}
                   onChange={(e) => setForm({ ...form, quantity: e.target.value })}
+                  onKeyDown={(e) => {
+                    if (!isCrypto && e.key === '.') {
+                      e.preventDefault();
+                    }
+                  }}
                   required
-                  min="1"
+                  min={isCrypto ? "0" : "1"}
+                  max={maxQty}
+                  step={isCrypto ? "any" : "1"}
                 />
               </div>
               <div className="form-group">

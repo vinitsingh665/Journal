@@ -43,6 +43,7 @@ export default function JournalList({ trades }: { trades: JournalTrade[] }) {
     return trades.filter((t) => {
       if (statusFilter === "OPEN" && t.status !== "OPEN" && t.status !== "PARTIAL") return false;
       if (statusFilter === "CLOSED" && t.status !== "CLOSED") return false;
+      if (statusFilter === "DELETED" && t.status !== "DELETED") return false;
       if (searchQuery && !t.symbol.toLowerCase().includes(searchQuery.toLowerCase())) return false;
       return true;
     });
@@ -61,6 +62,7 @@ export default function JournalList({ trades }: { trades: JournalTrade[] }) {
 
   const openCount = trades.filter((t) => t.status === "OPEN" || t.status === "PARTIAL").length;
   const closedCount = trades.filter((t) => t.status === "CLOSED").length;
+  const deletedCount = trades.filter((t) => t.status === "DELETED").length;
 
   return (
     <div>
@@ -85,6 +87,14 @@ export default function JournalList({ trades }: { trades: JournalTrade[] }) {
           >
             Closed <span className="trades-tab-count">{closedCount}</span>
           </button>
+          {deletedCount > 0 && (
+            <button
+              className={cn("trades-tab", statusFilter === "DELETED" && "trades-tab-active")}
+              onClick={() => setStatusFilter("DELETED")}
+            >
+              Deleted <span className="trades-tab-count">{deletedCount}</span>
+            </button>
+          )}
         </div>
         <div className="search-input" style={{ width: 200 }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -150,9 +160,10 @@ export default function JournalList({ trades }: { trades: JournalTrade[] }) {
                               <span className={cn(
                                 "badge",
                                 trade.status === "OPEN" ? "badge-open" :
-                                trade.status === "CLOSED" ? "badge-closed" : "badge-partial"
-                              )}>
-                                {trade.status === "CLOSED" ? "Closed" : trade.status === "OPEN" ? "Open" : "Partial"}
+                                trade.status === "CLOSED" ? "badge-closed" :
+                                trade.status === "DELETED" ? "badge-closed" : "badge-partial"
+                              )} style={trade.status === "DELETED" ? { background: "rgba(239, 68, 68, 0.15)", color: "#ef4444" } : undefined}>
+                                {trade.status === "CLOSED" ? "Closed" : trade.status === "OPEN" ? "Open" : trade.status === "DELETED" ? "Deleted" : "Partial"}
                               </span>
                               {trade.setup && (
                                 <span className="tag" style={{ fontSize: 10 }}>{trade.setup}</span>

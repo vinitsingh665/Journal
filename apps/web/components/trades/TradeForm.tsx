@@ -215,6 +215,8 @@ export default function TradeForm({ userId, tradeId, initialData }: TradeFormPro
     }
   };
 
+  const isCrypto = form.exchange === "CRYPTO";
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -229,7 +231,7 @@ export default function TradeForm({ userId, tradeId, initialData }: TradeFormPro
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
-          quantity: parseFloat(form.quantity),
+          quantity: isCrypto ? parseFloat(form.quantity) : parseInt(form.quantity, 10),
           price: parseFloat(form.price),
           exitPrice: form.exitPrice ? parseFloat(form.exitPrice) : null,
           exitTime: form.exitTime || null,
@@ -357,9 +359,14 @@ export default function TradeForm({ userId, tradeId, initialData }: TradeFormPro
                   placeholder="100"
                   value={form.quantity}
                   onChange={(e) => updateField("quantity", e.target.value)}
+                  onKeyDown={(e) => {
+                    if (!isCrypto && e.key === '.') {
+                      e.preventDefault();
+                    }
+                  }}
                   required
-                  min="0.000001"
-                  step="0.000001"
+                  min={isCrypto ? "0" : "1"}
+                  step={isCrypto ? "any" : "1"}
                   id="trade-quantity"
                 />
               </div>

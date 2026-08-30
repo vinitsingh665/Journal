@@ -572,7 +572,10 @@ export default function TradeDetail({ trade }: { trade: TradeData }) {
         <AddExecutionModal
           tradeId={trade.id}
           symbol={trade.symbol}
+          exchange={trade.exchange}
           direction={trade.direction}
+          currentPrice={currentPrice || trade.avgEntryPrice}
+          openQty={openQty}
           onClose={() => setShowAddExecution(false)}
         />
       )}

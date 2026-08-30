@@ -6,6 +6,11 @@ import { fetchMultipleQuotes, calculateUnrealizedPnl } from "@/lib/yahoo-finance
 import AnalyticsDashboard from "@/components/analytics/AnalyticsDashboard";
 
 async function SharedAnalyticsContent({ userId }: { userId: string }) {
+  const userSettings = await prisma.userSettings.findUnique({
+    where: { userId },
+  });
+  const baseCurrency = userSettings?.currency || "INR";
+
   const trades = await prisma.trade.findMany({
     where: { userId },
     select: {
@@ -44,7 +49,7 @@ async function SharedAnalyticsContent({ userId }: { userId: string }) {
   let liveQuotes = new Map<string, { regularMarketPrice: number }>();
   try {
     if (uniqueSymbols.length > 0) {
-      liveQuotes = await fetchMultipleQuotes(uniqueSymbols);
+      liveQuotes = await fetchMultipleQuotes(uniqueSymbols, baseCurrency);
     }
   } catch (e) {
     console.error("Failed to fetch live quotes for analytics:", e);

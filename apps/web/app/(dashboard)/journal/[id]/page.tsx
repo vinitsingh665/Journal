@@ -14,6 +14,11 @@ export default async function JournalDetailPage({
 
   const { id } = await params;
 
+  const userSettings = await prisma.userSettings.findUnique({
+    where: { userId },
+  });
+  const baseCurrency = userSettings?.currency || "INR";
+
   const trade = await prisma.trade.findFirst({
     where: { id, userId },
     include: {
@@ -46,7 +51,7 @@ export default async function JournalDetailPage({
     try {
       const quotes = await fetchMultipleQuotes([
         { symbol: trade.symbol, exchange: trade.exchange }
-      ]);
+      ], baseCurrency);
       const quoteKey = `${trade.symbol}:${trade.exchange}`;
       const quote = quotes.get(quoteKey);
       

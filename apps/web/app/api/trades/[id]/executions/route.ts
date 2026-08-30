@@ -45,6 +45,16 @@ export async function POST(
       );
     }
 
+    const isExit = trade.direction === "LONG" ? side === "SELL" : side === "BUY";
+    const openQty = Math.abs(trade.totalBuyQty - trade.totalSellQty);
+
+    if (isExit && quantity > openQty) {
+      return NextResponse.json(
+        { error: `Cannot exit more than ${openQty} units` },
+        { status: 400 }
+      );
+    }
+
     const execTime = executionTime ? new Date(executionTime) : new Date();
 
     const fingerprint = generateFingerprint({
