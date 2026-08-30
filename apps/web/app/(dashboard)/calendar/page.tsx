@@ -11,6 +11,9 @@ export default async function CalendarPage() {
   }
 
   // Fetch ALL trades to group by Entry Date
+  const userSettings = await prisma.userSettings.findUnique({ where: { userId } });
+  const baseCurrency = userSettings?.currency || "INR";
+
   const trades = await prisma.trade.findMany({
     where: { userId },
     select: {
@@ -41,7 +44,7 @@ export default async function CalendarPage() {
   let liveQuotes = new Map<string, { regularMarketPrice: number }>();
   try {
     if (uniqueSymbols.length > 0) {
-      liveQuotes = await fetchMultipleQuotes(uniqueSymbols);
+      liveQuotes = await fetchMultipleQuotes(uniqueSymbols, baseCurrency);
     }
   } catch (e) {
     console.error("Failed to fetch live quotes for calendar:", e);

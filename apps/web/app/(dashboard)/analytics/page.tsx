@@ -10,6 +10,9 @@ async function AnalyticsContent() {
   const userId = await getCurrentUser();
   if (!userId) redirect("/login");
 
+  const userSettings = await prisma.userSettings.findUnique({ where: { userId } });
+  const baseCurrency = userSettings?.currency || "INR";
+
   const trades = await prisma.trade.findMany({
     where: { userId },
     select: {
@@ -40,7 +43,7 @@ async function AnalyticsContent() {
   let liveQuotes = new Map<string, { regularMarketPrice: number }>();
   try {
     if (uniqueSymbols.length > 0) {
-      liveQuotes = await fetchMultipleQuotes(uniqueSymbols);
+      liveQuotes = await fetchMultipleQuotes(uniqueSymbols, baseCurrency);
     }
   } catch (e) {
     console.error("Failed to fetch live quotes for analytics:", e);
