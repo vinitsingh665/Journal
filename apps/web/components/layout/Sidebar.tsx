@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { NAV_ITEMS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
@@ -105,6 +106,28 @@ const ICONS: Record<string, React.ReactNode> = {
 export default function Sidebar({ userName = "Trader", tradingStyle = "Swing Trader", avatar = null }: { userName?: string, tradingStyle?: string, avatar?: string | null }) {
   const pathname = usePathname();
   const router = useRouter();
+
+  // Auto-sync stop losses
+  useEffect(() => {
+    const syncStops = async () => {
+      try {
+        const res = await fetch("/api/trades/sync-stops", { method: "POST" });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.closedCount > 0) {
+            console.log(`Auto-closed ${data.closedCount} trades that hit stop loss`);
+            router.refresh();
+          }
+        }
+      } catch (e) {
+        console.error("Failed to sync stops", e);
+      }
+    };
+
+    syncStops();
+    const interval = setInterval(syncStops, 5 * 60 * 1000); // Check every 5 mins
+    return () => clearInterval(interval);
+  }, [router, pathname]);
 
   const handleLogout = async () => {
     try {

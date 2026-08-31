@@ -765,7 +765,10 @@ export default function JournalDetail({ trade, isShared, sharedUserId }: { trade
                               : "Date and time not recorded"}
                           </div>
                           <div style={{ fontSize: "var(--text-sm)", marginTop: 2 }}>
-                            Delete {trade.totalBuyQty - trade.totalSellQty} @ {trade.avgExitPrice ? formatINR(trade.avgExitPrice) : "—"}
+                            {trade.totalBuyQty === trade.totalSellQty
+                              ? "Trade Archived"
+                              : `Liquidated ${trade.totalBuyQty - trade.totalSellQty} open positions${trade.avgExitPrice ? ` @ ${formatINR(trade.avgExitPrice)}` : ""}`
+                            }
                           </div>
                         </div>
                       </div>
