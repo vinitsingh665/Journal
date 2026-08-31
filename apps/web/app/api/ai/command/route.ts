@@ -126,7 +126,7 @@ export async function POST(req: NextRequest) {
     // Fetch open trades context to help the AI understand what "exit reliance" means
     const openTrades = await prisma.trade.findMany({
       where: { userId, status: { in: ["OPEN", "PARTIAL"] } },
-      select: { id: true, symbol: true, exchange: true, direction: true, totalBuyQty: true, totalSellQty: true, riskAmount: true, entryTime: true, grossPnl: true, netPnl: true, pnlPercentage: true, rMultiple: true },
+      select: { id: true, symbol: true, exchange: true, direction: true, totalBuyQty: true, totalSellQty: true, riskAmount: true, entryTime: true, grossPnl: true, netPnl: true, pnlPercentage: true, rMultiple: true, stopLoss: true },
     });
 
     const openTradesContext = openTrades.length > 0 
@@ -220,6 +220,16 @@ export async function POST(req: NextRequest) {
           else if (newBuyQty > 0) newStatus = "PARTIAL";
         }
 
+        if (newStatus === "CLOSED") {
+          if (trade.stopLoss && newAvgExit !== null) {
+            if (trade.direction === "LONG" && newAvgExit <= trade.stopLoss) {
+              newStatus = "STOP_LOSS_HIT";
+            } else if (trade.direction === "SHORT" && newAvgExit >= trade.stopLoss) {
+              newStatus = "STOP_LOSS_HIT";
+            }
+          }
+        }
+
         const totalEntryQty = trade.direction === "LONG" ? newBuyQty : newSellQty;
         const totalExitQty = trade.direction === "LONG" ? newSellQty : newBuyQty;
 
@@ -243,8 +253,8 @@ export async function POST(req: NextRequest) {
           }
         }
         
-        const exitDate = newStatus === "CLOSED" ? new Date() : undefined;
-        if (newStatus === "CLOSED") {
+        const exitDate = (newStatus === "CLOSED" || newStatus === "STOP_LOSS_HIT") ? new Date() : undefined;
+        if (newStatus === "CLOSED" || newStatus === "STOP_LOSS_HIT") {
           holdingPeriodMs = exitDate!.getTime() - trade.entryTime.getTime();
         }
 

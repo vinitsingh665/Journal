@@ -25,7 +25,7 @@ export async function POST(
       return NextResponse.json({ error: "Trade not found" }, { status: 404 });
     }
 
-    if (trade.status === "CLOSED") {
+    if (trade.status === "CLOSED" || trade.status === "STOP_LOSS_HIT") {
       return NextResponse.json({ error: "Cannot add execution to a closed trade" }, { status: 400 });
     }
 
@@ -122,7 +122,16 @@ export async function POST(
 
       let newStatus = trade.status;
       if (totalExitQty > 0) newStatus = "PARTIAL";
-      if (totalExitQty >= totalEntryQty) newStatus = "CLOSED";
+      if (totalExitQty >= totalEntryQty) {
+        newStatus = "CLOSED";
+        if (trade.stopLoss && newAvgExitPrice !== null) {
+          if (trade.direction === "LONG" && newAvgExitPrice <= trade.stopLoss) {
+            newStatus = "STOP_LOSS_HIT";
+          } else if (trade.direction === "SHORT" && newAvgExitPrice >= trade.stopLoss) {
+            newStatus = "STOP_LOSS_HIT";
+          }
+        }
+      }
 
       // 3. Recalculate P&L if exiting
       let grossPnl = trade.grossPnl;
@@ -146,7 +155,7 @@ export async function POST(
           rMultiple = grossPnl / trade.riskAmount;
         }
 
-        if (newStatus === "CLOSED") {
+        if (newStatus === "CLOSED" || newStatus === "STOP_LOSS_HIT") {
           exitDate = execTime;
           holdingPeriodMs = BigInt(exitDate.getTime() - trade.entryTime.getTime());
         }

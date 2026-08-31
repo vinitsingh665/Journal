@@ -146,6 +146,12 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    let tradeStatus = isClosed ? "CLOSED" : "OPEN";
+    if (isClosed && stopLoss) {
+      if (direction === "LONG" && exitPrice <= stopLoss) tradeStatus = "STOP_LOSS_HIT";
+      else if (direction === "SHORT" && exitPrice >= stopLoss) tradeStatus = "STOP_LOSS_HIT";
+    }
+
     // Create trade + execution in a transaction
     const result = await prisma.$transaction(async (tx) => {
       // Create the trade
@@ -155,7 +161,7 @@ export async function POST(request: NextRequest) {
           symbol: symbol.toUpperCase(),
           exchange,
           direction,
-          status: isClosed ? "CLOSED" : "OPEN",
+          status: tradeStatus,
           totalBuyQty: side === "BUY" ? quantity : (isClosed ? quantity : 0),
           totalSellQty: side === "SELL" ? quantity : (isClosed ? quantity : 0),
           avgEntryPrice: price,

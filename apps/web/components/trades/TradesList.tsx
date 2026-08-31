@@ -96,7 +96,7 @@ export default function TradesList({ trades }: { trades: Trade[] }) {
   // ─── KPI Calculations ────────────────────────────────
   const kpis = useMemo(() => {
     const total = trades.length;
-    const closed = trades.filter((t) => t.status === "CLOSED");
+    const closed = trades.filter((t) => t.status === "CLOSED" || t.status === "STOP_LOSS_HIT");
     const winning = closed.filter((t) => t.netPnl > 0);
     const winRate = closed.length > 0 ? (winning.length / closed.length) * 100 : 0;
     const totalPnl = trades.reduce((s, t) => s + t.netPnl, 0);
@@ -125,7 +125,7 @@ export default function TradesList({ trades }: { trades: Trade[] }) {
   const filtered = useMemo(() => {
     let result = trades.filter((t) => {
       if (statusFilter === "OPEN" && t.status !== "OPEN" && t.status !== "PARTIAL") return false;
-      if (statusFilter === "CLOSED" && t.status !== "CLOSED") return false;
+      if (statusFilter === "CLOSED" && (t.status !== "CLOSED" && t.status !== "STOP_LOSS_HIT")) return false;
       if (searchQuery && !t.symbol.toLowerCase().includes(searchQuery.toLowerCase())) return false;
       return true;
     });
@@ -442,9 +442,12 @@ export default function TradesList({ trades }: { trades: Trade[] }) {
                             <span className={cn(
                               "badge",
                               trade.status === "OPEN" ? "badge-open" :
-                              trade.status === "CLOSED" ? "badge-closed" : "badge-partial"
+                              trade.status === "CLOSED" ? "badge-closed" : 
+                              trade.status === "STOP_LOSS_HIT" ? "badge-stop-loss-hit" : "badge-partial"
                             )}>
-                              {trade.status === "CLOSED" ? "Closed" : trade.status === "OPEN" ? "Open" : "Partial"}
+                              {trade.status === "CLOSED" ? "Closed" : 
+                               trade.status === "STOP_LOSS_HIT" ? "SL Hit" :
+                               trade.status === "OPEN" ? "Open" : "Partial"}
                             </span>
                           </td>
                         </tr>
@@ -604,9 +607,9 @@ export default function TradesList({ trades }: { trades: Trade[] }) {
                     </span>
                     <span className={cn(
                       "badge",
-                      selectedTrade.status === "CLOSED" ? "badge-closed" : "badge-open"
+                      (selectedTrade.status === "CLOSED" || selectedTrade.status === "STOP_LOSS_HIT") ? (selectedTrade.status === "STOP_LOSS_HIT" ? "badge-stop-loss-hit" : "badge-closed") : "badge-open"
                     )}>
-                      {selectedTrade.status === "CLOSED" ? "Closed" : "Open"}
+                      {selectedTrade.status === "CLOSED" ? "Closed" : selectedTrade.status === "STOP_LOSS_HIT" ? "SL Hit" : "Open"}
                     </span>
                   </div>
                   <button

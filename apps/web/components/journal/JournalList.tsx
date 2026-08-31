@@ -42,7 +42,7 @@ export default function JournalList({ trades }: { trades: JournalTrade[] }) {
   const filtered = useMemo(() => {
     return trades.filter((t) => {
       if (statusFilter === "OPEN" && t.status !== "OPEN" && t.status !== "PARTIAL") return false;
-      if (statusFilter === "CLOSED" && t.status !== "CLOSED") return false;
+      if (statusFilter === "CLOSED" && (t.status !== "CLOSED" && t.status !== "STOP_LOSS_HIT")) return false;
       if (statusFilter === "DELETED" && t.status !== "DELETED") return false;
       if (searchQuery && !t.symbol.toLowerCase().includes(searchQuery.toLowerCase())) return false;
       return true;
@@ -61,7 +61,7 @@ export default function JournalList({ trades }: { trades: JournalTrade[] }) {
   }, [filtered]);
 
   const openCount = trades.filter((t) => t.status === "OPEN" || t.status === "PARTIAL").length;
-  const closedCount = trades.filter((t) => t.status === "CLOSED").length;
+  const closedCount = trades.filter((t) => t.status === "CLOSED" || t.status === "STOP_LOSS_HIT").length;
   const deletedCount = trades.filter((t) => t.status === "DELETED").length;
 
   return (
@@ -161,9 +161,12 @@ export default function JournalList({ trades }: { trades: JournalTrade[] }) {
                                 "badge",
                                 trade.status === "OPEN" ? "badge-open" :
                                 trade.status === "CLOSED" ? "badge-closed" :
+                                trade.status === "STOP_LOSS_HIT" ? "badge-stop-loss-hit" :
                                 trade.status === "DELETED" ? "badge-closed" : "badge-partial"
                               )} style={trade.status === "DELETED" ? { background: "rgba(239, 68, 68, 0.15)", color: "#ef4444" } : undefined}>
-                                {trade.status === "CLOSED" ? "Closed" : trade.status === "OPEN" ? "Open" : trade.status === "DELETED" ? "Deleted" : "Partial"}
+                                {trade.status === "CLOSED" ? "Closed" : 
+                                 trade.status === "STOP_LOSS_HIT" ? "SL Hit" :
+                                 trade.status === "OPEN" ? "Open" : trade.status === "DELETED" ? "Deleted" : "Partial"}
                               </span>
                               {trade.setup && (
                                 <span className="tag" style={{ fontSize: 10 }}>{trade.setup}</span>

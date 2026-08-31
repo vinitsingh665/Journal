@@ -424,7 +424,7 @@ export default function JournalDetail({ trade, isShared, sharedUserId }: { trade
                                   background: i === exitExecutions.length - 1 ? "rgba(239, 68, 68, 0.1)" : "rgba(251, 191, 36, 0.1)",
                                   color: i === exitExecutions.length - 1 ? "var(--color-negative)" : "#f59e0b",
                                 }}>
-                                  {i === exitExecutions.length - 1 && trade.status === "CLOSED" ? "Final Exit" : "Partial Exit"}
+                                  {i === exitExecutions.length - 1 && (trade.status === "CLOSED" || trade.status === "STOP_LOSS_HIT") ? "Final Exit" : "Partial Exit"}
                                 </span>
                               </td>
                               <td style={{ padding: "8px", textAlign: "right", fontFamily: "var(--font-mono)" }}>{formatINR(exec.price)}</td>
@@ -532,9 +532,12 @@ export default function JournalDetail({ trade, isShared, sharedUserId }: { trade
                 "badge",
                 trade.status === "CLOSED" ? "badge-closed" :
                 trade.status === "OPEN" ? "badge-open" :
+                trade.status === "STOP_LOSS_HIT" ? "badge-stop-loss-hit" :
                 trade.status === "DELETED" ? "badge-closed" : "badge-partial"
-              )} style={trade.status === "DELETED" ? { background: "rgba(239, 68, 68, 0.15)", color: "#ef4444" } : undefined}>
-                {trade.status === "CLOSED" ? "Closed" : trade.status === "OPEN" ? "Open" : trade.status === "DELETED" ? "Deleted" : "Partial"}
+              )}>
+                {trade.status === "CLOSED" ? "Closed" : 
+                 trade.status === "STOP_LOSS_HIT" ? "SL Hit" :
+                 trade.status === "OPEN" ? "Open" : trade.status === "DELETED" ? "Deleted" : "Partial"}
               </span>
             </div>
             <div className="card-body" style={{ padding: 0 }}>

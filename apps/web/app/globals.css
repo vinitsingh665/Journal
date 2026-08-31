@@ -795,6 +795,12 @@ h4 { font-size: var(--text-lg); }
   color: var(--text-secondary);
 }
 
+.badge-stop-loss-hit {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--color-negative);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
 .badge-partial {
   background: var(--color-warning-bg);
   color: var(--color-warning);

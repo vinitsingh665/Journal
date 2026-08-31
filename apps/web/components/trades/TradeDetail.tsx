@@ -161,8 +161,8 @@ export default function TradeDetail({ trade }: { trade: TradeData }) {
               <span className={`badge ${trade.direction === "LONG" ? "badge-long" : "badge-short"}`}>
                 {trade.direction}
               </span>
-              <span className={`badge badge-${trade.status.toLowerCase()}`}>
-                {trade.status}
+              <span className={cn("badge", trade.status === "STOP_LOSS_HIT" ? "badge-stop-loss-hit" : `badge-${trade.status.toLowerCase()}`)}>
+                {trade.status === "STOP_LOSS_HIT" ? "SL Hit" : trade.status}
               </span>
             </div>
             <div className="text-secondary" style={{ fontSize: "var(--text-sm)", marginTop: 2 }}>
@@ -252,7 +252,7 @@ export default function TradeDetail({ trade }: { trade: TradeData }) {
       )}
 
       {/* P&L Summary for Closed Trades */}
-      {trade.status === "CLOSED" && (
+      {(trade.status === "CLOSED" || trade.status === "STOP_LOSS_HIT") && (
         <div
           className="card mb-4"
           style={{
