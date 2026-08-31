@@ -152,7 +152,8 @@ export default function JournalDetail({ trade, isShared, sharedUserId }: { trade
   const handleDelete = async () => {
     setDeleting(true);
     try {
-      const res = await fetch(`/api/trades/${trade.id}`, { method: "DELETE" });
+      const isAlreadyDeleted = trade.status === "DELETED";
+      const res = await fetch(`/api/trades/${trade.id}${isAlreadyDeleted ? '?hard=true' : ''}`, { method: "DELETE" });
       if (res.ok) {
         router.push("/journal");
         router.refresh();
@@ -828,12 +829,17 @@ export default function JournalDetail({ trade, isShared, sharedUserId }: { trade
               </button>
             </div>
             <div className="modal-body">
-              <p>Are you sure you want to delete the trade for <strong>{trade.symbol}</strong>? This action cannot be undone.</p>
+              <p>
+                {trade.status === "DELETED"
+                  ? <span>Are you sure you want to permanently delete the trade history for <strong>{trade.symbol}</strong>? This will completely remove it from your journal and cannot be undone.</span>
+                  : <span>Are you sure you want to delete the trade for <strong>{trade.symbol}</strong>? It will be marked as deleted in your journal.</span>
+                }
+              </p>
             </div>
             <div className="modal-footer">
               <button className="btn btn-secondary" onClick={() => setShowDeleteConfirm(false)}>Cancel</button>
               <button className="btn btn-danger" onClick={handleDelete} disabled={deleting}>
-                {deleting ? "Deleting..." : "Delete Trade"}
+                {deleting ? "Deleting..." : (trade.status === "DELETED" ? "Permanently Delete" : "Delete Trade")}
               </button>
             </div>
           </div>
