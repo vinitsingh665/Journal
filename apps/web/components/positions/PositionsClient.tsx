@@ -63,6 +63,10 @@ export default function PositionsClient({ initialPositions, capital = 1000000 }:
           }
           setLiveQuotes(map);
         }
+
+        // Ping the background job to auto-close any trades that hit stop loss
+        // This simulates a cron job running while the dashboard is open
+        await fetch("/api/cron/stop-loss").catch(() => {});
       } catch { }
     };
 
