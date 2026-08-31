@@ -127,7 +127,8 @@ export default function TradeDetail({ trade }: { trade: TradeData }) {
   const handleDelete = async () => {
     setDeleting(true);
     try {
-      const res = await fetch(`/api/trades/${trade.id}`, {
+      const isAlreadyDeleted = trade.status === "DELETED";
+      const res = await fetch(`/api/trades/${trade.id}${isAlreadyDeleted ? '?hard=true' : ''}`, {
         method: "DELETE",
       });
       if (res.ok) {
@@ -534,10 +535,12 @@ export default function TradeDetail({ trade }: { trade: TradeData }) {
             </div>
             <div className="modal-body">
               <p>
-                Are you sure you want to delete the <strong>{trade.symbol}</strong>{" "}
-                <strong>{trade.direction}</strong> trade? This action cannot be undone.
+                {trade.status === "DELETED"
+                  ? <span>Are you sure you want to permanently delete the trade history for <strong>{trade.symbol}</strong>? This will completely remove it from your journal and cannot be undone.</span>
+                  : <span>Are you sure you want to delete the trade for <strong>{trade.symbol}</strong>? It will be marked as deleted in your journal.</span>
+                }
               </p>
-              {trade.netPnl !== 0 && (
+              {trade.status !== "DELETED" && trade.netPnl !== 0 && (
                 <p className="mt-4 text-secondary" style={{ fontSize: "var(--text-sm)" }}>
                   This trade has a P&L of{" "}
                   <span className={cn(trade.netPnl >= 0 ? "text-positive" : "text-negative")} style={{ fontWeight: 600 }}>
