@@ -39,7 +39,11 @@ export async function POST(request: NextRequest) {
       if (!hardDelete) {
         await tx.trade.updateMany({
           where: { id: { in: tradeIds } },
-          data: { isArchived: true },
+          data: { 
+            isArchived: true,
+            status: "DELETED",
+            exitTime: new Date()
+          },
         });
       } else {
         // Unlink executions

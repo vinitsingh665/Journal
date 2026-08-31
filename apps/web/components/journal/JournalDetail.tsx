@@ -152,7 +152,7 @@ export default function JournalDetail({ trade, isShared, sharedUserId }: { trade
   const handleDelete = async () => {
     setDeleting(true);
     try {
-      const res = await fetch(`/api/trades/${trade.id}?hard=true`, { method: "DELETE" });
+      const res = await fetch(`/api/trades/${trade.id}`, { method: "DELETE" });
       if (res.ok) {
         router.push("/journal");
         router.refresh();
