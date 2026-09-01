@@ -8,7 +8,7 @@ A comprehensive web application for traders to log, analyze, and review their tr
 - **Journal**: Log individual trades, including execution details, setups, and notes.
 - **Analytics**: Deep dive into your trading metrics and statistics.
 - **Calendar**: View your trades and performance on a calendar layout.
-
+- **Risk Management**: Calculate position sizes and plan multiple trades.
 ## Tech Stack
 
 - Next.js (App Router)
