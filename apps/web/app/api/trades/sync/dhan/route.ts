@@ -83,7 +83,14 @@ export async function POST(request: NextRequest) {
 
       return {
         ...exec,
-        fingerprint: generateFingerprint(exec),
+        fingerprint: generateFingerprint({
+          symbol: exec.symbol,
+          side: exec.side,
+          quantity: exec.quantity,
+          price: exec.price,
+          timestamp: exec.executionTime,
+          orderId: exec.orderId
+        }),
       } as NormalizedExecution;
     });
 
