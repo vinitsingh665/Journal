@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser, clearSessionCookie } from "@/lib/auth";
 import prisma from "@repo/database";
+import { encrypt } from "@/lib/encryption";
 
 export async function GET(req: Request) {
   try {
@@ -17,6 +18,16 @@ export async function GET(req: Request) {
         }
       }
     });
+
+    if (user && user.settings) {
+      // Redact sensitive keys from being sent to the browser
+      const hasDhanToken = !!user.settings.dhanAccessToken;
+      const hasGeminiKey = !!user.settings.geminiApiKey;
+      
+      user.settings.dhanAccessToken = hasDhanToken ? "********" : "";
+      user.settings.geminiApiKey = hasGeminiKey ? "********" : "";
+    }
+
     return NextResponse.json({ user });
   } catch (error) {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
@@ -36,7 +47,7 @@ export async function PUT(req: Request) {
     }
 
     const body = await req.json();
-    const { name, tradingStyle, about, avatar, defaultCapital } = body;
+    const { name, tradingStyle, about, avatar, defaultCapital, dhanClientId, dhanAccessToken } = body;
 
     if (!name) {
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
@@ -47,21 +58,28 @@ export async function PUT(req: Request) {
       data: { name },
     });
 
-    if (tradingStyle !== undefined || about !== undefined || avatar !== undefined || defaultCapital !== undefined) {
+    // Only encrypt if they provided a real token (not the placeholder). Empty string means delete.
+    const newDhanToken = dhanAccessToken === "" ? "" : (dhanAccessToken && dhanAccessToken !== "********" ? encrypt(dhanAccessToken) : undefined);
+
+    if (tradingStyle !== undefined || about !== undefined || avatar !== undefined || defaultCapital !== undefined || dhanClientId !== undefined || newDhanToken !== undefined) {
       await prisma.userSettings.upsert({
         where: { userId },
         update: { 
           ...(tradingStyle !== undefined && { tradingStyle }),
           ...(about !== undefined && { about }),
           ...(avatar !== undefined && { avatar }),
-          ...(defaultCapital !== undefined && { defaultCapital: Number(defaultCapital) })
+          ...(defaultCapital !== undefined && { defaultCapital: Number(defaultCapital) }),
+          ...(dhanClientId !== undefined && { dhanClientId }),
+          ...(newDhanToken !== undefined && { dhanAccessToken: newDhanToken })
         },
         create: {
           userId,
-          tradingStyle: tradingStyle || "Swing Trader",
-          about: about || "",
-          avatar: avatar || "",
-          defaultCapital: defaultCapital !== undefined ? Number(defaultCapital) : 500000
+          tradingStyle,
+          about,
+          avatar,
+          defaultCapital: defaultCapital ? Number(defaultCapital) : 500000,
+          dhanClientId,
+          dhanAccessToken: newDhanToken
         }
       });
     }

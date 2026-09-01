@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import DashboardLoading from "../../../(dashboard)/loading";
 import { prisma } from "@repo/database";
-import { fetchMultipleQuotes, calculateUnrealizedPnl } from "@/lib/yahoo-finance";
+import { fetchMultipleQuotes, calculateUnrealizedPnl } from "@/lib/finance";
 import JournalList from "@/components/journal/JournalList";
 
 async function SharedJournalContent({ userId }: { userId: string }) {

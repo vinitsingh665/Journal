@@ -38,12 +38,6 @@ async function SharedPositionsContent({ userId }: { userId: string }) {
 
   return (
     <>
-      <div className="page-header" style={{ marginBottom: "var(--space-6)" }}>
-        <div>
-          <h1 className="page-title">Live Positions</h1>
-          <p className="page-description text-muted">Currently open trades in the portfolio.</p>
-        </div>
-      </div>
       <PositionsClient initialPositions={serializedTrades} capital={capital} />
     </>
   );

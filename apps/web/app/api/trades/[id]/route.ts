@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@repo/database";
 import { getCurrentUser } from "@/lib/auth";
-import { fetchStockQuote } from "@/lib/yahoo-finance";
+import { fetchStockQuote } from "@/lib/finance";
 
 // GET /api/trades/[id] — Get single trade detail
 export async function GET(

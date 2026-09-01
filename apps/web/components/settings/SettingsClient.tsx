@@ -113,6 +113,10 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
   const [soundEffects, setSoundEffects] = useState(true);
   const [twoFactorAuth, setTwoFactorAuth] = useState(false);
   const [compactMode, setCompactMode] = useState(false);
+  
+  // Integrations
+  const [dhanClientId, setDhanClientId] = useState(initialSettings?.dhanClientId || "");
+  const [dhanAccessToken, setDhanAccessToken] = useState(initialSettings?.dhanAccessToken || "");
 
   const tabs = ["General", "Trading", "Import & Sync", "Notifications", "Security", "Billing", "Data & Export", "Appearance", "About"];
 
@@ -125,7 +129,7 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ name, tradingStyle, about, avatar, defaultCapital: Number(defaultCapital) }),
+        body: JSON.stringify({ name, tradingStyle, about, avatar, defaultCapital: Number(defaultCapital), dhanClientId, dhanAccessToken }),
       });
 
       if (res.ok) {
@@ -687,16 +691,52 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
                 <p className="settings-row-desc" style={{ marginBottom: "var(--space-4)" }}>Link your brokers for automatic trade syncing.</p>
 
                 <div className="card card-body" style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)" }}>
+                  {/*
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "var(--space-4)", border: "1px solid var(--border-secondary)", borderRadius: "var(--radius-md)" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "var(--space-4)" }}>
-                      <div style={{ width: 40, height: 40, background: "#f8f9fa", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, color: "#1e3a8a" }}>Z</div>
-                      <div>
-                        <div style={{ fontWeight: 600 }}>Zerodha (Kite)</div>
-                        <div className="text-muted" style={{ fontSize: "var(--text-xs)" }}>Not connected</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "var(--space-4)", width: "100%" }}>
+                      <div style={{ width: 40, height: 40, background: "#f8f9fa", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, color: "#119933" }}>D</div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: 600, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <span>DhanHQ (Real-Time API)</span>
+                          {dhanClientId && dhanAccessToken ? (
+                            <span style={{ fontSize: "0.75rem", background: "rgba(16, 185, 129, 0.1)", color: "#10b981", padding: "2px 8px", borderRadius: "10px" }}>Configured</span>
+                          ) : (
+                            <span style={{ fontSize: "0.75rem", background: "rgba(239, 68, 68, 0.1)", color: "#ef4444", padding: "2px 8px", borderRadius: "10px" }}>Not Configured</span>
+                          )}
+                        </div>
+                        <div className="text-muted" style={{ fontSize: "var(--text-xs)", marginBottom: "var(--space-3)" }}>
+                          Sync your trades instantly using Dhan's free trading API.
+                        </div>
+                        <div style={{ display: "flex", gap: "var(--space-3)" }}>
+                          <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
+                            <label className="form-label" style={{ fontSize: "0.75rem" }}>Client ID</label>
+                            <input 
+                              type="text" 
+                              className="form-input" 
+                              style={{ padding: "6px 10px", fontSize: "0.85rem" }} 
+                              placeholder="1100XXXXX"
+                              value={dhanClientId}
+                              onChange={(e) => setDhanClientId(e.target.value)}
+                              disabled={isGuest}
+                            />
+                          </div>
+                          <div className="form-group" style={{ flex: 2, marginBottom: 0 }}>
+                            <label className="form-label" style={{ fontSize: "0.75rem" }}>Access Token</label>
+                            <input 
+                              type="password" 
+                              className="form-input" 
+                              style={{ padding: "6px 10px", fontSize: "0.85rem" }} 
+                              placeholder="eyJhbGciOiJIUzI1NiIsInR..."
+                              value={dhanAccessToken}
+                              onChange={(e) => setDhanAccessToken(e.target.value)}
+                              disabled={isGuest}
+                            />
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <button className="btn btn-secondary btn-sm" disabled={isGuest}>Connect</button>
                   </div>
+                  */}
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "var(--space-4)", border: "1px solid var(--border-secondary)", borderRadius: "var(--radius-md)" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "var(--space-4)" }}>
                       <div style={{ width: 40, height: 40, background: "#f3ba2f", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, color: "#000" }}>B</div>

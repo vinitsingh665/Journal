@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
-import { fetchStockQuote, fetchMultipleQuotes } from "@/lib/yahoo-finance";
+import { fetchStockQuote, fetchMultipleQuotes } from "@/lib/finance";
 import { prisma } from "@repo/database";
 
 // GET /api/quotes?symbols=RELIANCE,TCS,INFY&exchange=NSE

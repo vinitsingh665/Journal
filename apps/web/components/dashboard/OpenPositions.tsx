@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { formatINR, formatPercent, formatHoldingPeriod, cn } from "@/lib/utils";
-import type { StockQuote } from "@/lib/yahoo-finance";
+import type { StockQuote } from "@/lib/finance";
 import MiniCandleChart from "./MiniCandleChart";
 
 interface Position {
@@ -113,7 +113,7 @@ export default function OpenPositions({ positions }: { positions: Position[] }) 
             </span>
           )}
         </div>
-        <Link href="/positions" className="btn btn-ghost btn-sm">
+        <Link href="/dashboard/positions" className="btn btn-ghost btn-sm">
           View All
         </Link>
       </div>

@@ -98,7 +98,7 @@ export default function AiAssistant() {
           if (pathname === "/trades/new") {
             window.location.reload();
           } else {
-            router.push("/trades/new");
+            router.push("/dashboard/trades/new");
           }
         }, 1500);
       } else if (data.data?.intent === "EDIT_TRADE") {
@@ -117,7 +117,7 @@ export default function AiAssistant() {
           if (pathname === "/mistakes") {
             window.location.reload();
           } else {
-            router.push("/mistakes");
+            router.push("/dashboard/mistakes");
           }
         }, 1500);
       } else if (data.data?.intent === "CALCULATE_RISK") {
@@ -130,7 +130,7 @@ export default function AiAssistant() {
           if (pathname === "/risk-calculator") {
             window.location.reload();
           } else {
-            router.push("/risk-calculator");
+            router.push("/dashboard/risk-calculator");
           }
         }, 1500);
       } else if (data.data?.intent === "EXPORT_SCREENSHOT" || data.intent === "EXPORT_SCREENSHOT") {
