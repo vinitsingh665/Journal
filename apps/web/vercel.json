@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/cron/stop-loss",
-      "schedule": "* * * * *"
+      "schedule": "0 0 * * *"
     }
   ]
 }
