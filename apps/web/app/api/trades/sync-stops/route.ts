@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@repo/database";
-import { fetchMultipleQuotes } from "@/lib/yahoo-finance";
+import { fetchMultipleQuotes } from "@/lib/finance";
 import { getCurrentUser } from "@/lib/auth";
 
 export async function POST() {

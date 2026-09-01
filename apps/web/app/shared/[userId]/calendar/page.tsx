@@ -1,6 +1,6 @@
 import { prisma } from "@repo/database";
 import { notFound } from "next/navigation";
-import { fetchMultipleQuotes, calculateUnrealizedPnl } from "@/lib/yahoo-finance";
+import { fetchMultipleQuotes, calculateUnrealizedPnl } from "@/lib/finance";
 import CalendarView from "@/components/calendar/CalendarView";
 import { Suspense } from "react";
 import DashboardLoading from "../../../(dashboard)/loading";

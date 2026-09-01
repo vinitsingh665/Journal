@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@repo/database";
 import Groq from "groq-sdk";
-import { fetchStockQuote } from "@/lib/yahoo-finance";
+import { fetchStockQuote } from "@/lib/finance";
 
 let groq: Groq;
 try {

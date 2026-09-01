@@ -240,7 +240,7 @@ export default function ImportPage() {
               <button className="btn btn-secondary" onClick={() => { setResult(null); setPreview(null); setFile(null); }}>
                 Import More
               </button>
-              <button className="btn btn-primary" onClick={() => router.push("/trades")}>
+              <button className="btn btn-primary" onClick={() => router.push("/dashboard/trades")}>
                 View Trades
               </button>
             </div>

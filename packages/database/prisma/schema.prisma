@@ -42,18 +42,20 @@ model User {
 }
 
 model UserSettings {
-  id             String  @id @default(cuid())
-  userId         String  @unique
-  user           User    @relation(fields: [userId], references: [id])
-  defaultCapital Float   @default(500000)
-  defaultRiskPct Float   @default(1.0)
-  currency       String  @default("INR")
-  theme          String  @default("light")
-  accentColor    String  @default("blue")
-  geminiApiKey   String?
-  tradingStyle   String  @default("Swing Trading")
-  about          String?
-  avatar         String?
+  id              String  @id @default(cuid())
+  userId          String  @unique
+  user            User    @relation(fields: [userId], references: [id])
+  defaultCapital  Float   @default(500000)
+  defaultRiskPct  Float   @default(1.0)
+  currency        String  @default("INR")
+  theme           String  @default("light")
+  accentColor     String  @default("blue")
+  geminiApiKey    String?
+  dhanClientId    String?
+  dhanAccessToken String?
+  tradingStyle    String  @default("Swing Trading")
+  about           String?
+  avatar          String?
 }
 
 // ─── RAW DATA ───────────────────────────────────────

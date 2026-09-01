@@ -3,7 +3,7 @@ import DashboardLoading from "../loading";
 import { prisma } from "@repo/database";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { fetchMultipleQuotes, calculateUnrealizedPnl } from "@/lib/yahoo-finance";
+import { fetchMultipleQuotes, calculateUnrealizedPnl } from "@/lib/finance";
 import AnalyticsDashboard from "@/components/analytics/AnalyticsDashboard";
 
 async function AnalyticsContent() {

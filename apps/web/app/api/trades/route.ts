@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@repo/database";
 import { getCurrentUser } from "@/lib/auth";
 import { generateFingerprint } from "@repo/trading-engine";
-import { fetchStockQuote } from "@/lib/yahoo-finance";
+import { fetchStockQuote } from "@/lib/finance";
 import { formatINR } from "@/lib/utils";
 
 // Create a manual trade

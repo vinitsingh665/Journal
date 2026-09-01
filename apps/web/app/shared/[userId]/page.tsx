@@ -6,7 +6,7 @@ import {
   calculateStrategyPerformance,
   calculateDailyPnl,
 } from "@repo/trading-engine";
-import { fetchMultipleQuotes, calculateUnrealizedPnl } from "@/lib/yahoo-finance";
+import { fetchMultipleQuotes, calculateUnrealizedPnl } from "@/lib/finance";
 import KpiCards from "@/components/dashboard/KpiCards";
 import OpenPositions from "@/components/dashboard/OpenPositions";
 import PerformanceOverview from "@/components/dashboard/PerformanceOverview";

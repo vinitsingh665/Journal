@@ -21,7 +21,7 @@ export default function RecentTrades({ trades }: { trades: Trade[] }) {
     <div className="card" id="recent-trades">
       <div className="card-header">
         <span className="card-title">Recent Trades</span>
-        <Link href="/trades" className="btn btn-ghost btn-sm">
+        <Link href="/dashboard/trades" className="btn btn-ghost btn-sm">
           View All
         </Link>
       </div>
@@ -118,8 +118,8 @@ export default function RecentTrades({ trades }: { trades: Trade[] }) {
               No trades yet. Import a CSV or add a trade manually to get started.
             </p>
             <div className="flex gap-3">
-              <Link href="/import" className="btn btn-secondary">Import CSV</Link>
-              <Link href="/trades/new" className="btn btn-primary">Add Trade</Link>
+              <Link href="/dashboard/import" className="btn btn-secondary">Import CSV</Link>
+              <Link href="/dashboard/trades/new" className="btn btn-primary">Add Trade</Link>
             </div>
           </div>
         )}

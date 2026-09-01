@@ -4,7 +4,7 @@ import { prisma } from "@repo/database";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { fetchMultipleQuotes, calculateUnrealizedPnl } from "@/lib/yahoo-finance";
+import { fetchMultipleQuotes, calculateUnrealizedPnl } from "@/lib/finance";
 import JournalList from "@/components/journal/JournalList";
 
 async function JournalContent() {

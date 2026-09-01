@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import DashboardLoading from "../../../(dashboard)/loading";
 import { prisma } from "@repo/database";
 import { notFound } from "next/navigation";
-import { fetchMultipleQuotes, calculateUnrealizedPnl } from "@/lib/yahoo-finance";
+import { fetchMultipleQuotes, calculateUnrealizedPnl } from "@/lib/finance";
 import AnalyticsDashboard from "@/components/analytics/AnalyticsDashboard";
 
 async function SharedAnalyticsContent({ userId }: { userId: string }) {

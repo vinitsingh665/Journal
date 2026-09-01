@@ -155,7 +155,7 @@ export default function JournalDetail({ trade, isShared, sharedUserId }: { trade
       const isAlreadyDeleted = trade.status === "DELETED";
       const res = await fetch(`/api/trades/${trade.id}${isAlreadyDeleted ? '?hard=true' : ''}`, { method: "DELETE" });
       if (res.ok) {
-        router.push("/journal");
+        router.push("/dashboard/journal");
         router.refresh();
       }
     } catch { /* */ }

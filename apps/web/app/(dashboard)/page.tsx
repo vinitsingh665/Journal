@@ -7,13 +7,14 @@ import {
   calculateStrategyPerformance,
   calculateDailyPnl,
 } from "@repo/trading-engine";
-import { fetchMultipleQuotes, calculateUnrealizedPnl } from "@/lib/yahoo-finance";
+import { fetchMultipleQuotes, calculateUnrealizedPnl } from "@/lib/finance";
 import KpiCards from "@/components/dashboard/KpiCards";
 import OpenPositions from "@/components/dashboard/OpenPositions";
 import PerformanceOverview from "@/components/dashboard/PerformanceOverview";
 import EquityCurve from "@/components/dashboard/EquityCurve";
 import PnlDistribution from "@/components/dashboard/PnlDistribution";
 import RecentTrades from "@/components/dashboard/RecentTrades";
+import DhanSyncButton from "@/components/trades/DhanSyncButton";
 
 import { Suspense } from "react";
 import DashboardLoading from "./loading";
@@ -283,10 +284,13 @@ async function DashboardContent() {
 export default function DashboardPage() {
   return (
     <>
-      <div className="page-header" style={{ marginBottom: "var(--space-6)" }}>
+      <div className="page-header" style={{ marginBottom: "var(--space-6)", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
         <div>
           <h1 className="page-title">Dashboard</h1>
           <p className="page-description text-muted">Welcome back. Here's your performance overview.</p>
+        </div>
+        <div className="page-actions">
+          {/* <DhanSyncButton /> */}
         </div>
       </div>
       <Suspense fallback={<DashboardLoading />}>

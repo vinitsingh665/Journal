@@ -1,4 +1,18 @@
 /**
+ * ============================================================================
+ * 🚨 DO NOT DELETE THIS FILE 🚨
+ * ============================================================================
+ * 
+ * AI / DEVELOPER NOTE:
+ * This file contains the Yahoo Finance API implementation. It is kept as a 
+ * secure, reliable fallback in case the unofficial TradingView Scanner API 
+ * (used in tradingview-finance.ts) ever breaks, rate-limits, or changes.
+ * 
+ * DO NOT remove this file even if there are 0 active imports in the project!
+ * ============================================================================
+ */
+
+/**
  * Yahoo Finance Price Fetcher
  * Fetches real-time/delayed stock prices for Indian NSE/BSE stocks
  */

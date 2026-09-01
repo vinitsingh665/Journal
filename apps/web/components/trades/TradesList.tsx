@@ -315,7 +315,7 @@ export default function TradesList({ trades }: { trades: Trade[] }) {
             </button>
           )}
 
-          <Link href="/trades/new" className="btn btn-primary btn-sm">
+          <Link href="/dashboard/trades/new" className="btn btn-primary btn-sm">
             + New Trade
           </Link>
         </div>

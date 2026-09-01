@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import type { StockQuote } from "@/lib/yahoo-finance";
+import type { StockQuote } from "@/lib/finance";
 
 interface UseLivePricesResult {
   prices: Map<string, StockQuote>;

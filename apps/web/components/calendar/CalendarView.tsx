@@ -162,7 +162,7 @@ export default function CalendarView({ initialTrades }: { initialTrades: TradeDa
             </button>
           </div>
           <button onClick={handleToday} className="btn btn-secondary" style={{ padding: "8px 16px" }}>Today</button>
-          <Link href="/trades/new" className="btn btn-primary" style={{ padding: "8px 16px" }}>+ New Trade</Link>
+          <Link href="/dashboard/trades/new" className="btn btn-primary" style={{ padding: "8px 16px" }}>+ New Trade</Link>
         </div>
       </div>
 

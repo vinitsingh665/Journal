@@ -1,6 +1,6 @@
 import { prisma } from "@repo/database";
 import { notFound } from "next/navigation";
-import { fetchMultipleQuotes, calculateUnrealizedPnl } from "@/lib/yahoo-finance";
+import { fetchMultipleQuotes, calculateUnrealizedPnl } from "@/lib/finance";
 import JournalDetail from "@/components/journal/JournalDetail";
 
 export default async function SharedJournalDetailPage({
