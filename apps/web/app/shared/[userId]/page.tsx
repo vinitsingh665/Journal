@@ -6,7 +6,6 @@ import {
   calculateStrategyPerformance,
   calculateDailyPnl,
 } from "@repo/trading-engine";
-import { fetchMultipleQuotes, calculateUnrealizedPnl } from "@/lib/finance";
 import KpiCards from "@/components/dashboard/KpiCards";
 import OpenPositions from "@/components/dashboard/OpenPositions";
 import PerformanceOverview from "@/components/dashboard/PerformanceOverview";
@@ -17,91 +16,32 @@ import { Suspense } from "react";
 import DashboardLoading from "../../(dashboard)/loading";
 
 async function SharedDashboardContent({ userId }: { userId: string }) {
-  // Fetch user settings for capital
-  const userSettings = await prisma.userSettings.findUnique({
-    where: { userId },
-  });
-  const totalCapital = userSettings?.defaultCapital || 500000;
-  const baseCurrency = userSettings?.currency || "INR";
+  // Fetch user settings and trades in parallel
+  const [userSettings, trades] = await Promise.all([
+    prisma.userSettings.findUnique({ where: { userId } }),
+    prisma.trade.findMany({
+      where: { userId, isArchived: false },
+      include: {
+        mistakes: { include: { mistakeTag: true } },
+      },
+      orderBy: { entryTime: "desc" },
+    }),
+  ]);
 
-  // Fetch all trades (excluding archived ones)
-  const trades = await prisma.trade.findMany({
-    where: { userId, isArchived: false },
-    include: {
-      mistakes: { include: { mistakeTag: true } },
-    },
-    orderBy: { entryTime: "desc" },
-  });
+  const totalCapital = userSettings?.defaultCapital || 500000;
 
   if (!trades) notFound();
 
   // Fetch open positions
   const openTrades = trades.filter((t) => t.status === "OPEN" || t.status === "PARTIAL");
 
-  // ─── FETCH LIVE PRICES FOR OPEN POSITIONS ────────────────────
-  const uniqueSymbols = [
-    ...new Set(openTrades.map((t) => JSON.stringify({ symbol: t.symbol, exchange: t.exchange })))
-  ].map((s) => JSON.parse(s) as { symbol: string; exchange: string });
+  // Use database-stored P&L values (live prices will be fetched client-side)
+  const enrichedTrades = trades.map((t) => ({
+    ...t,
+    todayPnl: 0,
+  }));
 
-  let liveQuotes = new Map<string, { regularMarketPrice: number; regularMarketChange: number; regularMarketChangePercent: number }>();
-
-  try {
-    const quotes = await fetchMultipleQuotes(uniqueSymbols, baseCurrency);
-    liveQuotes = quotes;
-  } catch (e) {
-    console.error("Failed to fetch live quotes for dashboard:", e);
-  }
-
-  // ─── INJECT UNREALIZED P&L INTO OPEN TRADES ──────────────────
-  // Create enriched trade objects with live P&L for open positions
-  const enrichedTrades = trades.map((t) => {
-    const isOpen = t.status === "OPEN" || t.status === "PARTIAL";
-    let netPnl = t.netPnl;
-    let grossPnl = t.grossPnl;
-    let pnlPercentage = t.pnlPercentage;
-    let todayPnl = 0;
-
-    if (isOpen) {
-      const quoteKey = `${t.symbol}:${t.exchange}`;
-      const quote = liveQuotes.get(quoteKey);
-      if (quote) {
-        const openQty = t.totalBuyQty - t.totalSellQty;
-        if (openQty > 0) {
-          const direction = t.direction as "LONG" | "SHORT";
-          const { pnl, pnlPercent } = calculateUnrealizedPnl(
-            t.avgEntryPrice,
-            quote.regularMarketPrice,
-            openQty,
-            direction
-          );
-          netPnl = pnl;
-          grossPnl = pnl;
-          pnlPercentage = pnlPercent;
-
-          // Calculate Today's P&L
-          const todayPriceChange = quote.regularMarketChange || 0;
-          let todayTradePnl = todayPriceChange * openQty;
-          if (direction === "SHORT") {
-            todayTradePnl = -todayTradePnl;
-          }
-
-          // If opened today, today's P&L is exactly the total netPnl.
-          const isOpenedToday = t.entryTime.toISOString().split("T")[0] === new Date().toISOString().split("T")[0];
-          todayPnl = isOpenedToday ? netPnl : todayTradePnl;
-        }
-      }
-    }
-
-    return {
-      ...t,
-      netPnl,
-      grossPnl,
-      pnlPercentage,
-      todayPnl,
-    };
-  });
-
-  // Calculate metrics using enriched trades (with live P&L)
+  // Calculate metrics using DB-stored P&L values
   const metrics = calculatePerformanceMetrics(
     enrichedTrades.map((t) => ({
       netPnl: t.netPnl,
@@ -173,7 +113,7 @@ async function SharedDashboardContent({ userId }: { userId: string }) {
     0
   );
 
-  // Recent trades (last 8) — with enriched P&L
+  // Recent trades (last 8)
   const recentTrades = enrichedTrades.slice(0, 8).map((t) => ({
     id: t.id,
     symbol: t.symbol,
@@ -197,7 +137,7 @@ async function SharedDashboardContent({ userId }: { userId: string }) {
     return sum;
   }, 0);
 
-  // Calculate all-time investment (sum of max quantity * entry price for all trades)
+  // Calculate all-time investment
   const allTimeInvestment = enrichedTrades.reduce((sum, t) => {
     const entryQty = t.direction === "LONG" ? t.totalBuyQty : t.totalSellQty;
     return sum + (t.avgEntryPrice * entryQty);

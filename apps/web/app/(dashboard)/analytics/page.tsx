@@ -3,15 +3,11 @@ import DashboardLoading from "../loading";
 import { prisma } from "@repo/database";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { fetchMultipleQuotes, calculateUnrealizedPnl } from "@/lib/finance";
 import AnalyticsDashboard from "@/components/analytics/AnalyticsDashboard";
 
 async function AnalyticsContent() {
   const userId = await getCurrentUser();
   if (!userId) redirect("/login");
-
-  const userSettings = await prisma.userSettings.findUnique({ where: { userId } });
-  const baseCurrency = userSettings?.currency || "INR";
 
   const trades = await prisma.trade.findMany({
     where: { userId },
@@ -35,46 +31,19 @@ async function AnalyticsContent() {
     orderBy: { entryTime: "asc" },
   });
 
-  const openTrades = trades.filter((t: any) => t.status === "OPEN" || t.status === "PARTIAL");
-  const uniqueSymbols = [
-    ...new Set(openTrades.map((t: any) => JSON.stringify({ symbol: t.symbol, exchange: t.exchange }))),
-  ].map((s) => JSON.parse(s) as { symbol: string; exchange: string });
-
-  let liveQuotes = new Map<string, { regularMarketPrice: number }>();
-  try {
-    if (uniqueSymbols.length > 0) {
-      liveQuotes = await fetchMultipleQuotes(uniqueSymbols, baseCurrency);
-    }
-  } catch (e) {
-    console.error("Failed to fetch live quotes for analytics:", e);
-  }
-
-  const serializedTrades = trades.map((t: any) => {
-    let netPnl = t.netPnl;
-    if (t.status === "OPEN" || t.status === "PARTIAL") {
-      const quote = liveQuotes.get(`${t.symbol}:${t.exchange}`);
-      if (quote) {
-        const openQty = t.totalBuyQty - t.totalSellQty;
-        if (openQty > 0) {
-          const { pnl } = calculateUnrealizedPnl(t.avgEntryPrice, quote.regularMarketPrice, openQty, t.direction as "LONG" | "SHORT");
-          netPnl = pnl;
-        }
-      }
-    }
-
-    return {
-      id: t.id,
-      symbol: t.symbol,
-      direction: t.direction,
-      setup: t.setup,
-      netPnl,
-      grossPnl: t.grossPnl,
-      rMultiple: t.rMultiple,
-      entryTime: t.entryTime.toISOString(),
-      exitTime: t.exitTime?.toISOString() || t.entryTime.toISOString(),
-      holdingPeriodMs: t.holdingPeriodMs ? Number(t.holdingPeriodMs) : null,
-    };
-  });
+  // Use DB-stored P&L values (live prices fetched client-side)
+  const serializedTrades = trades.map((t) => ({
+    id: t.id,
+    symbol: t.symbol,
+    direction: t.direction,
+    setup: t.setup,
+    netPnl: t.netPnl,
+    grossPnl: t.grossPnl,
+    rMultiple: t.rMultiple,
+    entryTime: t.entryTime.toISOString(),
+    exitTime: t.exitTime?.toISOString() || t.entryTime.toISOString(),
+    holdingPeriodMs: t.holdingPeriodMs ? Number(t.holdingPeriodMs) : null,
+  }));
 
   return <AnalyticsDashboard initialTrades={serializedTrades as any} />;
 }
