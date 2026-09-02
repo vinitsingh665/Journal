@@ -21,22 +21,54 @@ async function DashboardContent() {
   const userId = await getCurrentUser();
   if (!userId) redirect("/login");
 
-  // Fetch user settings and trades in parallel
-  const [userSettings, trades] = await Promise.all([
+  // Fetch user settings, trades (lightweight), and open positions in parallel
+  const [userSettings, trades, openTrades] = await Promise.all([
     prisma.userSettings.findUnique({ where: { userId } }),
     prisma.trade.findMany({
       where: { userId, isArchived: false },
-      include: {
-        mistakes: { include: { mistakeTag: true } },
+      select: {
+        id: true,
+        symbol: true,
+        exchange: true,
+        direction: true,
+        status: true,
+        avgEntryPrice: true,
+        avgExitPrice: true,
+        totalBuyQty: true,
+        totalSellQty: true,
+        grossPnl: true,
+        netPnl: true,
+        pnlPercentage: true,
+        rMultiple: true,
+        holdingPeriodMs: true,
+        entryTime: true,
+        exitTime: true,
+        strategy: true,
+        stopLoss: true,
+        target: true,
+      },
+      orderBy: { entryTime: "desc" },
+    }),
+    prisma.trade.findMany({
+      where: { userId, isArchived: false, status: { in: ["OPEN", "PARTIAL"] } },
+      select: {
+        id: true,
+        symbol: true,
+        exchange: true,
+        direction: true,
+        avgEntryPrice: true,
+        totalBuyQty: true,
+        totalSellQty: true,
+        stopLoss: true,
+        target: true,
+        entryTime: true,
+        pnlPercentage: true,
       },
       orderBy: { entryTime: "desc" },
     }),
   ]);
 
   const totalCapital = userSettings?.defaultCapital || 500000;
-
-  // Fetch open positions
-  const openTrades = trades.filter((t) => t.status === "OPEN" || t.status === "PARTIAL");
 
   // Use database-stored P&L values (live prices will be fetched client-side)
   const enrichedTrades = trades.map((t) => ({
@@ -90,27 +122,7 @@ async function DashboardContent() {
     }))
   );
 
-  // Count mistakes
-  const allMistakes = trades.flatMap((t) => t.mistakes);
-  const mistakeCounts = new Map<string, { name: string; count: number; color: string }>();
-  for (const m of allMistakes) {
-    const key = m.mistakeTag.name;
-    const existing = mistakeCounts.get(key);
-    if (existing) {
-      existing.count++;
-    } else {
-      mistakeCounts.set(key, {
-        name: m.mistakeTag.name,
-        count: 1,
-        color: m.mistakeTag.color || "#6366F1",
-      });
-    }
-  }
-  const topMistakes = [...mistakeCounts.values()]
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 5);
-
-  // Calculate total investment
+  // Calculate total investment from open positions (already fetched separately)
   const openInvestment = openTrades.reduce(
     (sum, t) => sum + t.avgEntryPrice * t.totalBuyQty,
     0

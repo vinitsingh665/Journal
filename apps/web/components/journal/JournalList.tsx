@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { formatINR, formatDate, formatHoldingPeriod, cn } from "@/lib/utils";
 
 interface JournalTrade {
@@ -35,19 +36,53 @@ interface JournalTrade {
   executionCount: number;
 }
 
-export default function JournalList({ trades }: { trades: JournalTrade[] }) {
-  const [statusFilter, setStatusFilter] = useState<string>("ALL");
-  const [searchQuery, setSearchQuery] = useState("");
+export default function JournalList({ 
+  trades, 
+  counts, 
+  initialStatus, 
+  initialSearch 
+}: { 
+  trades: JournalTrade[]; 
+  counts: { openCount: number; closedCount: number; deletedCount: number };
+  initialStatus?: string;
+  initialSearch?: string;
+}) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  const filtered = useMemo(() => {
-    return trades.filter((t) => {
-      if (statusFilter === "OPEN" && t.status !== "OPEN" && t.status !== "PARTIAL") return false;
-      if (statusFilter === "CLOSED" && (t.status !== "CLOSED" && t.status !== "STOP_LOSS_HIT")) return false;
-      if (statusFilter === "DELETED" && t.status !== "DELETED") return false;
-      if (searchQuery && !t.symbol.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-      return true;
-    });
-  }, [trades, statusFilter, searchQuery]);
+  // Server-driven values
+  const statusFilter = initialStatus || "ALL";
+  const searchQuery = initialSearch || "";
+  const [localSearch, setLocalSearch] = useState(searchQuery);
+
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (localSearch !== searchQuery) {
+        updateParams({ search: localSearch || undefined });
+      }
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [localSearch]);
+
+  const updateParams = useCallback((updates: Record<string, string | undefined>) => {
+    const params = new URLSearchParams(searchParams.toString());
+    for (const [key, value] of Object.entries(updates)) {
+      if (value === undefined || value === "") {
+        params.delete(key);
+      } else {
+        params.set(key, value);
+      }
+    }
+    if (params.get("status") === "ALL") params.delete("status");
+    const qs = params.toString();
+    router.push(`${pathname}${qs ? `?${qs}` : ""}`, { scroll: false });
+  }, [searchParams, pathname, router]);
+
+  const setStatusFilter = (status: string) => updateParams({ status });
+
+  const filtered = trades;
 
   // Group by date
   const grouped = useMemo(() => {
@@ -79,20 +114,20 @@ export default function JournalList({ trades }: { trades: JournalTrade[] }) {
             className={cn("trades-tab", statusFilter === "OPEN" && "trades-tab-active")}
             onClick={() => setStatusFilter("OPEN")}
           >
-            Open <span className="trades-tab-count">{openCount}</span>
+            Open <span className="trades-tab-count">{counts.openCount}</span>
           </button>
           <button
             className={cn("trades-tab", statusFilter === "CLOSED" && "trades-tab-active")}
             onClick={() => setStatusFilter("CLOSED")}
           >
-            Closed <span className="trades-tab-count">{closedCount}</span>
+            Closed <span className="trades-tab-count">{counts.closedCount}</span>
           </button>
-          {deletedCount > 0 && (
+          {counts.deletedCount > 0 && (
             <button
               className={cn("trades-tab", statusFilter === "DELETED" && "trades-tab-active")}
               onClick={() => setStatusFilter("DELETED")}
             >
-              Deleted <span className="trades-tab-count">{deletedCount}</span>
+              Deleted <span className="trades-tab-count">{counts.deletedCount}</span>
             </button>
           )}
         </div>
@@ -104,8 +139,8 @@ export default function JournalList({ trades }: { trades: JournalTrade[] }) {
           <input
             type="text"
             placeholder="Search symbol..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            value={localSearch}
+            onChange={(e) => setLocalSearch(e.target.value)}
           />
         </div>
       </div>

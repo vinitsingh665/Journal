@@ -1,25 +1,65 @@
 import { Suspense } from "react";
 import DashboardLoading from "../loading";
 import { prisma } from "@repo/database";
+import { Prisma } from "@prisma/client";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import JournalList from "@/components/journal/JournalList";
 
-async function JournalContent() {
+const TRADES_PER_PAGE = 20;
+
+async function JournalContent({
+  searchParams,
+}: {
+  searchParams: { page?: string; status?: string; search?: string };
+}) {
   const userId = await getCurrentUser();
   if (!userId) redirect("/login");
 
-  const [trades, userSettings] = await Promise.all([
+  const page = Math.max(1, parseInt(searchParams.page || "1", 10) || 1);
+  const statusFilter = searchParams.status || "ALL";
+  const searchQuery = searchParams.search || "";
+
+  // Build the where clause
+  const where: Prisma.TradeWhereInput = { userId };
+  if (statusFilter === "OPEN") {
+    where.status = { in: ["OPEN", "PARTIAL"] };
+  } else if (statusFilter === "CLOSED") {
+    where.status = { in: ["CLOSED", "STOP_LOSS_HIT"] };
+  } else if (statusFilter === "DELETED") {
+    where.status = "DELETED";
+  } else {
+    // By default, exclude DELETED and ARCHIVED for "ALL"
+    where.isArchived = false;
+    where.status = { not: "DELETED" };
+  }
+  
+  if (searchQuery) {
+    where.symbol = { contains: searchQuery };
+  }
+
+  const [trades, totalCount, openCount, closedCount, deletedCount] = await Promise.all([
     prisma.trade.findMany({
-      where: { userId },
+      where,
       include: {
         executions: { orderBy: { executionTime: "asc" } },
         mistakes: { include: { mistakeTag: true } },
       },
       orderBy: { entryTime: "desc" },
+      take: TRADES_PER_PAGE,
+      skip: (page - 1) * TRADES_PER_PAGE,
     }),
-    prisma.userSettings.findUnique({ where: { userId } }),
+    prisma.trade.count({ where }),
+    prisma.trade.count({
+      where: { userId, isArchived: false, status: { in: ["OPEN", "PARTIAL"] } },
+    }),
+    prisma.trade.count({
+      where: { userId, isArchived: false, status: { in: ["CLOSED", "STOP_LOSS_HIT"] } },
+    }),
+    prisma.trade.count({
+      where: { userId, status: "DELETED" },
+    }),
   ]);
 
   // Use DB-stored P&L values (live prices fetched client-side)
@@ -57,10 +97,23 @@ async function JournalContent() {
     executionCount: t.executions.length,
   }));
 
-  return <JournalList trades={serialized} />;
+  return (
+    <JournalList 
+      trades={serialized} 
+      initialStatus={statusFilter}
+      initialSearch={searchQuery}
+      counts={{ openCount, closedCount, deletedCount }}
+    />
+  );
 }
 
-export default function JournalPage() {
+export default async function JournalPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; status?: string; search?: string }>;
+}) {
+  const resolvedParams = await searchParams;
+
   return (
     <>
       <div className="page-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
@@ -77,7 +130,7 @@ export default function JournalPage() {
         </div>
       </div>
       <Suspense fallback={<DashboardLoading />}>
-        <JournalContent />
+        <JournalContent searchParams={resolvedParams} />
       </Suspense>
     </>
   );

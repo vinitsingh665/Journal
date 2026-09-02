@@ -127,7 +127,7 @@ export default function Sidebar({ userName = "Trader", tradingStyle = "Swing Tra
     syncStops();
     const interval = setInterval(syncStops, 5 * 60 * 1000); // Check every 5 mins
     return () => clearInterval(interval);
-  }, [router, pathname]);
+  }, [router]);
 
   const handleLogout = async () => {
     try {

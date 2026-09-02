@@ -6,15 +6,39 @@ import CalendarView from "@/components/calendar/CalendarView";
 import { Suspense } from "react";
 import DashboardLoading from "../loading";
 
-async function CalendarContent() {
+async function CalendarContent({ searchParams }: { searchParams: { month?: string; year?: string } }) {
   const userId = await getCurrentUser();
   if (!userId) {
     redirect("/login");
   }
 
-  // Fetch ALL trades to group by Entry Date — use DB-stored P&L
+  const now = new Date();
+  let year = now.getFullYear();
+  let month = now.getMonth();
+
+  if (searchParams.year !== undefined) {
+    const parsedYear = parseInt(String(searchParams.year), 10);
+    if (!isNaN(parsedYear)) year = parsedYear;
+  }
+  if (searchParams.month !== undefined) {
+    const parsedMonth = parseInt(String(searchParams.month), 10);
+    if (!isNaN(parsedMonth)) month = parsedMonth;
+  }
+
+  // Create date boundaries for the selected month (in local time / UTC neutral depending on how entryTime is stored)
+  // Usually entryTime is stored as UTC, so we query for all trades from the 1st of the month to the 1st of the next month.
+  const startDate = new Date(year, month, 1);
+  const endDate = new Date(year, month + 1, 1);
+
+  // Fetch only trades for the current month
   const trades = await prisma.trade.findMany({
-    where: { userId },
+    where: { 
+      userId,
+      entryTime: {
+        gte: startDate,
+        lt: endDate
+      }
+    },
     select: {
       id: true,
       symbol: true,
@@ -42,10 +66,12 @@ async function CalendarContent() {
     totalCharges: t.totalCharges,
   }));
 
-  return <CalendarView initialTrades={serialized as any} />;
+  return <CalendarView initialTrades={serialized as any} year={year} month={month} />;
 }
 
-export default function CalendarPage() {
+export default async function CalendarPage({ searchParams }: { searchParams: Promise<{ month?: string; year?: string }> }) {
+  const resolvedParams = await searchParams;
+
   return (
     <>
       <div className="page-header" style={{ marginBottom: "var(--space-6)" }}>
@@ -55,7 +81,7 @@ export default function CalendarPage() {
         </div>
       </div>
       <Suspense fallback={<DashboardLoading />}>
-        <CalendarContent />
+        <CalendarContent searchParams={resolvedParams} />
       </Suspense>
     </>
   );

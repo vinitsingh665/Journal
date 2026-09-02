@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { formatINR, formatDate, formatDateTime, formatHoldingPeriod, cn } from "@/lib/utils";
 import MiniCandleChart from "@/components/dashboard/MiniCandleChart";
@@ -74,13 +74,32 @@ function useLiveHoldingPeriod(entryTime: string | undefined, initialMs: number |
 
 const TRADES_PER_PAGE = 12;
 
-export default function TradesList({ trades }: { trades: Trade[] }) {
+export default function TradesList({
+  trades,
+  kpis: serverKpis,
+  pagination,
+  filters,
+}: {
+  trades: Trade[];
+  kpis?: { total: number; winRate: number; totalPnl: number; avgR: number; best: number | null; worst: number | null; openCount: number; closedCount: number };
+  pagination?: { page: number; totalCount: number; totalPages: number; perPage: number };
+  filters?: { status: string; search: string; sort: string; dir: string };
+}) {
   const router = useRouter();
-  const [statusFilter, setStatusFilter] = useState<string>("ALL");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [sortField, setSortField] = useState<string>("date");
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
-  const [page, setPage] = useState(1);
+  const pathname = usePathname();
+  const currentSearchParams = useSearchParams();
+
+  // Use server-driven values or fall back to client-side defaults
+  const statusFilter = filters?.status || "ALL";
+  const searchQuery = filters?.search || "";
+  const sortField = filters?.sort || "date";
+  const sortDir = (filters?.dir || "desc") as "asc" | "desc";
+  const page = pagination?.page || 1;
+  const totalPages = pagination?.totalPages || 1;
+  const totalCount = pagination?.totalCount || trades.length;
+  const perPage = pagination?.perPage || TRADES_PER_PAGE;
+
+  const [localSearch, setLocalSearch] = useState(searchQuery);
   const [selectedTradeId, setSelectedTradeId] = useState<string | null>(null);
   const [chartData, setChartData] = useState<ChartData | null>(null);
   const [chartLoading, setChartLoading] = useState(false);
@@ -90,67 +109,51 @@ export default function TradesList({ trades }: { trades: Trade[] }) {
   const [showAddExecution, setShowAddExecution] = useState(false);
   const [expandedTradeId, setExpandedTradeId] = useState<string | null>(null);
 
+  // Debounce search — triggers server-side re-fetch via URL
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (localSearch !== searchQuery) {
+        updateParams({ search: localSearch || undefined, page: undefined });
+      }
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [localSearch]);
+
+  // Helper to update URL search params (triggers server re-fetch)
+  const updateParams = useCallback((updates: Record<string, string | undefined>) => {
+    const params = new URLSearchParams(currentSearchParams.toString());
+    for (const [key, value] of Object.entries(updates)) {
+      if (value === undefined || value === "") {
+        params.delete(key);
+      } else {
+        params.set(key, value);
+      }
+    }
+    if (params.get("page") === "1") params.delete("page");
+    if (params.get("status") === "ALL") params.delete("status");
+    if (params.get("sort") === "date") params.delete("sort");
+    if (params.get("dir") === "desc") params.delete("dir");
+    const qs = params.toString();
+    router.push(`${pathname}${qs ? `?${qs}` : ""}`, { scroll: false });
+  }, [currentSearchParams, pathname, router]);
+
   const selectedTrade = useMemo(() => trades.find((t) => t.id === selectedTradeId), [trades, selectedTradeId]);
   const liveDuration = useLiveHoldingPeriod(selectedTrade?.entryTime, selectedTrade?.holdingPeriodMs);
 
-  // ─── KPI Calculations ────────────────────────────────
-  const kpis = useMemo(() => {
-    const total = trades.length;
-    const closed = trades.filter((t) => t.status === "CLOSED" || t.status === "STOP_LOSS_HIT");
-    const winning = closed.filter((t) => t.netPnl > 0);
-    const winRate = closed.length > 0 ? (winning.length / closed.length) * 100 : 0;
-    const totalPnl = trades.reduce((s, t) => s + t.netPnl, 0);
-    const rTrades = trades.filter((t) => t.rMultiple !== null);
-    const avgR = rTrades.length > 0
-      ? rTrades.reduce((s, t) => s + t.rMultiple!, 0) / rTrades.length
-      : 0;
-    let best: number | null = trades.length > 0 ? Math.max(...trades.map((t) => t.netPnl)) : null;
-    let worst: number | null = trades.length > 0 ? Math.min(...trades.map((t) => t.netPnl)) : null;
-    
-    if (trades.length === 1) {
-      if (trades[0].netPnl >= 0) {
-        worst = null;
-      } else {
-        best = null;
-      }
-    }
+  // Use server-provided KPIs or fallback
+  const kpis = serverKpis || {
+    total: trades.length,
+    winRate: 0,
+    totalPnl: trades.reduce((s, t) => s + t.netPnl, 0),
+    avgR: 0,
+    best: trades.length > 0 ? Math.max(...trades.map((t) => t.netPnl)) : null,
+    worst: trades.length > 0 ? Math.min(...trades.map((t) => t.netPnl)) : null,
+    openCount: 0,
+    closedCount: 0,
+  };
 
-    const openCount = trades.filter((t) => t.status === "OPEN" || t.status === "PARTIAL").length;
-    const closedCount = closed.length;
-
-    return { total, winRate, totalPnl, avgR, best, worst, openCount, closedCount };
-  }, [trades]);
-
-  // ─── Filtering ────────────────────────────────────────
-  const filtered = useMemo(() => {
-    let result = trades.filter((t) => {
-      if (statusFilter === "OPEN" && t.status !== "OPEN" && t.status !== "PARTIAL") return false;
-      if (statusFilter === "CLOSED" && (t.status !== "CLOSED" && t.status !== "STOP_LOSS_HIT")) return false;
-      if (searchQuery && !t.symbol.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-      return true;
-    });
-
-    // Sort
-    result.sort((a, b) => {
-      let cmp = 0;
-      switch (sortField) {
-        case "symbol": cmp = a.symbol.localeCompare(b.symbol); break;
-        case "pnl": cmp = a.netPnl - b.netPnl; break;
-        case "r": cmp = (a.rMultiple ?? 0) - (b.rMultiple ?? 0); break;
-        default: cmp = new Date(a.entryTime).getTime() - new Date(b.entryTime).getTime();
-      }
-      return sortDir === "asc" ? cmp : -cmp;
-    });
-
-    return result;
-  }, [trades, statusFilter, searchQuery, sortField, sortDir]);
-
-  // ─── Pagination ──────────────────────────────────────
-  const totalPages = Math.ceil(filtered.length / TRADES_PER_PAGE);
-  const paginated = filtered.slice((page - 1) * TRADES_PER_PAGE, page * TRADES_PER_PAGE);
-
-  // Reset page when filters change
-  useEffect(() => { setPage(1); }, [statusFilter, searchQuery]);
+  // Trades are already paginated from server
+  const paginated = trades;
 
   // ─── Selected Trade ──────────────────────────────────
 
@@ -215,11 +218,18 @@ export default function TradesList({ trades }: { trades: Trade[] }) {
 
   const handleSort = (field: string) => {
     if (sortField === field) {
-      setSortDir(sortDir === "asc" ? "desc" : "asc");
+      updateParams({ sort: field, dir: sortDir === "asc" ? "desc" : "asc", page: undefined });
     } else {
-      setSortField(field);
-      setSortDir("desc");
+      updateParams({ sort: field, dir: "desc", page: undefined });
     }
+  };
+
+  const handleStatusChange = (status: string) => {
+    updateParams({ status, page: undefined });
+  };
+
+  const handlePageChange = (newPage: number) => {
+    updateParams({ page: String(newPage) });
   };
 
   const SortIcon = ({ field }: { field: string }) => {
@@ -274,19 +284,19 @@ export default function TradesList({ trades }: { trades: Trade[] }) {
         <div className="trades-tabs">
           <button
             className={cn("trades-tab", statusFilter === "ALL" && "trades-tab-active")}
-            onClick={() => setStatusFilter("ALL")}
+            onClick={() => handleStatusChange("ALL")}
           >
             All Trades
           </button>
           <button
             className={cn("trades-tab", statusFilter === "OPEN" && "trades-tab-active")}
-            onClick={() => setStatusFilter("OPEN")}
+            onClick={() => handleStatusChange("OPEN")}
           >
             Open Trades <span className="trades-tab-count">{kpis.openCount}</span>
           </button>
           <button
             className={cn("trades-tab", statusFilter === "CLOSED" && "trades-tab-active")}
-            onClick={() => setStatusFilter("CLOSED")}
+            onClick={() => handleStatusChange("CLOSED")}
           >
             Closed Trades <span className="trades-tab-count">{kpis.closedCount}</span>
           </button>
@@ -301,8 +311,8 @@ export default function TradesList({ trades }: { trades: Trade[] }) {
             <input
               type="text"
               placeholder="Search symbol..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={localSearch}
+              onChange={(e) => setLocalSearch(e.target.value)}
             />
           </div>
 
@@ -546,14 +556,14 @@ export default function TradesList({ trades }: { trades: Trade[] }) {
             {totalPages > 1 && (
               <div className="trades-pagination">
                 <span className="text-muted" style={{ fontSize: "var(--text-sm)" }}>
-                  Showing {(page - 1) * TRADES_PER_PAGE + 1} to{" "}
-                  {Math.min(page * TRADES_PER_PAGE, filtered.length)} of {filtered.length} trades
+                  Showing {(page - 1) * perPage + 1} to{" "}
+                  {Math.min(page * perPage, totalCount)} of {totalCount} trades
                 </span>
                 <div className="trades-page-buttons">
                   <button
                     className="trades-page-btn"
                     disabled={page <= 1}
-                    onClick={() => setPage(page - 1)}
+                    onClick={() => handlePageChange(page - 1)}
                   >
                     ‹
                   </button>
@@ -572,7 +582,7 @@ export default function TradesList({ trades }: { trades: Trade[] }) {
                       <button
                         key={pageNum}
                         className={cn("trades-page-btn", page === pageNum && "trades-page-btn-active")}
-                        onClick={() => setPage(pageNum)}
+                        onClick={() => handlePageChange(pageNum)}
                       >
                         {pageNum}
                       </button>
@@ -581,7 +591,7 @@ export default function TradesList({ trades }: { trades: Trade[] }) {
                   <button
                     className="trades-page-btn"
                     disabled={page >= totalPages}
-                    onClick={() => setPage(page + 1)}
+                    onClick={() => handlePageChange(page + 1)}
                   >
                     ›
                   </button>

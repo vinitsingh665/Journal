@@ -1,28 +1,114 @@
 import { Suspense } from "react";
 import DashboardLoading from "../loading";
 import { prisma } from "@repo/database";
+import { Prisma } from "@prisma/client";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import TradesList from "@/components/trades/TradesList";
 
-async function TradesContent() {
+const TRADES_PER_PAGE = 12;
+
+async function TradesContent({
+  searchParams,
+}: {
+  searchParams: { page?: string; status?: string; search?: string; sort?: string; dir?: string };
+}) {
   const userId = await getCurrentUser();
   if (!userId) redirect("/login");
 
-  const [trades, userSettings] = await Promise.all([
+  const page = Math.max(1, parseInt(searchParams.page || "1", 10) || 1);
+  const statusFilter = searchParams.status || "ALL";
+  const searchQuery = searchParams.search || "";
+  const sortField = searchParams.sort || "date";
+  const sortDir = (searchParams.dir || "desc") as "asc" | "desc";
+
+  // Build the where clause
+  const where: Prisma.TradeWhereInput = { userId, isArchived: false };
+  if (statusFilter === "OPEN") {
+    where.status = { in: ["OPEN", "PARTIAL"] };
+  } else if (statusFilter === "CLOSED") {
+    where.status = { in: ["CLOSED", "STOP_LOSS_HIT"] };
+  }
+  if (searchQuery) {
+    where.symbol = { contains: searchQuery };
+  }
+
+  // Build sort
+  let orderBy: Prisma.TradeOrderByWithRelationInput = { entryTime: sortDir };
+  if (sortField === "symbol") orderBy = { symbol: sortDir };
+  else if (sortField === "pnl") orderBy = { netPnl: sortDir };
+  else if (sortField === "r") orderBy = { rMultiple: sortDir };
+
+  // Fetch paginated trades and counts in parallel
+  const [
+    trades, 
+    totalCount, 
+    openCount, 
+    closedCount, 
+    kpiAggregates, 
+    rAggregates,
+    winningCount,
+    tradesWithPnl
+  ] = await Promise.all([
     prisma.trade.findMany({
-      where: { userId, isArchived: false },
+      where,
       include: {
         mistakes: { include: { mistakeTag: true } },
         executions: { orderBy: { executionTime: "asc" } },
       },
-      orderBy: { entryTime: "desc" },
+      orderBy,
+      take: TRADES_PER_PAGE,
+      skip: (page - 1) * TRADES_PER_PAGE,
     }),
-    prisma.userSettings.findUnique({ where: { userId } }),
+    prisma.trade.count({ where }),
+    prisma.trade.count({
+      where: { userId, isArchived: false, status: { in: ["OPEN", "PARTIAL"] } },
+    }),
+    prisma.trade.count({
+      where: { userId, isArchived: false, status: { in: ["CLOSED", "STOP_LOSS_HIT"] } },
+    }),
+    prisma.trade.aggregate({
+      where: { userId, isArchived: false },
+      _sum: { netPnl: true },
+      _count: true,
+      _max: { netPnl: true },
+      _min: { netPnl: true },
+    }),
+    prisma.trade.aggregate({
+      where: { userId, isArchived: false, rMultiple: { not: null } },
+      _avg: { rMultiple: true },
+    }),
+    prisma.trade.count({
+      where: { userId, isArchived: false, netPnl: { gt: 0 } },
+    }),
+    prisma.trade.count({
+      where: { userId, isArchived: false, netPnl: { not: 0 } },
+    }),
   ]);
 
-  // Serialize trades with DB-stored P&L (live prices fetched client-side)
+  // Calculate win rate from DB
+  const totalTrades = kpiAggregates._count;
+  const winRate = tradesWithPnl > 0 ? (winningCount / tradesWithPnl) * 100 : 0;
+
+  const kpis = {
+    total: totalTrades,
+    winRate,
+    totalPnl: kpiAggregates._sum.netPnl || 0,
+    avgR: rAggregates._avg.rMultiple || 0,
+    best: totalTrades > 0 ? kpiAggregates._max.netPnl : null,
+    worst: totalTrades > 0 ? kpiAggregates._min.netPnl : null,
+    openCount,
+    closedCount,
+  };
+
+  // Handle edge case: single trade
+  if (totalTrades === 1) {
+    if ((kpis.best || 0) >= 0) kpis.worst = null;
+    else kpis.best = null;
+  }
+
+  // Serialize trades
   const serializedTrades = trades.map((t) => ({
     id: t.id,
     symbol: t.symbol,
@@ -55,10 +141,33 @@ async function TradesContent() {
     })),
   }));
 
-  return <TradesList trades={serializedTrades} />;
+  return (
+    <TradesList
+      trades={serializedTrades}
+      kpis={kpis}
+      pagination={{
+        page,
+        totalCount,
+        totalPages: Math.ceil(totalCount / TRADES_PER_PAGE),
+        perPage: TRADES_PER_PAGE,
+      }}
+      filters={{
+        status: statusFilter,
+        search: searchQuery,
+        sort: sortField,
+        dir: sortDir,
+      }}
+    />
+  );
 }
 
-export default function TradesPage() {
+export default async function TradesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; status?: string; search?: string; sort?: string; dir?: string }>;
+}) {
+  const resolvedParams = await searchParams;
+
   return (
     <>
       <div className="page-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
@@ -84,7 +193,7 @@ export default function TradesPage() {
         </div>
       </div>
       <Suspense fallback={<DashboardLoading />}>
-        <TradesContent />
+        <TradesContent searchParams={resolvedParams} />
       </Suspense>
     </>
   );

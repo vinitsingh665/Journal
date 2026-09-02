@@ -13,30 +13,34 @@ export default async function JournalDetailPage({
 
   const { id } = await params;
 
-  const [trade, allTradeIds] = await Promise.all([
+  const trade = await prisma.trade.findFirst({
+    where: { id, userId },
+    include: {
+      executions: { orderBy: { executionTime: "asc" } },
+      events: { orderBy: { createdAt: "asc" } },
+      mistakes: { include: { mistakeTag: true } },
+      screenshots: { orderBy: { createdAt: "desc" } },
+    },
+  });
+
+  if (!trade) notFound();
+
+  // Get prev/next trade IDs efficiently (1 query each instead of fetching ALL IDs)
+  const [prevTrade, nextTrade] = await Promise.all([
     prisma.trade.findFirst({
-      where: { id, userId },
-      include: {
-        executions: { orderBy: { executionTime: "asc" } },
-        events: { orderBy: { createdAt: "asc" } },
-        mistakes: { include: { mistakeTag: true } },
-        screenshots: { orderBy: { createdAt: "desc" } },
-      },
+      where: { userId, entryTime: { gt: trade.entryTime } },
+      select: { id: true },
+      orderBy: { entryTime: "asc" },
     }),
-    prisma.trade.findMany({
-      where: { userId },
+    prisma.trade.findFirst({
+      where: { userId, entryTime: { lt: trade.entryTime } },
       select: { id: true },
       orderBy: { entryTime: "desc" },
     }),
   ]);
 
-  if (!trade) notFound();
-
-  // Get prev/next trade IDs for navigation
-  const tradeIds = allTradeIds.map((t) => t.id);
-  const currentIndex = tradeIds.indexOf(id);
-  const prevId = currentIndex > 0 ? tradeIds[currentIndex - 1] : null;
-  const nextId = currentIndex < tradeIds.length - 1 ? tradeIds[currentIndex + 1] : null;
+  const prevId = prevTrade?.id || null;
+  const nextId = nextTrade?.id || null;
 
   // Use DB-stored P&L values (live prices fetched client-side)
   const serialized = {

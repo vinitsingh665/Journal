@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { formatINR, cn } from "@/lib/utils";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
@@ -16,20 +17,21 @@ interface TradeData {
   totalCharges: number;
 }
 
-export default function CalendarView({ initialTrades }: { initialTrades: TradeData[] }) {
-  const [currentDate, setCurrentDate] = useState(new Date());
+export default function CalendarView({ 
+  initialTrades,
+  year,
+  month
+}: { 
+  initialTrades: TradeData[];
+  year: number;
+  month: number;
+}) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  const year = currentDate.getFullYear();
-  const month = currentDate.getMonth(); // 0-11
-
-  // Filter trades for the current selected month and year
-  const currentMonthTrades = useMemo(() => {
-    return initialTrades.filter((t) => {
-      if (!t.entryTime) return false;
-      const d = new Date(t.entryTime);
-      return d.getFullYear() === year && d.getMonth() === month;
-    });
-  }, [initialTrades, year, month]);
+  // initialTrades are already filtered for the current month and year by the server
+  const currentMonthTrades = initialTrades;
 
   // Group trades by day (1-31)
   const tradesByDay = useMemo(() => {
@@ -64,6 +66,7 @@ export default function CalendarView({ initialTrades }: { initialTrades: TradeDa
   const worstTrade = currentMonthTrades.length > 0 ? Math.min(...currentMonthTrades.map(t => t.netPnl)) : 0;
 
   // Best/Worst Days calculation
+  const currentDate = new Date(year, month, 1);
   const daysArray = Array.from(tradesByDay.entries());
   let bestDay = { date: "", pnl: -Infinity, day: 0 };
   let worstDay = { date: "", pnl: Infinity, day: 0 };
@@ -111,14 +114,26 @@ export default function CalendarView({ initialTrades }: { initialTrades: TradeDa
   }
 
   // Navigation handlers
+  const navigateTo = (newYear: number, newMonth: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("year", newYear.toString());
+    params.set("month", newMonth.toString());
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
   const handlePrevMonth = () => {
-    setCurrentDate(new Date(year, month - 1, 1));
+    const d = new Date(year, month - 1, 1);
+    navigateTo(d.getFullYear(), d.getMonth());
   };
+  
   const handleNextMonth = () => {
-    setCurrentDate(new Date(year, month + 1, 1));
+    const d = new Date(year, month + 1, 1);
+    navigateTo(d.getFullYear(), d.getMonth());
   };
+  
   const handleToday = () => {
-    setCurrentDate(new Date());
+    const d = new Date();
+    navigateTo(d.getFullYear(), d.getMonth());
   };
 
   const todayDate = new Date();
