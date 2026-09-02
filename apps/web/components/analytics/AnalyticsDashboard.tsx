@@ -2,6 +2,7 @@
 
 import React, { useMemo } from "react";
 import { formatINR, cn } from "@/lib/utils";
+import { useEnrichedPnl } from "@/hooks/useEnrichedPnl";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -33,7 +34,13 @@ ChartJS.register(
 interface TradeData {
   id: string;
   symbol: string;
+  exchange: string;
+  status: string;
   direction: string;
+  avgEntryPrice: number;
+  totalBuyQty: number;
+  totalSellQty: number;
+  stopLoss: number | null;
   setup: string | null;
   netPnl: number;
   grossPnl: number;
@@ -43,7 +50,29 @@ interface TradeData {
   holdingPeriodMs: number | null;
 }
 
-export default function AnalyticsDashboard({ initialTrades }: { initialTrades: TradeData[] }) {
+export default function AnalyticsDashboard({ initialTrades: rawTrades }: { initialTrades: TradeData[] }) {
+  const openTrades = useMemo(() => rawTrades.filter((t) => t.status === "OPEN" || t.status === "PARTIAL"), [rawTrades]);
+  const { livePnl } = useEnrichedPnl(openTrades);
+
+  const initialTrades = useMemo(() => {
+    return rawTrades.map((t) => {
+      if (t.status !== "OPEN" && t.status !== "PARTIAL") return t;
+      const liveQuote = livePnl.get(`${t.symbol}:${t.exchange}`);
+      if (!liveQuote) return t;
+
+      const displayPnl = liveQuote.netPnl;
+      let displayR = t.rMultiple;
+      if (t.stopLoss) {
+        displayR = displayPnl / (Math.abs(t.avgEntryPrice - t.stopLoss) * (t.totalBuyQty - t.totalSellQty));
+      }
+
+      return {
+        ...t,
+        netPnl: displayPnl,
+        rMultiple: displayR
+      };
+    });
+  }, [rawTrades, livePnl]);
   // ─── AGGREGATE MATH ──────────────────────────────────────────────────────────
   const {
     totalPnl,

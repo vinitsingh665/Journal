@@ -1,6 +1,8 @@
 "use client";
 
 import { formatINR, formatPercent } from "@/lib/utils";
+import { useEnrichedPnl } from "@/hooks/useEnrichedPnl";
+import { useMemo } from "react";
 
 interface KpiCardsProps {
   totalPnl: number;
@@ -13,6 +15,15 @@ interface KpiCardsProps {
   totalTrades: number;
   totalReturnPercent?: number;
   todayReturnPercent?: number;
+  allTimeInvestment?: number;
+  openTrades?: {
+    symbol: string;
+    exchange: string;
+    direction: string;
+    avgEntryPrice: number;
+    totalBuyQty: number;
+    totalSellQty: number;
+  }[];
 }
 
 export default function KpiCards({
@@ -26,7 +37,46 @@ export default function KpiCards({
   totalTrades,
   totalReturnPercent,
   todayReturnPercent,
+  allTimeInvestment,
+  openTrades,
 }: KpiCardsProps) {
+  const { livePnl } = useEnrichedPnl(openTrades || []);
+
+  const {
+    displayTotalPnl,
+    displayTodayPnl,
+    displayTotalReturnPercent,
+    displayTodayReturnPercent,
+  } = useMemo(() => {
+    let extraTotal = 0;
+    let extraToday = 0;
+    
+    if (livePnl && livePnl.size > 0) {
+      for (const pnl of livePnl.values()) {
+        extraTotal += pnl.netPnl;
+        extraToday += pnl.todayPnl;
+      }
+    }
+    
+    const finalTotal = totalPnl + extraTotal;
+    const finalToday = todayPnl + extraToday;
+    
+    let finalTotalReturnPercent = totalReturnPercent;
+    let finalTodayReturnPercent = todayReturnPercent;
+    
+    if (allTimeInvestment && allTimeInvestment > 0) {
+       finalTotalReturnPercent = (finalTotal / allTimeInvestment) * 100;
+       finalTodayReturnPercent = (finalToday / allTimeInvestment) * 100;
+    }
+    
+    return {
+       displayTotalPnl: finalTotal,
+       displayTodayPnl: finalToday,
+       displayTotalReturnPercent: finalTotalReturnPercent,
+       displayTodayReturnPercent: finalTodayReturnPercent
+    };
+  }, [livePnl, totalPnl, todayPnl, totalReturnPercent, todayReturnPercent, allTimeInvestment]);
+
   const kpis = [
     {
       label: "Total Capital",
@@ -56,33 +106,33 @@ export default function KpiCards({
     },
     {
       label: "Total P&L",
-      value: formatINR(totalPnl, { compact: true, showSign: true }),
-      change: totalReturnPercent != null 
-        ? formatPercent(totalReturnPercent) 
-        : (totalPnl !== 0 ? formatPercent((todayPnl / Math.abs(totalPnl || 1)) * 100) : "0%"),
-      positive: totalPnl >= 0,
+      value: formatINR(displayTotalPnl, { compact: true, showSign: true }),
+      change: displayTotalReturnPercent != null 
+        ? formatPercent(displayTotalReturnPercent) 
+        : (displayTotalPnl !== 0 ? formatPercent((displayTodayPnl / Math.abs(displayTotalPnl || 1)) * 100) : "0%"),
+      positive: displayTotalPnl >= 0,
       icon: (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
           <polyline points="16 7 22 7 22 13" />
         </svg>
       ),
-      accentColor: totalPnl >= 0 ? "#10B981" : "#EF4444",
+      accentColor: displayTotalPnl >= 0 ? "#10B981" : "#EF4444",
     },
     {
       label: "Today's P&L",
-      value: formatINR(todayPnl, { compact: true, showSign: true }),
-      change: todayReturnPercent != null 
-        ? formatPercent(todayReturnPercent)
-        : (totalPnl !== 0 ? formatPercent((todayPnl / Math.abs(totalPnl || 1)) * 100) : "0%"),
-      positive: todayPnl >= 0,
+      value: formatINR(displayTodayPnl, { compact: true, showSign: true }),
+      change: displayTodayReturnPercent != null 
+        ? formatPercent(displayTodayReturnPercent)
+        : (displayTotalPnl !== 0 ? formatPercent((displayTodayPnl / Math.abs(displayTotalPnl || 1)) * 100) : "0%"),
+      positive: displayTodayPnl >= 0,
       icon: (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="10" />
           <polyline points="12 6 12 12 16 14" />
         </svg>
       ),
-      accentColor: todayPnl >= 0 ? "#10B981" : "#EF4444",
+      accentColor: displayTodayPnl >= 0 ? "#10B981" : "#EF4444",
     },
     {
       label: "Deployed Capital",

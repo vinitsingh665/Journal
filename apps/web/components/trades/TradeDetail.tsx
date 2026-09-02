@@ -132,7 +132,7 @@ export default function TradeDetail({ trade }: { trade: TradeData }) {
         method: "DELETE",
       });
       if (res.ok) {
-        router.push("/dashboard/trades");
+        router.push("/trades");
         router.refresh();
       } else {
         const data = await res.json();
@@ -151,7 +151,7 @@ export default function TradeDetail({ trade }: { trade: TradeData }) {
       {/* Header */}
       <div className="page-header">
         <div className="flex items-center gap-4">
-          <Link href="/dashboard/trades" className="btn btn-ghost btn-icon">
+          <Link href="/trades" className="btn btn-ghost btn-icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="15 18 9 12 15 6" />
             </svg>

@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { formatINR, formatDate, formatHoldingPeriod, cn } from "@/lib/utils";
+import { useEnrichedPnl } from "@/hooks/useEnrichedPnl";
 
 interface JournalTrade {
   id: string;
@@ -83,6 +84,8 @@ export default function JournalList({
   const setStatusFilter = (status: string) => updateParams({ status });
 
   const filtered = trades;
+  const openTrades = useMemo(() => trades.filter((t) => t.status === "OPEN" || t.status === "PARTIAL"), [trades]);
+  const { livePnl } = useEnrichedPnl(openTrades);
 
   // Group by date
   const grouped = useMemo(() => {
@@ -215,32 +218,43 @@ export default function JournalList({
                         </div>
 
                         {/* Right: P&L + R */}
-                        <div style={{ display: "flex", alignItems: "center", gap: "var(--space-6)", textAlign: "right" }}>
-                          {trade.rMultiple !== null && (
-                            <div>
-                              <div className="text-muted" style={{ fontSize: 10 }}>R-Multiple</div>
-                              <div className={cn(trade.rMultiple >= 0 ? "text-positive" : "text-negative")}
-                                style={{ fontWeight: 700, fontFamily: "var(--font-mono)", fontSize: "var(--text-sm)" }}>
-                                {trade.rMultiple >= 0 ? "+" : ""}{trade.rMultiple.toFixed(2)}R
+                        {(() => {
+                          const liveQuote = livePnl.get(`${trade.symbol}:${trade.exchange}`);
+                          const displayPnl = liveQuote ? liveQuote.netPnl : trade.netPnl;
+                          const displayPct = liveQuote ? liveQuote.pnlPercentage : trade.pnlPercentage;
+                          const displayR = liveQuote && trade.stopLoss 
+                            ? (displayPnl / (Math.abs(trade.avgEntryPrice - trade.stopLoss) * (trade.totalBuyQty - trade.totalSellQty)))
+                            : trade.rMultiple;
+
+                          return (
+                            <div style={{ display: "flex", alignItems: "center", gap: "var(--space-6)", textAlign: "right" }}>
+                              {displayR !== null && (
+                                <div>
+                                  <div className="text-muted" style={{ fontSize: 10 }}>R-Multiple</div>
+                                  <div className={cn(displayR >= 0 ? "text-positive" : "text-negative")}
+                                    style={{ fontWeight: 700, fontFamily: "var(--font-mono)", fontSize: "var(--text-sm)" }}>
+                                    {displayR >= 0 ? "+" : ""}{displayR.toFixed(2)}R
+                                  </div>
+                                </div>
+                              )}
+                              <div>
+                                <div className="text-muted" style={{ fontSize: 10 }}>P&L</div>
+                                <div className={cn(displayPnl >= 0 ? "text-positive" : "text-negative")}
+                                  style={{ fontWeight: 700, fontFamily: "var(--font-mono)", fontSize: "var(--text-sm)" }}>
+                                  {formatINR(displayPnl, { showSign: true })}
+                                </div>
                               </div>
+                              <div>
+                                <div className="text-muted" style={{ fontSize: 10 }}>Return</div>
+                                <div className={cn(displayPct >= 0 ? "text-positive" : "text-negative")}
+                                  style={{ fontWeight: 700, fontFamily: "var(--font-mono)", fontSize: "var(--text-sm)" }}>
+                                  {displayPct >= 0 ? "+" : ""}{displayPct.toFixed(2)}%
+                                </div>
+                              </div>
+                              <div style={{ color: "var(--text-muted)", fontSize: 18 }}>›</div>
                             </div>
-                          )}
-                          <div>
-                            <div className="text-muted" style={{ fontSize: 10 }}>P&L</div>
-                            <div className={cn(trade.netPnl >= 0 ? "text-positive" : "text-negative")}
-                              style={{ fontWeight: 700, fontFamily: "var(--font-mono)", fontSize: "var(--text-sm)" }}>
-                              {formatINR(trade.netPnl, { showSign: true })}
-                            </div>
-                          </div>
-                          <div>
-                            <div className="text-muted" style={{ fontSize: 10 }}>Return</div>
-                            <div className={cn(trade.pnlPercentage >= 0 ? "text-positive" : "text-negative")}
-                              style={{ fontWeight: 700, fontFamily: "var(--font-mono)", fontSize: "var(--text-sm)" }}>
-                              {trade.pnlPercentage >= 0 ? "+" : ""}{trade.pnlPercentage.toFixed(2)}%
-                            </div>
-                          </div>
-                          <div style={{ color: "var(--text-muted)", fontSize: 18 }}>›</div>
-                        </div>
+                          );
+                        })()}
                       </div>
 
                       {/* Thesis preview */}

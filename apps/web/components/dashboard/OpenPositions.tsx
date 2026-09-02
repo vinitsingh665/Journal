@@ -113,7 +113,7 @@ export default function OpenPositions({ positions }: { positions: Position[] }) 
             </span>
           )}
         </div>
-        <Link href="/dashboard/positions" className="btn btn-ghost btn-sm">
+        <Link href="/positions" className="btn btn-ghost btn-sm">
           View All
         </Link>
       </div>

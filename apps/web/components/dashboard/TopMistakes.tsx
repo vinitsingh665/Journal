@@ -13,7 +13,7 @@ export default function TopMistakes({ mistakes }: { mistakes: Mistake[] }) {
     <div className="card" id="top-mistakes">
       <div className="card-header">
         <span className="card-title">Top Mistakes This Month</span>
-        <Link href="/dashboard/mistakes" className="btn btn-ghost btn-sm">
+        <Link href="/mistakes" className="btn btn-ghost btn-sm">
           View All
         </Link>
       </div>

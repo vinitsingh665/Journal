@@ -1,6 +1,6 @@
 import { prisma } from "@repo/database";
 import { getCurrentUser } from "@/lib/auth";
-import { redirect, notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import TradeDetail from "@/components/trades/TradeDetail";
 
 export default async function TradeDetailPage({
@@ -21,7 +21,7 @@ export default async function TradeDetailPage({
     },
   });
 
-  if (!trade) notFound();
+  if (!trade) redirect("/trades");
 
   const serialized = {
     id: trade.id,

@@ -174,6 +174,8 @@ async function DashboardContent() {
         totalTrades={metrics.totalTrades}
         totalReturnPercent={totalReturnPercent}
         todayReturnPercent={todayReturnPercent}
+        allTimeInvestment={allTimeInvestment}
+        openTrades={openTrades}
       />
 
       {/* Open Positions */}

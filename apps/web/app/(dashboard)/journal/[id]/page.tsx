@@ -1,6 +1,6 @@
 import { prisma } from "@repo/database";
 import { getCurrentUser } from "@/lib/auth";
-import { redirect, notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import JournalDetail from "@/components/journal/JournalDetail";
 
 export default async function JournalDetailPage({
@@ -23,7 +23,7 @@ export default async function JournalDetailPage({
     },
   });
 
-  if (!trade) notFound();
+  if (!trade) redirect("/journal");
 
   // Get prev/next trade IDs efficiently (1 query each instead of fetching ALL IDs)
   const [prevTrade, nextTrade] = await Promise.all([

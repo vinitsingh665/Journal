@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { formatINR, formatDate, formatTime, formatHoldingPeriod, cn } from "@/lib/utils";
+import { useEnrichedPnl } from "@/hooks/useEnrichedPnl";
 
 interface Execution {
   id: string;
@@ -100,6 +101,16 @@ export default function JournalDetail({ trade, isShared, sharedUserId }: { trade
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  const openTrades = (trade.status === "OPEN" || trade.status === "PARTIAL") ? [trade] : [];
+  const { livePnl } = useEnrichedPnl(openTrades);
+  const liveQuote = livePnl.get(`${trade.symbol}:${trade.exchange}`);
+
+  const displayPnl = liveQuote ? liveQuote.netPnl : trade.netPnl;
+  const displayPct = liveQuote ? liveQuote.pnlPercentage : trade.pnlPercentage;
+  const displayR = liveQuote && trade.stopLoss 
+    ? (displayPnl / (Math.abs(trade.avgEntryPrice - trade.stopLoss) * (trade.totalBuyQty - trade.totalSellQty)))
+    : trade.rMultiple;
+
   const entrySide = trade.direction === "LONG" ? "BUY" : "SELL";
   const exitSide = trade.direction === "LONG" ? "SELL" : "BUY";
 
@@ -155,7 +166,7 @@ export default function JournalDetail({ trade, isShared, sharedUserId }: { trade
       const isAlreadyDeleted = trade.status === "DELETED";
       const res = await fetch(`/api/trades/${trade.id}${isAlreadyDeleted ? '?hard=true' : ''}`, { method: "DELETE" });
       if (res.ok) {
-        router.push("/dashboard/journal");
+        router.push("/journal");
         router.refresh();
       }
     } catch { /* */ }
@@ -235,24 +246,24 @@ export default function JournalDetail({ trade, isShared, sharedUserId }: { trade
 
           {/* KPI Row */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "var(--space-4)" }}>
-            <div className="card" style={{ padding: "var(--space-3) var(--space-4)", textAlign: "center", overflow: "hidden" }} title={trade.rMultiple !== null ? `${trade.rMultiple >= 0 ? "+" : ""}${trade.rMultiple.toFixed(2)}R` : "—"}>
+            <div className="card" style={{ padding: "var(--space-3) var(--space-4)", textAlign: "center", overflow: "hidden" }} title={displayR !== null ? `${displayR >= 0 ? "+" : ""}${displayR.toFixed(2)}R` : "—"}>
               <div className="text-muted" style={{ fontSize: "var(--text-xs)", marginBottom: 4 }}>R-MULTIPLE</div>
               <div className={cn(
-                (trade.rMultiple ?? 0) >= 0 ? "text-positive" : "text-negative"
+                (displayR ?? 0) >= 0 ? "text-positive" : "text-negative"
               )} style={{ fontSize: "var(--text-xl)", fontWeight: 700, fontFamily: "var(--font-mono)", whiteSpace: "nowrap", textOverflow: "ellipsis", overflow: "hidden" }}>
-                {trade.rMultiple !== null ? `${trade.rMultiple >= 0 ? "+" : ""}${trade.rMultiple.toFixed(2)}R` : "—"}
+                {displayR !== null ? `${displayR >= 0 ? "+" : ""}${displayR.toFixed(2)}R` : "—"}
               </div>
             </div>
-            <div className="card" style={{ padding: "var(--space-3) var(--space-4)", textAlign: "center", overflow: "hidden" }} title={formatINR(trade.netPnl, { showSign: true })}>
+            <div className="card" style={{ padding: "var(--space-3) var(--space-4)", textAlign: "center", overflow: "hidden" }} title={formatINR(displayPnl, { showSign: true })}>
               <div className="text-muted" style={{ fontSize: "var(--text-xs)", marginBottom: 4 }}>P&L</div>
-              <div className={cn(trade.netPnl >= 0 ? "text-positive" : "text-negative")} style={{ fontSize: "var(--text-xl)", fontWeight: 700, fontFamily: "var(--font-mono)", whiteSpace: "nowrap", textOverflow: "ellipsis", overflow: "hidden" }}>
-                {formatINR(trade.netPnl, { showSign: true, compact: true })}
+              <div className={cn(displayPnl >= 0 ? "text-positive" : "text-negative")} style={{ fontSize: "var(--text-xl)", fontWeight: 700, fontFamily: "var(--font-mono)", whiteSpace: "nowrap", textOverflow: "ellipsis", overflow: "hidden" }}>
+                {formatINR(displayPnl, { showSign: true, compact: true })}
               </div>
             </div>
-            <div className="card" style={{ padding: "var(--space-3) var(--space-4)", textAlign: "center", overflow: "hidden" }} title={`${trade.pnlPercentage >= 0 ? "+" : ""}${trade.pnlPercentage.toFixed(2)}%`}>
+            <div className="card" style={{ padding: "var(--space-3) var(--space-4)", textAlign: "center", overflow: "hidden" }} title={`${displayPct >= 0 ? "+" : ""}${displayPct.toFixed(2)}%`}>
               <div className="text-muted" style={{ fontSize: "var(--text-xs)", marginBottom: 4 }}>RETURN</div>
-              <div className={cn(trade.pnlPercentage >= 0 ? "text-positive" : "text-negative")} style={{ fontSize: "var(--text-xl)", fontWeight: 700, fontFamily: "var(--font-mono)", whiteSpace: "nowrap", textOverflow: "ellipsis", overflow: "hidden" }}>
-                {trade.pnlPercentage >= 0 ? "+" : ""}{trade.pnlPercentage.toFixed(2)}%
+              <div className={cn(displayPct >= 0 ? "text-positive" : "text-negative")} style={{ fontSize: "var(--text-xl)", fontWeight: 700, fontFamily: "var(--font-mono)", whiteSpace: "nowrap", textOverflow: "ellipsis", overflow: "hidden" }}>
+                {displayPct >= 0 ? "+" : ""}{displayPct.toFixed(2)}%
               </div>
             </div>
             <div className="card" style={{ padding: "var(--space-3) var(--space-4)", textAlign: "center", overflow: "hidden" }} title={liveDuration.text}>
@@ -481,8 +492,8 @@ export default function JournalDetail({ trade, isShared, sharedUserId }: { trade
                   Fees & Charges: <strong style={{ fontFamily: "var(--font-mono)" }}>{formatINR(totalFees)}</strong>
                 </span>
                 <span style={{ fontSize: "var(--text-sm)" }}>
-                  Net P&L: <strong className={cn(trade.netPnl >= 0 ? "text-positive" : "text-negative")} style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-lg)" }}>
-                    {formatINR(trade.netPnl, { showSign: true })}
+                  Net P&L: <strong className={cn(displayPnl >= 0 ? "text-positive" : "text-negative")} style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-lg)" }}>
+                    {formatINR(displayPnl, { showSign: true })}
                   </strong>
                   <span className="text-muted" style={{ fontSize: "var(--text-xs)", marginLeft: 4 }}>(After fees)</span>
                 </span>
@@ -572,8 +583,8 @@ export default function JournalDetail({ trade, isShared, sharedUserId }: { trade
                 </div>
                 <div style={{ padding: "var(--space-3) var(--space-4)" }}>
                   <div className="text-muted" style={{ fontSize: "var(--text-xs)", marginBottom: 2 }}>Net P&L</div>
-                  <div className={cn(trade.netPnl >= 0 ? "text-positive" : "text-negative")} style={{ fontWeight: 700, fontFamily: "var(--font-mono)" }}>
-                    {formatINR(trade.netPnl, { showSign: true })}
+                  <div className={cn(displayPnl >= 0 ? "text-positive" : "text-negative")} style={{ fontWeight: 700, fontFamily: "var(--font-mono)" }}>
+                    {formatINR(displayPnl, { showSign: true })}
                   </div>
                 </div>
               </div>
@@ -582,14 +593,14 @@ export default function JournalDetail({ trade, isShared, sharedUserId }: { trade
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", borderBottom: "1px solid var(--border-secondary)" }}>
                 <div style={{ padding: "var(--space-3) var(--space-4)" }}>
                   <div className="text-muted" style={{ fontSize: "var(--text-xs)", marginBottom: 2 }}>R-Multiple</div>
-                  <div className={cn((trade.rMultiple ?? 0) >= 0 ? "text-positive" : "text-negative")} style={{ fontWeight: 600, fontFamily: "var(--font-mono)" }}>
-                    {trade.rMultiple !== null ? `${trade.rMultiple >= 0 ? "+" : ""}${trade.rMultiple.toFixed(2)}R` : "—"}
+                  <div className={cn((displayR ?? 0) >= 0 ? "text-positive" : "text-negative")} style={{ fontWeight: 600, fontFamily: "var(--font-mono)" }}>
+                    {displayR !== null ? `${displayR >= 0 ? "+" : ""}${displayR.toFixed(2)}R` : "—"}
                   </div>
                 </div>
                 <div style={{ padding: "var(--space-3) var(--space-4)" }}>
                   <div className="text-muted" style={{ fontSize: "var(--text-xs)", marginBottom: 2 }}>Return</div>
-                  <div className={cn(trade.pnlPercentage >= 0 ? "text-positive" : "text-negative")} style={{ fontWeight: 600, fontFamily: "var(--font-mono)" }}>
-                    {trade.pnlPercentage >= 0 ? "+" : ""}{trade.pnlPercentage.toFixed(2)}%
+                  <div className={cn(displayPct >= 0 ? "text-positive" : "text-negative")} style={{ fontWeight: 600, fontFamily: "var(--font-mono)" }}>
+                    {displayPct >= 0 ? "+" : ""}{displayPct.toFixed(2)}%
                   </div>
                 </div>
                 <div style={{ padding: "var(--space-3) var(--space-4)" }}>

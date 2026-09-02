@@ -245,7 +245,7 @@ export default function TradeForm({ userId, tradeId, initialData }: TradeFormPro
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || (tradeId ? "Failed to update trade" : "Failed to create trade"));
 
-      router.push("/dashboard/trades");
+      router.push("/trades");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");

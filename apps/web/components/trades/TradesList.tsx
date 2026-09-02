@@ -6,6 +6,7 @@ import Link from "next/link";
 import { formatINR, formatDate, formatDateTime, formatHoldingPeriod, cn } from "@/lib/utils";
 import MiniCandleChart from "@/components/dashboard/MiniCandleChart";
 import AddExecutionModal from "./AddExecutionModal";
+import { useEnrichedPnl } from "@/hooks/useEnrichedPnl";
 
 interface Trade {
   id: string;
@@ -139,6 +140,9 @@ export default function TradesList({
 
   const selectedTrade = useMemo(() => trades.find((t) => t.id === selectedTradeId), [trades, selectedTradeId]);
   const liveDuration = useLiveHoldingPeriod(selectedTrade?.entryTime, selectedTrade?.holdingPeriodMs);
+
+  const openTrades = useMemo(() => trades.filter((t) => t.status === "OPEN" || t.status === "PARTIAL"), [trades]);
+  const { livePnl } = useEnrichedPnl(openTrades);
 
   // Use server-provided KPIs or fallback
   const kpis = serverKpis || {
@@ -325,7 +329,7 @@ export default function TradesList({
             </button>
           )}
 
-          <Link href="/dashboard/trades/new" className="btn btn-primary btn-sm">
+          <Link href="/trades/new" className="btn btn-primary btn-sm">
             + New Trade
           </Link>
         </div>
@@ -369,8 +373,15 @@ export default function TradesList({
                     </tr>
                   </thead>
                   <tbody>
-                    {paginated.map((trade) => (
-                      <React.Fragment key={trade.id}>
+                    {paginated.map((trade) => {
+                      const liveQuote = livePnl.get(`${trade.symbol}:${trade.exchange}`);
+                      const displayPnl = liveQuote ? liveQuote.netPnl : trade.netPnl;
+                      const displayR = liveQuote && trade.stopLoss 
+                        ? (displayPnl / (Math.abs(trade.avgEntryPrice - trade.stopLoss) * (trade.totalBuyQty - trade.totalSellQty)))
+                        : trade.rMultiple;
+                        
+                      return (
+                        <React.Fragment key={trade.id}>
                         <tr
                           onClick={() => setSelectedTradeId(trade.id)}
                           className={cn(
@@ -437,15 +448,15 @@ export default function TradesList({
                             {trade.avgExitPrice ? formatINR(trade.avgExitPrice) : "—"}
                           </td>
                           <td className="col-numeric" style={{ padding: "8px 6px" }}>
-                            {trade.rMultiple !== null ? (
-                              <span className={cn(trade.rMultiple >= 0 ? "text-positive" : "text-negative")}>
-                                {trade.rMultiple >= 0 ? "+" : ""}{trade.rMultiple.toFixed(2)}R
+                            {displayR !== null ? (
+                              <span className={cn(displayR >= 0 ? "text-positive" : "text-negative")}>
+                                {displayR >= 0 ? "+" : ""}{displayR.toFixed(2)}R
                               </span>
                             ) : "—"}
                           </td>
                           <td className="col-numeric" style={{ padding: "8px 6px" }}>
-                            <span className={cn(trade.netPnl >= 0 ? "text-positive" : "text-negative")} style={{ fontWeight: 600 }}>
-                              {formatINR(trade.netPnl, { showSign: true, compact: true })}
+                            <span className={cn(displayPnl >= 0 ? "text-positive" : "text-negative")} style={{ fontWeight: 600 }}>
+                              {formatINR(displayPnl, { showSign: true, compact: true })}
                             </span>
                           </td>
                           <td style={{ padding: "8px 6px" }}>
@@ -533,7 +544,8 @@ export default function TradesList({
                           </tr>
                         )}
                       </React.Fragment>
-                    ))}
+                    );
+                  })}
                   </tbody>
                 </table>
               ) : (
@@ -638,26 +650,37 @@ export default function TradesList({
               </div>
 
               {/* Key Metrics */}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "var(--space-3)", padding: "var(--space-4) var(--space-5)", borderBottom: "1px solid var(--border-secondary)" }}>
-                <div>
-                  <div className="text-muted" style={{ fontSize: "var(--text-xs)", marginBottom: 2 }}>R-Multiple</div>
-                  <div className={cn("text-positive", (selectedTrade.rMultiple ?? 0) < 0 && "text-negative")} style={{ fontSize: "var(--text-lg)", fontWeight: 700, fontFamily: "var(--font-mono)" }}>
-                    {selectedTrade.rMultiple !== null ? `${selectedTrade.rMultiple >= 0 ? "+" : ""}${selectedTrade.rMultiple.toFixed(2)}R` : "—"}
+              {(() => {
+                const liveQuote = livePnl.get(`${selectedTrade.symbol}:${selectedTrade.exchange}`);
+                const displayPnl = liveQuote ? liveQuote.netPnl : selectedTrade.netPnl;
+                const displayPct = liveQuote ? liveQuote.pnlPercentage : selectedTrade.pnlPercentage;
+                const displayR = liveQuote && selectedTrade.stopLoss 
+                  ? (displayPnl / (Math.abs(selectedTrade.avgEntryPrice - selectedTrade.stopLoss) * (selectedTrade.totalBuyQty - selectedTrade.totalSellQty)))
+                  : selectedTrade.rMultiple;
+                  
+                return (
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "var(--space-3)", padding: "var(--space-4) var(--space-5)", borderBottom: "1px solid var(--border-secondary)" }}>
+                    <div>
+                      <div className="text-muted" style={{ fontSize: "var(--text-xs)", marginBottom: 2 }}>R-Multiple</div>
+                      <div className={cn("text-positive", (displayR ?? 0) < 0 && "text-negative")} style={{ fontSize: "var(--text-lg)", fontWeight: 700, fontFamily: "var(--font-mono)" }}>
+                        {displayR !== null ? `${displayR >= 0 ? "+" : ""}${displayR.toFixed(2)}R` : "—"}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-muted" style={{ fontSize: "var(--text-xs)", marginBottom: 2 }}>P&L</div>
+                      <div className={cn(displayPnl >= 0 ? "text-positive" : "text-negative")} style={{ fontSize: "var(--text-lg)", fontWeight: 700, fontFamily: "var(--font-mono)" }}>
+                        {formatINR(displayPnl, { showSign: true })}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-muted" style={{ fontSize: "var(--text-xs)", marginBottom: 2 }}>Return</div>
+                      <div className={cn(displayPct >= 0 ? "text-positive" : "text-negative")} style={{ fontSize: "var(--text-lg)", fontWeight: 700, fontFamily: "var(--font-mono)" }}>
+                        {displayPct >= 0 ? "+" : ""}{displayPct.toFixed(2)}%
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <div>
-                  <div className="text-muted" style={{ fontSize: "var(--text-xs)", marginBottom: 2 }}>P&L</div>
-                  <div className={cn(selectedTrade.netPnl >= 0 ? "text-positive" : "text-negative")} style={{ fontSize: "var(--text-lg)", fontWeight: 700, fontFamily: "var(--font-mono)" }}>
-                    {formatINR(selectedTrade.netPnl, { showSign: true })}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-muted" style={{ fontSize: "var(--text-xs)", marginBottom: 2 }}>Return</div>
-                  <div className={cn(selectedTrade.pnlPercentage >= 0 ? "text-positive" : "text-negative")} style={{ fontSize: "var(--text-lg)", fontWeight: 700, fontFamily: "var(--font-mono)" }}>
-                    {selectedTrade.pnlPercentage >= 0 ? "+" : ""}{selectedTrade.pnlPercentage.toFixed(2)}%
-                  </div>
-                </div>
-              </div>
+                );
+              })()}
 
               {/* Trade Info Grid */}
               <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "var(--space-3)", padding: "var(--space-4) var(--space-5)", borderBottom: "1px solid var(--border-secondary)" }}>
