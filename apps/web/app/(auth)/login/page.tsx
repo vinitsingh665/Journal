@@ -50,21 +50,12 @@ export default function LoginPage() {
   const [isSetup, setIsSetup] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [checkingSetup, setCheckingSetup] = useState(true);
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== "undefined") {
       return localStorage.getItem("auth-theme") === "dark";
     }
     return false;
   });
-
-  useEffect(() => {
-    fetch("/api/auth/check")
-      .then((r) => r.json())
-      .then((data) => { setIsSetup(!data.hasUser); setCheckingSetup(false); })
-      .catch(() => { setIsSetup(true); setCheckingSetup(false); });
-      
-  }, []);
 
   const toggleTheme = () => {
     const newTheme = !isDark;
@@ -101,13 +92,7 @@ export default function LoginPage() {
     finally { setLoading(false); }
   };
 
-  if (checkingSetup) {
-    return (
-      <div suppressHydrationWarning data-theme={isDark ? "dark" : "light"} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: 'var(--bg-primary)' }}>
-        <p style={{ color: "var(--text-muted)" }}>Loading...</p>
-      </div>
-    );
-  }
+
 
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
 
