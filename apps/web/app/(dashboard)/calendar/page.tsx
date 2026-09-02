@@ -60,6 +60,13 @@ async function CalendarContent({ searchParams }: { searchParams: { month?: strin
 
   const serialized = trades.map((t) => ({
     id: t.id,
+    symbol: t.symbol,
+    exchange: t.exchange,
+    status: t.status,
+    direction: t.direction,
+    avgEntryPrice: t.avgEntryPrice,
+    totalBuyQty: t.totalBuyQty,
+    totalSellQty: t.totalSellQty,
     entryTime: t.entryTime.toISOString(),
     netPnl: t.netPnl,
     grossPnl: t.grossPnl,

@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { formatINR, cn } from "@/lib/utils";
+import { useEnrichedPnl } from "@/hooks/useEnrichedPnl";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
 
@@ -11,6 +12,13 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 
 interface TradeData {
   id: string;
+  symbol: string;
+  exchange: string;
+  status: string;
+  direction: string;
+  avgEntryPrice: number;
+  totalBuyQty: number;
+  totalSellQty: number;
   entryTime: string;
   netPnl: number;
   grossPnl: number;
@@ -30,8 +38,22 @@ export default function CalendarView({
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  // initialTrades are already filtered for the current month and year by the server
-  const currentMonthTrades = initialTrades;
+  // Extract open trades for live pricing
+  const openTrades = useMemo(() => initialTrades.filter((t) => t.status === "OPEN" || t.status === "PARTIAL"), [initialTrades]);
+  const { livePnl } = useEnrichedPnl(openTrades);
+
+  // Apply live P&L back to trades
+  const currentMonthTrades = useMemo(() => {
+    return initialTrades.map((t) => {
+      if (t.status === "OPEN" || t.status === "PARTIAL") {
+        const liveQuote = livePnl.get(`${t.symbol}:${t.exchange}`);
+        if (liveQuote) {
+          return { ...t, netPnl: liveQuote.netPnl, grossPnl: liveQuote.grossPnl };
+        }
+      }
+      return t;
+    });
+  }, [initialTrades, livePnl]);
 
   // Group trades by day (1-31)
   const tradesByDay = useMemo(() => {

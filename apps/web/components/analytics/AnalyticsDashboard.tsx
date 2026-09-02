@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { formatINR, cn } from "@/lib/utils";
 import { useEnrichedPnl } from "@/hooks/useEnrichedPnl";
 import {
@@ -51,6 +51,9 @@ interface TradeData {
 }
 
 export default function AnalyticsDashboard({ initialTrades: rawTrades }: { initialTrades: TradeData[] }) {
+  const [perfView, setPerfView] = useState("Monthly");
+  const [perfMetric, setPerfMetric] = useState("P&L");
+
   const openTrades = useMemo(() => rawTrades.filter((t) => t.status === "OPEN" || t.status === "PARTIAL"), [rawTrades]);
   const { livePnl } = useEnrichedPnl(openTrades);
 
@@ -208,16 +211,75 @@ export default function AnalyticsDashboard({ initialTrades: rawTrades }: { initi
     return { labels, data };
   }, [initialTrades]);
 
-  // Monthly Performance
-  const monthlyData = useMemo(() => {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const pnlByMonth = new Array(12).fill(0);
-    initialTrades.forEach(t => {
-      const month = new Date(t.entryTime).getMonth();
-      pnlByMonth[month] += t.netPnl;
-    });
-    return pnlByMonth;
-  }, [initialTrades]);
+  // Performance Chart Data
+  const perfChartData = useMemo(() => {
+    let labels: string[] = [];
+    let data: number[] = [];
+
+    if (perfView === "Daily") {
+      const dayMap: Record<string, number> = {};
+      initialTrades.forEach(t => {
+        const d = new Date(t.entryTime);
+        const key = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        const val = perfMetric === "P&L" ? t.netPnl : (t.rMultiple || 0);
+        dayMap[key] = (dayMap[key] || 0) + val;
+      });
+      const sortedKeys = Object.keys(dayMap).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+      labels = sortedKeys.map(k => new Date(k).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }));
+      data = sortedKeys.map(k => dayMap[k]);
+    } else if (perfView === "Weekly") {
+      const weekMap: Record<string, number> = {};
+      initialTrades.forEach(t => {
+        const d = new Date(t.entryTime);
+        const day = d.getDay();
+        const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Get Monday
+        const monday = new Date(new Date(d).setDate(diff));
+        const key = monday.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        const val = perfMetric === "P&L" ? t.netPnl : (t.rMultiple || 0);
+        weekMap[key] = (weekMap[key] || 0) + val;
+      });
+      const sortedKeys = Object.keys(weekMap).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+      labels = sortedKeys.map(k => `Wk of ${new Date(k).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`);
+      data = sortedKeys.map(k => weekMap[k]);
+    } else if (perfView === "Yearly") {
+      const yearMap: Record<string, number> = {};
+      initialTrades.forEach(t => {
+        const year = new Date(t.entryTime).getFullYear().toString();
+        const val = perfMetric === "P&L" ? t.netPnl : (t.rMultiple || 0);
+        yearMap[year] = (yearMap[year] || 0) + val;
+      });
+      labels = Object.keys(yearMap).sort();
+      data = labels.map(y => yearMap[y]);
+    } else {
+      // Monthly
+      const monthMap: Record<string, number> = {};
+      initialTrades.forEach(t => {
+        const d = new Date(t.entryTime);
+        const key = `${d.getFullYear()}-${d.getMonth()}`; 
+        const val = perfMetric === "P&L" ? t.netPnl : (t.rMultiple || 0);
+        monthMap[key] = (monthMap[key] || 0) + val;
+      });
+      const sortedKeys = Object.keys(monthMap).sort((a, b) => {
+         const [yA, mA] = a.split('-');
+         const [yB, mB] = b.split('-');
+         if (yA !== yB) return Number(yA) - Number(yB);
+         return Number(mA) - Number(mB);
+      });
+      labels = sortedKeys.map(k => {
+         const [y, m] = k.split('-');
+         const d = new Date(Number(y), Number(m), 1);
+         return d.toLocaleDateString(undefined, { month: 'short', year: '2-digit' });
+      });
+      data = sortedKeys.map(k => monthMap[k]);
+    }
+
+    if (labels.length === 0) {
+      labels = ['No Data'];
+      data = [0];
+    }
+
+    return { labels, data };
+  }, [initialTrades, perfView, perfMetric]);
 
   // R-Multiple Bins
   const rBins = useMemo(() => {
@@ -366,19 +428,36 @@ export default function AnalyticsDashboard({ initialTrades: rawTrades }: { initi
 
         <div className="card" style={{ flex: "1 1 300px", padding: "var(--space-5)", minWidth: 0 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-4)" }}>
-            <div style={{ fontSize: "var(--text-sm)", fontWeight: 700 }}>MONTHLY PERFORMANCE <span className="text-muted">ⓘ</span></div>
+            <div style={{ display: "flex", alignItems: "center", gap: "var(--space-4)" }}>
+              <div style={{ fontSize: "var(--text-sm)", fontWeight: 700 }}>PERFORMANCE <span className="text-muted">ⓘ</span></div>
+              <select className="input" style={{ padding: "4px 8px", fontSize: "var(--text-xs)", height: "auto", color: "var(--text-primary)", backgroundColor: "var(--bg-primary)" }} value={perfView} onChange={(e) => setPerfView(e.target.value)}>
+                <option>Daily</option>
+                <option>Weekly</option>
+                <option>Monthly</option>
+                <option>Yearly</option>
+              </select>
+            </div>
             <div style={{ display: "flex", background: "var(--bg-secondary)", borderRadius: 6, padding: 2 }}>
-              <button style={{ background: "var(--bg-primary)", color: "var(--text-primary)", border: "none", padding: "4px 8px", fontSize: 10, fontWeight: 600, borderRadius: 4, boxShadow: "0 1px 2px rgba(0,0,0,0.05)" }}>P&L</button>
-              <button className="text-muted" style={{ background: "transparent", color: "var(--text-muted)", border: "none", padding: "4px 8px", fontSize: 10, fontWeight: 600 }}>R-Multiple</button>
+              <button onClick={() => setPerfMetric("P&L")} style={{ background: perfMetric === "P&L" ? "var(--bg-primary)" : "transparent", color: perfMetric === "P&L" ? "var(--text-primary)" : "var(--text-muted)", border: "none", padding: "4px 8px", fontSize: 10, fontWeight: 600, borderRadius: 4, boxShadow: perfMetric === "P&L" ? "0 1px 2px rgba(0,0,0,0.05)" : "none", cursor: "pointer" }}>P&L</button>
+              <button onClick={() => setPerfMetric("R-Multiple")} style={{ background: perfMetric === "R-Multiple" ? "var(--bg-primary)" : "transparent", color: perfMetric === "R-Multiple" ? "var(--text-primary)" : "var(--text-muted)", border: "none", padding: "4px 8px", fontSize: 10, fontWeight: 600, borderRadius: 4, boxShadow: perfMetric === "R-Multiple" ? "0 1px 2px rgba(0,0,0,0.05)" : "none", cursor: "pointer" }}>R-Multiple</button>
             </div>
           </div>
-          <div style={{ height: 280 }}>
-            <Bar
+          <div style={{ height: 280, overflowX: "auto", overflowY: "hidden" }}>
+            <div style={{ 
+              height: "100%", 
+              width: perfView === "Daily" 
+                ? `${Math.max(100, (perfChartData.labels.length / 15) * 100)}%` 
+                : perfView === "Weekly" || perfView === "Monthly"
+                ? `${Math.max(100, (perfChartData.labels.length / 12) * 100)}%`
+                : "100%",
+              minWidth: "100%" 
+            }}>
+              <Bar
               data={{
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                labels: perfChartData.labels,
                 datasets: [{
-                  data: monthlyData,
-                  backgroundColor: monthlyData.map(v => v >= 0 ? "rgba(16, 185, 129, 0.9)" : "rgba(239, 68, 68, 0.9)"),
+                  data: perfChartData.data,
+                  backgroundColor: perfChartData.data.map((v: number) => v >= 0 ? "rgba(16, 185, 129, 0.9)" : "rgba(239, 68, 68, 0.9)"),
                   borderRadius: 2,
                   barPercentage: 0.6,
                 }]
@@ -400,7 +479,8 @@ export default function AnalyticsDashboard({ initialTrades: rawTrades }: { initi
                       font: { size: 10 }, 
                       color: "#71717a",
                       callback: function(value: any) {
-                        if (value === 0) return '₹0';
+                        if (value === 0) return perfMetric === "P&L" ? '₹0' : '0R';
+                        if (perfMetric === "R-Multiple") return (value > 0 ? '+' : '') + value.toFixed(1) + 'R';
                         if (Math.abs(value) >= 100000) return (value < 0 ? '-' : '') + '₹' + (Math.abs(value) / 100000).toFixed(1) + 'L';
                         if (Math.abs(value) >= 1000) return (value < 0 ? '-' : '') + '₹' + (Math.abs(value) / 1000).toFixed(1) + 'K';
                         return (value < 0 ? '-' : '') + '₹' + Math.abs(value);
@@ -410,6 +490,7 @@ export default function AnalyticsDashboard({ initialTrades: rawTrades }: { initi
                 }
               }}
             />
+          </div>
           </div>
         </div>
       </div>
