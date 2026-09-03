@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (baseCurrency === "INR" && ["NASDAQ", "NYSE", "CRYPTO"].includes(exchange.toUpperCase())) {
-      const quote = await fetchStockQuote("USDINR=X", "FOREX");
+      const quote = await fetchStockQuote("USDINR", "FX_IDC");
       if (!quote || !quote.regularMarketPrice) {
         return NextResponse.json(
           { error: "Failed to fetch live exchange rate for USD to INR conversion. Please try again." },

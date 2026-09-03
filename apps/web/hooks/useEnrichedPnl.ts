@@ -9,6 +9,7 @@ interface OpenPosition {
   avgEntryPrice: number;
   totalBuyQty: number;
   totalSellQty: number;
+  entryTime?: Date | string;
 }
 
 interface LivePnl {
@@ -58,31 +59,22 @@ export function useEnrichedPnl(
         byExchange.get(exch)!.push(symbol);
       }
 
-      // Fetch all exchanges in parallel
+      // Fetch all required symbols via batch API
+      const res = await fetch("/api/quotes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          symbols: uniqueSymbols.map(s => ({ symbol: s.symbol, exchange: s.exchange || "NSE" }))
+        }),
+      });
+
+      if (!res.ok) throw new Error("Failed to fetch quotes");
+      const quotesMap = await res.json();
+      
       const allQuotes = new Map<string, any>();
-      const fetchPromises = Array.from(byExchange.entries()).map(
-        async ([exchange, syms]) => {
-          try {
-            const res = await fetch(
-              `/api/quotes?symbols=${syms.join(",")}&exchange=${exchange}`
-            );
-            if (!res.ok) return;
-            const data = await res.json();
-
-            if (syms.length === 1 && data.symbol) {
-              allQuotes.set(`${data.symbol}:${exchange}`, data);
-            } else {
-              for (const [key, quote] of Object.entries(data)) {
-                allQuotes.set(key, quote);
-              }
-            }
-          } catch (e) {
-            console.warn(`Failed to fetch quotes for ${exchange}:`, e);
-          }
-        }
-      );
-
-      await Promise.all(fetchPromises);
+      for (const [key, quote] of Object.entries(quotesMap)) {
+        allQuotes.set(key, quote);
+      }
 
       // Calculate P&L for each open position
       const pnlMap = new Map<string, LivePnl>();
@@ -111,6 +103,19 @@ export function useEnrichedPnl(
         let todayPnl = todayPriceChange * openQty;
         if (pos.direction === "SHORT") {
           todayPnl = -todayPnl;
+        }
+
+        // If the position was opened today, Today's P&L is exactly the Total P&L
+        if (pos.entryTime) {
+          const entryDate = new Date(pos.entryTime);
+          const today = new Date();
+          if (
+            entryDate.getDate() === today.getDate() &&
+            entryDate.getMonth() === today.getMonth() &&
+            entryDate.getFullYear() === today.getFullYear()
+          ) {
+            todayPnl = pnl;
+          }
         }
 
         pnlMap.set(key, {

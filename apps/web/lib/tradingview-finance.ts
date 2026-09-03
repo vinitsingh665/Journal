@@ -7,7 +7,7 @@ function getScannerRegion(exchange: string): string {
   const upper = exchange.toUpperCase();
   if (upper === "NSE" || upper === "BSE") return "india";
   if (upper === "CRYPTO" || upper === "BINANCE") return "crypto";
-  if (upper === "FOREX" || upper === "FX") return "forex";
+  if (upper === "FOREX" || upper === "FX" || upper === "FX_IDC") return "forex";
   return "america"; // Default to america for NYSE, NASDAQ, AMEX, etc
 }
 
@@ -119,9 +119,6 @@ export async function fetchMultipleQuotes(
               currency: d[7] || (region === "india" ? "INR" : "USD"),
               lastUpdated: new Date().toISOString()
             };
-
-            // Convert currency if requested (Implementation simplified for now, assuming base app currency matches market)
-            // You can implement forex conversion here if needed just like in yahoo-finance
             
             results.set(`${originalReq.symbol}:${originalReq.exchange}`, quote);
           }
@@ -133,6 +130,53 @@ export async function fetchMultipleQuotes(
   });
 
   await Promise.all(fetchPromises);
+
+  // Apply currency conversion if targetCurrency is provided
+  if (targetCurrency) {
+    const targetUpper = targetCurrency.toUpperCase();
+    const conversionsNeeded = new Set<string>();
+    
+    for (const quote of results.values()) {
+      if (quote.currency && quote.currency.toUpperCase() !== targetUpper) {
+        conversionsNeeded.add(quote.currency.toUpperCase());
+      }
+    }
+
+    if (conversionsNeeded.size > 0) {
+      // Map stablecoins to USD for forex lookup
+      const mapCurrency = (c: string) => 
+        ["USDT", "USDC", "BUSD", "DAI"].includes(c) ? "USD" : c;
+
+      // Fetch exchange rates (e.g., USD -> INR = USDINR)
+      const fxSymbols = Array.from(conversionsNeeded).map(c => ({ 
+        symbol: `${mapCurrency(c)}${targetUpper}`, 
+        exchange: "FX_IDC" 
+      }));
+      
+      // Call recursively WITHOUT targetCurrency to avoid infinite loops
+      const fxQuotes = await fetchMultipleQuotes(fxSymbols);
+      
+      for (const quote of results.values()) {
+        const quoteCurrency = quote.currency?.toUpperCase();
+        if (quoteCurrency && quoteCurrency !== targetUpper) {
+          const mappedCurrency = mapCurrency(quoteCurrency);
+          const fxKey = `${mappedCurrency}${targetUpper}:FX_IDC`;
+          const fxRate = fxQuotes.get(fxKey)?.regularMarketPrice;
+          
+          if (fxRate) {
+            quote.regularMarketPrice *= fxRate;
+            quote.regularMarketChange *= fxRate;
+            quote.regularMarketOpen *= fxRate;
+            quote.regularMarketDayHigh *= fxRate;
+            quote.regularMarketDayLow *= fxRate;
+            quote.regularMarketPreviousClose *= fxRate;
+            quote.currency = targetUpper;
+          }
+        }
+      }
+    }
+  }
+
   return results;
 }
 

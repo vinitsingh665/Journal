@@ -23,6 +23,7 @@ interface KpiCardsProps {
     avgEntryPrice: number;
     totalBuyQty: number;
     totalSellQty: number;
+    entryTime?: Date | string;
   }[];
 }
 

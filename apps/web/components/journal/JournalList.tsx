@@ -56,6 +56,27 @@ export default function JournalList({
   const statusFilter = initialStatus || "ALL";
   const searchQuery = initialSearch || "";
   const [localSearch, setLocalSearch] = useState(searchQuery);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleEmptyTrash = async () => {
+    if (!window.confirm("Are you sure you want to permanently delete all items in the trash? This action cannot be undone.")) {
+      return;
+    }
+    setIsDeleting(true);
+    try {
+      const res = await fetch("/api/trades/deleted", { method: "DELETE" });
+      if (res.ok) {
+        router.refresh();
+      } else {
+        alert("Failed to empty trash. Please try again.");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("An error occurred while emptying the trash.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   // Debounce search
   useEffect(() => {
@@ -134,17 +155,29 @@ export default function JournalList({
             </button>
           )}
         </div>
-        <div className="search-input" style={{ width: 200 }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="11" cy="11" r="8" />
-            <line x1="21" y1="21" x2="16.65" y2="16.65" />
-          </svg>
-          <input
-            type="text"
-            placeholder="Search symbol..."
-            value={localSearch}
-            onChange={(e) => setLocalSearch(e.target.value)}
-          />
+        <div style={{ display: "flex", gap: "var(--space-2)", alignItems: "center" }}>
+          {statusFilter === "DELETED" && counts.deletedCount > 0 && (
+            <button
+              className="btn btn-sm"
+              style={{ background: "rgba(239, 68, 68, 0.15)", color: "#ef4444", border: "1px solid rgba(239, 68, 68, 0.3)" }}
+              onClick={handleEmptyTrash}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Emptying..." : "Empty Trash"}
+            </button>
+          )}
+          <div className="search-input" style={{ width: 200 }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Search symbol..."
+              value={localSearch}
+              onChange={(e) => setLocalSearch(e.target.value)}
+            />
+          </div>
         </div>
       </div>
 
