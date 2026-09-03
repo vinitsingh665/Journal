@@ -691,7 +691,6 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
                 <p className="settings-row-desc" style={{ marginBottom: "var(--space-4)" }}>Link your brokers for automatic trade syncing.</p>
 
                 <div className="card card-body" style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)" }}>
-                  {/*
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "var(--space-4)", border: "1px solid var(--border-secondary)", borderRadius: "var(--radius-md)" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "var(--space-4)", width: "100%" }}>
                       <div style={{ width: 40, height: 40, background: "#f8f9fa", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, color: "#119933" }}>D</div>
@@ -736,7 +735,6 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
                       </div>
                     </div>
                   </div>
-                  */}
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "var(--space-4)", border: "1px solid var(--border-secondary)", borderRadius: "var(--radius-md)" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "var(--space-4)" }}>
                       <div style={{ width: 40, height: 40, background: "#f3ba2f", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, color: "#000" }}>B</div>
