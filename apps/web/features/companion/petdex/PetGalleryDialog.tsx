@@ -226,10 +226,10 @@ function FileDrop({
         type="button"
         variant="outline"
         size="sm"
-        className="h-8 shrink-0 rounded-full border-white/[0.12] bg-white/[0.04] text-xs"
+        className="h-8 shrink-0 rounded-full border-white/[0.12] bg-white/[0.04] text-xs px-3 font-medium"
         onClick={() => inputRef.current?.click()}
       >
-        {file ? t("myBuddy.import.replace") : t("myBuddy.import.choose")}
+        {file ? "Replace file" : "Choose file"}
       </Button>
       <input
         ref={inputRef}
@@ -292,7 +292,7 @@ function CompanionCard({
                 event.stopPropagation();
                 onDelete();
               }}
-              className="flex h-7 w-7 items-center justify-center rounded-full text-text-muted opacity-0 transition-colors hover:bg-white/[0.08] hover:text-rose-300 group-hover:opacity-100"
+              className="flex h-7 w-7 items-center justify-center rounded-full bg-transparent border-none text-text-muted transition-colors hover:bg-white/[0.08] hover:text-red-500"
               title={t("common.delete")}
             >
               <Trash2 className="size-3.5" />
@@ -654,7 +654,7 @@ export function PetGalleryDialog({
         >
           {mode === "gallery" ? <span aria-hidden="true" /> : (
             <h2 className="pt-1 text-[15px] font-semibold text-text-dark">
-              {t("myBuddy.import.title")}
+              Import petdex pet
             </h2>
           )}
           <div className="flex translate-x-1 translate-y-[2px] items-center gap-2 pt-2">
@@ -853,13 +853,22 @@ export function PetGalleryDialog({
         ) : (
           <div className="flex min-h-0 flex-1 flex-col gap-4 px-5 pb-3">
             <p className="max-w-[560px] text-[12px] leading-relaxed text-text-muted">
-              {t("myBuddy.import.desc")}
+              Pick a spritesheet.webp (required) and pet.json (optional) downloaded from{" "}
+              <a
+                href="https://petdex.dev/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#0d9488] hover:underline"
+              >
+                petdex
+              </a>
+              ; it becomes available in the gallery.
             </p>
             <div className="flex flex-col gap-2.5">
               <FileDrop
                 icon={<ImageUp className="size-4" />}
-                title={t("myBuddy.import.spritesheetTitle")}
-                hint={t("myBuddy.import.spritesheetHint")}
+                title="Click or drop spritesheet.webp"
+                hint="Required · webp / png spritesheet"
                 accept=".webp,.png,image/webp,image/png"
                 file={spriteFile}
                 onFile={setSpriteFile}
@@ -871,8 +880,8 @@ export function PetGalleryDialog({
               </FileDrop>
               <FileDrop
                 icon={<FileJson className="size-4" />}
-                title={t("myBuddy.import.jsonTitle")}
-                hint={t("myBuddy.import.jsonHint")}
+                title="Click or drop pet.json"
+                hint="Optional · used for the name"
                 accept=".json,application/json"
                 file={jsonFile}
                 onFile={setJsonFile}
@@ -881,7 +890,7 @@ export function PetGalleryDialog({
               {importError && <p className="text-xs text-destructive">{importError}</p>}
               <p className="flex items-start gap-1.5 text-[11px] leading-relaxed text-text-muted">
                 <UploadCloud className="mt-0.5 size-3.5 shrink-0" />
-                {t("myBuddy.import.hint")}
+                Pets are stored only in your browser (IndexedDB), never uploaded; the spritesheet must be petdex's standard 8×9 grid.
               </p>
             </div>
           </div>
@@ -901,21 +910,22 @@ export function PetGalleryDialog({
                   resetImport();
                   setMode("gallery");
                 }}
+                className="font-bold hover:bg-transparent"
               >
-                {t("common.cancel")}
+                Cancel
               </Button>
               <Button
-                className={PRIMARY_ACTION_BUTTON_CLASS}
+                className="rounded-[9px] bg-[#0d9488] text-white shadow-none hover:bg-[#0f766e] active:opacity-80 disabled:opacity-50"
                 disabled={!spriteFile || importBusy}
                 onClick={handleImport}
               >
-                {t("myBuddy.import.confirm")}
+                Import
               </Button>
             </>
           ) : (
             <>
               <Button variant="ghost" onClick={() => onOpenChange(false)}>
-                {t("common.cancel")}
+                Cancel
               </Button>
               <Button
                 className={PRIMARY_ACTION_BUTTON_CLASS}
@@ -924,7 +934,7 @@ export function PetGalleryDialog({
                   onOpenChange(false);
                 }}
               >
-                {t("common.confirm")}
+                Confirm
               </Button>
             </>
           )}

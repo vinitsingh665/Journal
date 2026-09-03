@@ -2630,6 +2630,7 @@ h4 { font-size: var(--text-lg); }
 }
 .petdex-dialog-panel [role="button"] button:hover {
   background: var(--petdex-btn-hover) !important;
+  color: #ef4444 !important;
 }
 
 /* Accessory menu (portaled outside dialog) */
