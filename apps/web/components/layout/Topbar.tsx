@@ -1,11 +1,25 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AiAssistant from "@/components/ai/AiAssistant";
 import SnapshotTool from "@/components/layout/SnapshotTool";
+import { useAppStore } from "@/stores/app-store";
+import { MyBuddyCompanion } from "@/features/companion/MyBuddyCompanion";
+import { PetGalleryDialog } from "@/features/companion/petdex/PetGalleryDialog";
+import "@/lib/i18n";
 
 export default function Topbar({ userName = "Trader", avatar = null, isGuest = false, userId }: { userName?: string, avatar?: string | null, isGuest?: boolean, userId?: string }) {
+  const [galleryOpen, setGalleryOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const companionKind = useAppStore(s => s.companionKind);
+  const companionPet = useAppStore(s => s.companionPet);
+  const pikoAccessory = useAppStore(s => s.pikoAccessory);
+  const setCompanionConfig = useAppStore(s => s.setCompanionConfig);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <header className="topbar" id="topbar">
@@ -17,6 +31,13 @@ export default function Topbar({ userName = "Trader", avatar = null, isGuest = f
       </div>
 
       <div className="topbar-right">
+        <button 
+          className="companion-capsule-btn"
+          onClick={() => setGalleryOpen(true)}
+          title="Companion"
+        >
+          <img src="/companion-capsule.png" alt="Companion" draggable={false} />
+        </button>
         <SnapshotTool userId={userId} />
         {!isGuest && <AiAssistant />}
 
@@ -29,6 +50,23 @@ export default function Topbar({ userName = "Trader", avatar = null, isGuest = f
           New Trade
         </Link>
       </div>
+
+      {mounted && (
+        <>
+          <MyBuddyCompanion />
+          <PetGalleryDialog
+            open={galleryOpen}
+            onOpenChange={setGalleryOpen}
+            currentKind={companionKind}
+            currentPet={companionPet}
+            currentAccessory={pikoAccessory}
+            onConfirm={(selection, accessory) => {
+              setCompanionConfig(selection.kind, selection.pet, accessory);
+              setGalleryOpen(false);
+            }}
+          />
+        </>
+      )}
     </header>
   );
 }

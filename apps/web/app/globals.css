@@ -3,6 +3,9 @@
    ═══════════════════════════════════════════════════ */
 @import url('https://cdn.jsdelivr.net/gh/JetBrains/JetBrainsMono/css/jetbrains-mono.css');
 
+@tailwind components;
+@tailwind utilities;
+
 /* ─── CSS CUSTOM PROPERTIES ─────────────────────── */
 
 :root {
@@ -2308,3 +2311,353 @@ h4 { font-size: var(--text-lg); }
   color: #ef4444 !important;
   opacity: 1 !important;
 }
+
+/* ─── COMPANION CAPSULE BUTTON ────────────────────── */
+.companion-capsule-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 50%;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.companion-capsule-btn img {
+  width: 32px;
+  height: 32px;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.25));
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.companion-capsule-btn:hover img {
+  transform: scale(1.15) rotate(-8deg);
+  filter: drop-shadow(0 2px 8px rgba(99, 200, 220, 0.45));
+}
+
+.companion-capsule-btn:active img {
+  transform: scale(0.92);
+}
+
+/* ═══════════════════════════════════════════════════
+   COMPANION / PETDEX DIALOG — THEME-AWARE STYLES
+   ═══════════════════════════════════════════════════ */
+
+/* --- CSS Variables for companion dialog (light mode defaults) --- */
+:root {
+  --petdex-bg: #ffffff;
+  --petdex-bg-secondary: #f4f5f7;
+  --petdex-text: #1a1a2e;
+  --petdex-text-muted: #71717a;
+  --petdex-border: rgba(0, 0, 0, 0.10);
+  --petdex-card-bg: #f7f7f9;
+  --petdex-card-border: rgba(0, 0, 0, 0.08);
+  --petdex-card-selected-bg: rgba(215, 174, 95, 0.10);
+  --petdex-card-selected-border: rgba(215, 174, 95, 0.50);
+  --petdex-card-hover-bg: rgba(0, 0, 0, 0.03);
+  --petdex-card-hover-border: rgba(0, 0, 0, 0.14);
+  --petdex-overlay: rgba(0, 0, 0, 0.35);
+  --petdex-btn-hover: rgba(0, 0, 0, 0.06);
+  --petdex-toggle-bg: rgba(0, 0, 0, 0.15);
+  --petdex-shadow: 0 18px 58px rgba(0, 0, 0, 0.18);
+  --petdex-accessory-bg: #ffffff;
+  --petdex-accessory-border: rgba(0, 0, 0, 0.10);
+  --petdex-accessory-text: #1a1a2e;
+  --petdex-accessory-hover: rgba(0, 0, 0, 0.05);
+  --petdex-accessory-selected: rgba(0, 0, 0, 0.08);
+  --petdex-footer-cancel-text: #71717a;
+  --petdex-footer-cancel-hover: rgba(0, 0, 0, 0.06);
+  --petdex-import-btn-bg: rgba(0, 0, 0, 0.04);
+  --petdex-import-btn-border: rgba(0, 0, 0, 0.12);
+  --petdex-import-btn-text: #71717a;
+  --petdex-dashed-border: rgba(0, 0, 0, 0.10);
+  --petdex-dashed-bg: rgba(0, 0, 0, 0.02);
+  --petdex-loading-border: rgba(0, 0, 0, 0.06);
+}
+
+/* --- Dark mode overrides --- */
+[data-theme='dark'] {
+  --petdex-bg: #121212;
+  --petdex-bg-secondary: #1a1a1e;
+  --petdex-text: #e8e8ec;
+  --petdex-text-muted: #71717a;
+  --petdex-border: rgba(255, 255, 255, 0.08);
+  --petdex-card-bg: rgba(255, 255, 255, 0.045);
+  --petdex-card-border: rgba(255, 255, 255, 0.10);
+  --petdex-card-selected-bg: rgba(215, 174, 95, 0.055);
+  --petdex-card-selected-border: rgba(215, 174, 95, 0.70);
+  --petdex-card-hover-bg: rgba(255, 255, 255, 0.06);
+  --petdex-card-hover-border: rgba(255, 255, 255, 0.18);
+  --petdex-overlay: rgba(0, 0, 0, 0.48);
+  --petdex-btn-hover: rgba(255, 255, 255, 0.08);
+  --petdex-toggle-bg: rgba(255, 255, 255, 0.20);
+  --petdex-shadow: 0 18px 58px rgba(0, 0, 0, 0.56);
+  --petdex-accessory-bg: rgba(32, 35, 38, 0.96);
+  --petdex-accessory-border: rgba(255, 255, 255, 0.12);
+  --petdex-accessory-text: #e2e4ea;
+  --petdex-accessory-hover: rgba(255, 255, 255, 0.08);
+  --petdex-accessory-selected: rgba(255, 255, 255, 0.10);
+  --petdex-footer-cancel-text: rgba(255, 255, 255, 0.72);
+  --petdex-footer-cancel-hover: rgba(255, 255, 255, 0.08);
+  --petdex-import-btn-bg: rgba(255, 255, 255, 0.035);
+  --petdex-import-btn-border: rgba(255, 255, 255, 0.16);
+  --petdex-import-btn-text: rgba(255, 255, 255, 0.72);
+  --petdex-dashed-border: rgba(255, 255, 255, 0.10);
+  --petdex-dashed-bg: rgba(255, 255, 255, 0.025);
+  --petdex-loading-border: rgba(255, 255, 255, 0.08);
+}
+
+/* Companion dialog — overlay backdrop */
+.petdex-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: var(--petdex-overlay);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Companion dialog — main panel */
+.petdex-dialog-panel {
+  position: relative;
+  display: flex;
+  max-height: 88vh;
+  width: 100%;
+  max-width: 568px;
+  flex-direction: column;
+  border-radius: 12px;
+  border: 1px solid var(--petdex-border);
+  background: var(--petdex-bg) !important;
+  box-shadow: var(--petdex-shadow);
+  color: var(--petdex-text);
+}
+
+/* Force all text inside the dialog to use petdex-text color */
+.petdex-dialog-panel,
+.petdex-dialog-panel * {
+  --tw-text-opacity: 1;
+}
+
+/* Override Tailwind text-text-dark inside dialog */
+.petdex-dialog-panel .text-text-dark {
+  color: var(--petdex-text) !important;
+}
+
+/* Override Tailwind text-text-muted inside dialog */
+.petdex-dialog-panel .text-text-muted {
+  color: var(--petdex-text-muted) !important;
+}
+
+/* Override Tailwind text-slate-100 / text-slate-400 inside dialog */
+.petdex-dialog-panel .text-slate-100,
+.petdex-dialog-panel .text-slate-200 {
+  color: var(--petdex-text) !important;
+}
+
+.petdex-dialog-panel .text-slate-400 {
+  color: var(--petdex-text-muted) !important;
+}
+
+.petdex-dialog-panel .text-white {
+  color: var(--petdex-text) !important;
+}
+
+/* Companion card backgrounds */
+.petdex-dialog-panel [role="button"][aria-pressed] {
+  background: var(--petdex-card-bg) !important;
+  border-color: var(--petdex-card-border) !important;
+}
+
+.petdex-dialog-panel [role="button"][aria-pressed]:hover {
+  background: var(--petdex-card-hover-bg) !important;
+  border-color: var(--petdex-card-hover-border) !important;
+}
+
+.petdex-dialog-panel [role="button"][aria-pressed="true"] {
+  background: var(--petdex-card-selected-bg) !important;
+  border-color: var(--petdex-card-selected-border) !important;
+}
+
+/* Companion card title */
+.petdex-dialog-panel [role="button"] .truncate {
+  color: var(--petdex-text) !important;
+}
+
+/* Section headings ("Official Pets", "Peripheral Group") */
+.petdex-dialog-panel h3 {
+  color: var(--petdex-text-muted) !important;
+}
+
+/* Footer background */
+.petdex-dialog-panel footer {
+  background: transparent !important;
+}
+
+/* Toggle switch button text */
+.petdex-dialog-panel [role="switch"] {
+  color: var(--petdex-text-muted) !important;
+}
+.petdex-dialog-panel [role="switch"]:hover {
+  background: var(--petdex-btn-hover) !important;
+  color: var(--petdex-text) !important;
+}
+
+/* --- Toggle Companion button --- */
+.petdex-toggle-btn {
+  color: var(--petdex-text-muted) !important;
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+}
+.petdex-toggle-btn:hover {
+  background: var(--petdex-btn-hover) !important;
+  color: var(--petdex-text) !important;
+}
+
+/* Toggle track (the pill shape) */
+.petdex-toggle-track {
+  background: var(--petdex-toggle-bg) !important;
+}
+.petdex-toggle-track--on {
+  background: var(--accent-primary) !important;
+}
+
+/* Toggle knob (the circle dot) */
+.petdex-toggle-knob {
+  background: var(--petdex-text) !important;
+}
+[data-theme='dark'] .petdex-toggle-knob {
+  background: #ffffff !important;
+}
+
+/* --- Import Pet button --- */
+.petdex-import-btn {
+  border: 1px solid var(--petdex-card-border) !important;
+  background: var(--petdex-card-bg) !important;
+  color: var(--petdex-text-muted) !important;
+}
+.petdex-import-btn:hover {
+  border-color: var(--petdex-card-hover-border) !important;
+  background: var(--petdex-btn-hover) !important;
+  color: var(--petdex-text) !important;
+}
+
+/* --- Close (X) button --- */
+.petdex-close-btn {
+  color: var(--petdex-text-muted) !important;
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+}
+.petdex-close-btn:hover {
+  background: var(--petdex-btn-hover) !important;
+  color: var(--petdex-text) !important;
+}
+
+/* Accessory pill button ("None >") */
+.petdex-dialog-panel [aria-expanded] {
+  border-color: var(--petdex-card-border) !important;
+  background: var(--petdex-card-bg) !important;
+  color: var(--petdex-text-muted) !important;
+}
+.petdex-dialog-panel [aria-expanded]:hover {
+  border-color: var(--petdex-card-hover-border) !important;
+  background: var(--petdex-btn-hover) !important;
+  color: var(--petdex-text) !important;
+}
+
+/* Loading placeholder */
+.petdex-dialog-panel .animate-spin {
+  color: var(--petdex-text-muted) !important;
+}
+
+/* Scrollbar area */
+.petdex-dialog-panel .ui-scrollbar {
+  scrollbar-color: var(--petdex-text-muted) transparent;
+}
+
+/* --- Footer buttons --- */
+.petdex-dialog-panel footer {
+  background: transparent !important;
+  border-top: 1px solid var(--petdex-border);
+}
+
+/* All footer buttons: reset browser defaults */
+.petdex-dialog-panel footer button {
+  padding: 6px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Cancel button (ghost variant) — no background, no border, just text */
+.petdex-dialog-panel footer button[class*="bg-transparent"],
+.petdex-dialog-panel footer button[class*="border-none"] {
+  background: transparent !important;
+  color: var(--petdex-text-muted) !important;
+}
+.petdex-dialog-panel footer button[class*="bg-transparent"]:hover,
+.petdex-dialog-panel footer button[class*="border-none"]:hover {
+  background: var(--petdex-btn-hover) !important;
+  color: var(--petdex-text) !important;
+}
+
+/* Confirm button (primary) — accent-colored */
+.petdex-dialog-panel footer button[class*="rounded-[9px]"] {
+  background: var(--accent-primary) !important;
+  color: #ffffff !important;
+}
+.petdex-dialog-panel footer button[class*="rounded-[9px]"]:hover {
+  opacity: 0.9;
+}
+
+/* Delete button on cards */
+.petdex-dialog-panel [role="button"] button {
+  color: var(--petdex-text-muted) !important;
+}
+.petdex-dialog-panel [role="button"] button:hover {
+  background: var(--petdex-btn-hover) !important;
+}
+
+/* Accessory menu (portaled outside dialog) */
+#piko-accessory-menu {
+  background: var(--petdex-accessory-bg) !important;
+  border: 1px solid var(--petdex-accessory-border) !important;
+  color: var(--petdex-accessory-text) !important;
+}
+
+#piko-accessory-menu button {
+  color: var(--petdex-accessory-text) !important;
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+}
+
+#piko-accessory-menu button:hover {
+  background: var(--petdex-accessory-hover) !important;
+  color: var(--petdex-text) !important;
+}
+
+/* Dashed border areas (file drop zones) */
+.petdex-dialog-panel .border-dashed {
+  border-color: var(--petdex-dashed-border) !important;
+  background: var(--petdex-dashed-bg) !important;
+}
+
+/* Import description text */
+.petdex-dialog-panel p {
+  color: var(--petdex-text-muted);
+}
