@@ -17,6 +17,7 @@ interface KpiCardsProps {
   todayReturnPercent?: number;
   allTimeInvestment?: number;
   openTrades?: {
+    id: string;
     symbol: string;
     exchange: string;
     direction: string;
