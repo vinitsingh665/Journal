@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 
 interface OpenPosition {
+  id: string;
   symbol: string;
   exchange: string;
   direction: string;
@@ -80,8 +81,7 @@ export function useEnrichedPnl(
       const pnlMap = new Map<string, LivePnl>();
 
       for (const pos of positions) {
-        const key = `${pos.symbol}:${pos.exchange}`;
-        const quote = allQuotes.get(key);
+        const quote = allQuotes.get(`${pos.symbol}:${pos.exchange}`);
         if (!quote) continue;
 
         const openQty = pos.totalBuyQty - pos.totalSellQty;
@@ -118,7 +118,7 @@ export function useEnrichedPnl(
           }
         }
 
-        pnlMap.set(key, {
+        pnlMap.set(pos.id, {
           netPnl: pnl,
           grossPnl: pnl,
           pnlPercentage: pnlPercent,

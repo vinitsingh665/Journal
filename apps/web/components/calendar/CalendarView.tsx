@@ -46,7 +46,7 @@ export default function CalendarView({
   const currentMonthTrades = useMemo(() => {
     return initialTrades.map((t) => {
       if (t.status === "OPEN" || t.status === "PARTIAL") {
-        const liveQuote = livePnl.get(`${t.symbol}:${t.exchange}`);
+        const liveQuote = livePnl.get(t.id);
         if (liveQuote) {
           return { ...t, netPnl: liveQuote.netPnl, grossPnl: liveQuote.grossPnl };
         }

@@ -180,7 +180,10 @@ export async function PUT(
       return NextResponse.json({ error: "Trade not found" }, { status: 404 });
     }
 
-    const {
+    const userSettings = await prisma.userSettings.findUnique({ where: { userId } });
+    const baseCurrency = userSettings?.currency || "INR";
+
+    let {
       symbol,
       exchange = "NSE",
       side,
@@ -205,6 +208,24 @@ export async function PUT(
       emotionalState,
       postTradeReview,
     } = body;
+
+    if (baseCurrency === "INR" && ["NASDAQ", "NYSE", "CRYPTO"].includes(exchange.toUpperCase())) {
+      const quote = await fetchStockQuote("USDINR", "FX_IDC");
+      if (!quote || !quote.regularMarketPrice) {
+        return NextResponse.json(
+          { error: "Failed to fetch live exchange rate for USD to INR conversion. Please try again." },
+          { status: 500 }
+        );
+      }
+      const rate = quote.regularMarketPrice;
+      price = price * rate;
+      if (exitPrice) exitPrice = exitPrice * rate;
+      if (stopLoss) stopLoss = stopLoss * rate;
+      if (target) target = target * rate;
+      
+      const conversionNote = `Auto-converted from USD to INR at exchange rate ₹${rate.toFixed(2)}`;
+      notes = notes ? `${notes}\n\n${conversionNote}` : conversionNote;
+    }
 
     const execTime = executionTime ? new Date(executionTime) : new Date();
     const direction = side === "BUY" ? "LONG" : "SHORT";

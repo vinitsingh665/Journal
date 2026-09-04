@@ -10,13 +10,16 @@ export async function POST() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // 1. Fetch open trades with stop loss set
+    // 1. Fetch open trades with stop loss or target set
     const openTrades = await prisma.trade.findMany({
       where: {
         userId,
         status: { in: ["OPEN", "PARTIAL"] },
         isArchived: false,
-        stopLoss: { not: null },
+        OR: [
+          { stopLoss: { not: null } },
+          { target: { not: null } }
+        ]
       },
     });
 
@@ -39,15 +42,29 @@ export async function POST() {
 
     for (const trade of openTrades) {
       const quote = quotes.get(`${trade.symbol}:${trade.exchange}`);
-      if (!quote || !trade.stopLoss) continue;
+      if (!quote || (!trade.stopLoss && !trade.target)) continue;
+
+      // SAFETY: Skip if currency conversion failed (e.g. quote is still in USD but trade data is in INR)
+      // This prevents false SL triggers from comparing prices in different currencies.
+      const quoteCurrency = quote.currency?.toUpperCase();
+      if (quoteCurrency && quoteCurrency !== baseCurrency.toUpperCase()) {
+        console.warn(
+          `[sync-stops] Skipping ${trade.symbol}: quote currency "${quoteCurrency}" ≠ base currency "${baseCurrency}". Forex conversion likely failed.`
+        );
+        continue;
+      }
 
       const currentPrice = quote.regularMarketPrice;
       const isLong = trade.direction === "LONG";
       
-      // Stop loss hit condition
-      const slHit = isLong ? currentPrice <= trade.stopLoss : currentPrice >= trade.stopLoss;
+      // Hit conditions
+      const slHit = trade.stopLoss !== null && (isLong ? currentPrice <= trade.stopLoss : currentPrice >= trade.stopLoss);
+      const targetHit = trade.target !== null && (isLong ? currentPrice >= trade.target : currentPrice <= trade.target);
 
-      if (slHit) {
+      if (slHit || targetHit) {
+        const exitPrice = slHit ? trade.stopLoss! : trade.target!;
+        const hitType = slHit ? "Stop Loss" : "Target";
+        
         // Close the trade!
         const openQty = trade.totalBuyQty - trade.totalSellQty;
         const exitTime = new Date();
@@ -57,14 +74,14 @@ export async function POST() {
           const execution = await tx.execution.create({
             data: {
               userId,
-              fingerprint: `auto-sl-${trade.id}-${Date.now()}`,
+              fingerprint: `auto-${slHit ? 'sl' : 'tp'}-${trade.id}-${Date.now()}`,
               symbol: trade.symbol,
               exchange: trade.exchange,
               side: isLong ? "SELL" : "BUY",
               quantity: openQty,
               executedQty: openQty,
-              price: trade.stopLoss!, // execute at the stop loss price
-              avgPrice: trade.stopLoss!,
+              price: exitPrice, // execute at the stop loss or target price
+              avgPrice: exitPrice,
               executionTime: exitTime,
               tradeId: trade.id,
             },
@@ -79,9 +96,9 @@ export async function POST() {
           let pnlPercentage = 0;
 
           if (isLong) {
-            grossPnl = (trade.stopLoss! - trade.avgEntryPrice) * totalBuyQty;
+            grossPnl = (exitPrice - trade.avgEntryPrice) * totalBuyQty;
           } else {
-            grossPnl = (trade.avgEntryPrice - trade.stopLoss!) * totalSellQty;
+            grossPnl = (trade.avgEntryPrice - exitPrice) * totalSellQty;
           }
           netPnl = grossPnl;
           const investment = trade.avgEntryPrice * (isLong ? totalBuyQty : totalSellQty);
@@ -100,7 +117,7 @@ export async function POST() {
               status: "CLOSED",
               totalBuyQty,
               totalSellQty,
-              avgExitPrice: trade.stopLoss!,
+              avgExitPrice: exitPrice,
               exitTime,
               grossPnl,
               netPnl,
@@ -115,7 +132,7 @@ export async function POST() {
             data: {
               tradeId: trade.id,
               type: "AUTO_CLOSED",
-              description: `Auto-closed by Stop Loss hit at ${trade.stopLoss}`,
+              description: `Auto-closed by ${hitType} hit at ${exitPrice}`,
             },
           });
 

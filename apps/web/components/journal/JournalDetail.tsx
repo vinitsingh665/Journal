@@ -103,12 +103,15 @@ export default function JournalDetail({ trade, isShared, sharedUserId }: { trade
 
   const openTrades = (trade.status === "OPEN" || trade.status === "PARTIAL") ? [trade] : [];
   const { livePnl } = useEnrichedPnl(openTrades);
-  const liveQuote = livePnl.get(`${trade.symbol}:${trade.exchange}`);
+  const liveQuote = livePnl.get(trade.id);
 
   const displayPnl = liveQuote ? liveQuote.netPnl : trade.netPnl;
   const displayPct = liveQuote ? liveQuote.pnlPercentage : trade.pnlPercentage;
-  const displayR = liveQuote && trade.stopLoss 
-    ? (displayPnl / (Math.abs(trade.avgEntryPrice - trade.stopLoss) * (trade.totalBuyQty - trade.totalSellQty)))
+  const jdOpenQty = trade.totalBuyQty - trade.totalSellQty;
+  const jdRiskPerUnit = trade.stopLoss ? Math.abs(trade.avgEntryPrice - trade.stopLoss) : 0;
+  const jdRiskAmount = jdRiskPerUnit * (jdOpenQty || 1);
+  const displayR = liveQuote && trade.stopLoss && jdRiskAmount > 0
+    ? (displayPnl / jdRiskAmount)
     : trade.rMultiple;
 
   const entrySide = trade.direction === "LONG" ? "BUY" : "SELL";

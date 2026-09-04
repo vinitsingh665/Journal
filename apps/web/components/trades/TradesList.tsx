@@ -374,10 +374,13 @@ export default function TradesList({
                   </thead>
                   <tbody>
                     {paginated.map((trade) => {
-                      const liveQuote = livePnl.get(`${trade.symbol}:${trade.exchange}`);
+                      const liveQuote = livePnl.get(trade.id);
                       const displayPnl = liveQuote ? liveQuote.netPnl : trade.netPnl;
-                      const displayR = liveQuote && trade.stopLoss 
-                        ? (displayPnl / (Math.abs(trade.avgEntryPrice - trade.stopLoss) * (trade.totalBuyQty - trade.totalSellQty)))
+                      const openQty = trade.totalBuyQty - trade.totalSellQty;
+                      const riskPerUnit = trade.stopLoss ? Math.abs(trade.avgEntryPrice - trade.stopLoss) : 0;
+                      const riskAmount = riskPerUnit * (openQty || 1);
+                      const displayR = liveQuote && trade.stopLoss && riskAmount > 0
+                        ? (displayPnl / riskAmount)
                         : trade.rMultiple;
                         
                       return (
@@ -651,11 +654,14 @@ export default function TradesList({
 
               {/* Key Metrics */}
               {(() => {
-                const liveQuote = livePnl.get(`${selectedTrade.symbol}:${selectedTrade.exchange}`);
+                const liveQuote = livePnl.get(selectedTrade.id);
                 const displayPnl = liveQuote ? liveQuote.netPnl : selectedTrade.netPnl;
                 const displayPct = liveQuote ? liveQuote.pnlPercentage : selectedTrade.pnlPercentage;
-                const displayR = liveQuote && selectedTrade.stopLoss 
-                  ? (displayPnl / (Math.abs(selectedTrade.avgEntryPrice - selectedTrade.stopLoss) * (selectedTrade.totalBuyQty - selectedTrade.totalSellQty)))
+                const detailOpenQty = selectedTrade.totalBuyQty - selectedTrade.totalSellQty;
+                const detailRiskPerUnit = selectedTrade.stopLoss ? Math.abs(selectedTrade.avgEntryPrice - selectedTrade.stopLoss) : 0;
+                const detailRiskAmount = detailRiskPerUnit * (detailOpenQty || 1);
+                const displayR = liveQuote && selectedTrade.stopLoss && detailRiskAmount > 0
+                  ? (displayPnl / detailRiskAmount)
                   : selectedTrade.rMultiple;
                   
                 return (

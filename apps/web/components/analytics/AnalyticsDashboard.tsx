@@ -60,7 +60,7 @@ export default function AnalyticsDashboard({ initialTrades: rawTrades }: { initi
   const initialTrades = useMemo(() => {
     return rawTrades.map((t) => {
       if (t.status !== "OPEN" && t.status !== "PARTIAL") return t;
-      const liveQuote = livePnl.get(`${t.symbol}:${t.exchange}`);
+      const liveQuote = livePnl.get(t.id);
       if (!liveQuote) return t;
 
       const displayPnl = liveQuote.netPnl;

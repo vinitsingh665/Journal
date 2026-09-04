@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@repo/database";
 import { getCurrentUser } from "@/lib/auth";
 import { generateFingerprint } from "@repo/trading-engine";
+import { fetchStockQuote } from "@/lib/finance";
 
 export async function POST(
   request: NextRequest,
@@ -29,7 +30,7 @@ export async function POST(
       return NextResponse.json({ error: "Cannot add execution to a closed trade" }, { status: 400 });
     }
 
-    const {
+    let {
       side,
       quantity,
       price,
@@ -43,6 +44,20 @@ export async function POST(
         { error: "Side, quantity, and price are required" },
         { status: 400 }
       );
+    }
+
+    const userSettings = await prisma.userSettings.findUnique({ where: { userId } });
+    const baseCurrency = userSettings?.currency || "INR";
+
+    if (baseCurrency === "INR" && ["NASDAQ", "NYSE", "CRYPTO"].includes(trade.exchange.toUpperCase())) {
+      const quote = await fetchStockQuote("USDINR", "FX_IDC");
+      if (!quote || !quote.regularMarketPrice) {
+        return NextResponse.json(
+          { error: "Failed to fetch live exchange rate for USD to INR conversion. Please try again." },
+          { status: 500 }
+        );
+      }
+      price = price * quote.regularMarketPrice;
     }
 
     const isExit = trade.direction === "LONG" ? side === "SELL" : side === "BUY";
