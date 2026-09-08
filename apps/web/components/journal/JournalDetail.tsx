@@ -682,7 +682,7 @@ export default function JournalDetail({ trade, isShared, sharedUserId }: { trade
                           const ev = item.data as TradeEvent;
                           color = "var(--accent-primary)";
                           timeStr = `${formatDate(ev.createdAt)}, ${formatTime(ev.createdAt)}`;
-                          title = ev.description || "Updated Trade";
+                          title = ev.description ? ev.description.replace(/(\d+\.\d{3,})/g, (match) => parseFloat(match).toFixed(2)) : "Updated Trade";
                         }
                       
                         // Calculate next item color for connecting line

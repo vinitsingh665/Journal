@@ -416,17 +416,28 @@ export default function TradeForm({ userId, tradeId, initialData }: TradeFormPro
                 <span style={{ fontSize: "var(--text-sm)", fontWeight: 600, color: "var(--text-secondary)" }}>Exit Details</span>
                 <span className="text-muted" style={{ fontSize: "var(--text-xs)" }}>(leave blank if trade is still open)</span>
               </div>
-              <div className="form-group" style={{ marginBottom: "var(--space-4)" }}>
-                <label className="form-label">Exit Price</label>
-                <input
-                  type="number"
-                  className="form-input"
-                  placeholder="1515.00"
-                  value={form.exitPrice}
-                  onChange={(e) => updateField("exitPrice", e.target.value)}
-                  step="0.01"
-                  id="trade-exit-price"
-                />
+              <div className="grid-2" style={{ marginBottom: "var(--space-4)" }}>
+                <div className="form-group">
+                  <label className="form-label">Exit Price</label>
+                  <input
+                    type="number"
+                    className="form-input"
+                    placeholder="1515.00"
+                    value={form.exitPrice}
+                    onChange={(e) => updateField("exitPrice", e.target.value)}
+                    step="0.01"
+                    id="trade-exit-price"
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Exit Time</label>
+                  <input
+                    type="datetime-local"
+                    className="form-input"
+                    value={form.exitTime}
+                    onChange={(e) => updateField("exitTime", e.target.value)}
+                  />
+                </div>
               </div>
 
               <div className="grid-2">

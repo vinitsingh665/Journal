@@ -222,9 +222,6 @@ export async function PUT(
       if (exitPrice) exitPrice = exitPrice * rate;
       if (stopLoss) stopLoss = stopLoss * rate;
       if (target) target = target * rate;
-      
-      const conversionNote = `Auto-converted from USD to INR at exchange rate ₹${rate.toFixed(2)}`;
-      notes = notes ? `${notes}\n\n${conversionNote}` : conversionNote;
     }
 
     const execTime = executionTime ? new Date(executionTime) : new Date();
@@ -268,7 +265,7 @@ export async function PUT(
     if (stopLoss !== undefined && existingTrade.stopLoss !== stopLoss) {
       newEvents.push({
         type: "STOP_LOSS_UPDATE",
-        description: stopLoss === null ? "Removed Stop Loss" : `Shifted Stop Loss from ${existingTrade.stopLoss || 'None'} to ${stopLoss}`,
+        description: stopLoss === null ? "Removed Stop Loss" : `Shifted Stop Loss from ${existingTrade.stopLoss != null ? Number(existingTrade.stopLoss).toFixed(2) : 'None'} to ${Number(stopLoss).toFixed(2)}`,
         oldValue: existingTrade.stopLoss?.toString() || null,
         newValue: stopLoss?.toString() || null,
       });
@@ -276,7 +273,7 @@ export async function PUT(
     if (target !== undefined && existingTrade.target !== target) {
       newEvents.push({
         type: "TARGET_UPDATE",
-        description: target === null ? "Removed Target" : `Updated Target from ${existingTrade.target || 'None'} to ${target}`,
+        description: target === null ? "Removed Target" : `Updated Target from ${existingTrade.target != null ? Number(existingTrade.target).toFixed(2) : 'None'} to ${Number(target).toFixed(2)}`,
         oldValue: existingTrade.target?.toString() || null,
         newValue: target?.toString() || null,
       });
@@ -302,7 +299,7 @@ export async function PUT(
         grossPnl,
         netPnl,
         pnlPercentage,
-        entryTime: execTime,
+        // entryTime is intentionally NOT updated — preserve the original entry date
         exitTime: exitDate,
         holdingPeriodMs,
         strategy: strategy || null,
@@ -395,7 +392,7 @@ export async function PATCH(
     if (updateData.stopLoss !== undefined && trade.stopLoss !== updateData.stopLoss) {
       newEvents.push({
         type: "STOP_LOSS_UPDATE",
-        description: updateData.stopLoss === null ? "Removed Stop Loss" : `Shifted Stop Loss from ${trade.stopLoss || 'None'} to ${updateData.stopLoss}`,
+        description: updateData.stopLoss === null ? "Removed Stop Loss" : `Shifted Stop Loss from ${trade.stopLoss != null ? Number(trade.stopLoss).toFixed(2) : 'None'} to ${Number(updateData.stopLoss).toFixed(2)}`,
         oldValue: trade.stopLoss?.toString() || null,
         newValue: updateData.stopLoss?.toString() || null,
       });
@@ -403,7 +400,7 @@ export async function PATCH(
     if (updateData.target !== undefined && trade.target !== updateData.target) {
       newEvents.push({
         type: "TARGET_UPDATE",
-        description: updateData.target === null ? "Removed Target" : `Updated Target from ${trade.target || 'None'} to ${updateData.target}`,
+        description: updateData.target === null ? "Removed Target" : `Updated Target from ${trade.target != null ? Number(trade.target).toFixed(2) : 'None'} to ${Number(updateData.target).toFixed(2)}`,
         oldValue: trade.target?.toString() || null,
         newValue: updateData.target?.toString() || null,
       });
