@@ -1,8 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
-import { AlertCircle, ArrowLeft } from "lucide-react";
+import { ArrowLeft, RefreshCw } from "lucide-react";
 
 const Loader = () => {
   return (
@@ -43,26 +43,54 @@ const Loader = () => {
         }
 
         @keyframes bob {
-          0% { transform: translateY(0) rotate(3deg); }
-          5% { transform: translateY(0) rotate(3deg); }
-          25% { transform: translateY(5px) rotate(0deg); }
-          50% { transform: translateY(0px) rotate(-3deg); }
-          70% { transform: translateY(5px) rotate(0deg); }
-          100% { transform: translateY(0) rotate(3deg); }
+          0% {
+            transform: translateY(0) rotate(3deg);
+          }
+          5% {
+            transform: translateY(0) rotate(3deg);
+          }
+          25% {
+            transform: translateY(5px) rotate(0deg);
+          }
+          50% {
+            transform: translateY(0px) rotate(-3deg);
+          }
+          70% {
+            transform: translateY(5px) rotate(0deg);
+          }
+          100% {
+            transform: translateY(0) rotate(3deg);
+          }
         }
 
         @keyframes lstep {
-          0% { transform: translateY(0) rotate(-5deg); }
-          33% { transform: translateY(-15px) translate(32px) rotate(35deg); }
-          66% { transform: translateY(0) translate(25px) rotate(-25deg); }
-          100% { transform: translateY(0) rotate(-5deg); }
+          0% {
+            transform: translateY(0) rotate(-5deg);
+          }
+          33% {
+            transform: translateY(-15px) translate(32px) rotate(35deg);
+          }
+          66% {
+            transform: translateY(0) translate(25px) rotate(-25deg);
+          }
+          100% {
+            transform: translateY(0) rotate(-5deg);
+          }
         }
 
         @keyframes rstep {
-          0% { transform: translateY(0) translate(0px) rotate(-5deg); }
-          33% { transform: translateY(-10px) translate(30px) rotate(35deg); }
-          66% { transform: translateY(0) translate(20px) rotate(-25deg); }
-          100% { transform: translateY(0) translate(0px) rotate(-5deg); }
+          0% {
+            transform: translateY(0) translate(0px) rotate(-5deg);
+          }
+          33% {
+            transform: translateY(-10px) translate(30px) rotate(35deg);
+          }
+          66% {
+            transform: translateY(0) translate(20px) rotate(-25deg);
+          }
+          100% {
+            transform: translateY(0) translate(0px) rotate(-5deg);
+          }
         }
 
         #gnd {
@@ -75,10 +103,20 @@ const Loader = () => {
         }
 
         @keyframes scroll {
-          0% { transform: translateY(25px) translate(50px); opacity: 0; }
-          33% { opacity: 0.25; }
-          66% { opacity: 0.25; }
-          to { transform: translateY(-50px) translate(-100px); opacity: 0; }
+          0% {
+            transform: translateY(25px) translate(50px);
+            opacity: 0;
+          }
+          33% {
+            opacity: 0.25;
+          }
+          66% {
+            opacity: 0.25;
+          }
+          to {
+            transform: translateY(-50px) translate(-100px);
+            opacity: 0;
+          }
         }
       `}</style>
       <div className="loader">
@@ -145,7 +183,17 @@ const Loader = () => {
   );
 };
 
-export default function NotFound() {
+export default function ErrorPage({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string }
+  reset: () => void
+}) {
+  useEffect(() => {
+    console.error(error);
+  }, [error]);
+
   return (
     <div style={{
       minHeight: "100vh",
@@ -159,27 +207,18 @@ export default function NotFound() {
       textAlign: "center"
     }}>
       <h1 style={{
-        fontSize: 120,
+        fontSize: 48,
         fontWeight: 800,
         margin: 0,
         lineHeight: 1,
         color: "var(--text-primary)"
       }}>
-        404
+        Something went wrong!
       </h1>
-      
-      <div style={{ margin: "1rem 0 2rem 0" }}>
+
+      <div style={{ margin: "2rem 0" }}>
         <Loader />
       </div>
-      
-      <h2 style={{
-        fontSize: 24,
-        fontWeight: 600,
-        marginTop: 16,
-        marginBottom: 8
-      }}>
-        Page Not Found
-      </h2>
       
       <p style={{
         color: "var(--text-secondary)",
@@ -187,25 +226,47 @@ export default function NotFound() {
         marginBottom: 40,
         lineHeight: 1.6
       }}>
-        The page you are looking for doesn't exist or has been moved. 
-        Please check the URL or navigate back to safety.
+        We encountered an unexpected error. 
+        Please try again or return to the dashboard.
       </p>
       
-      <Link href="/" style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 8,
-        backgroundColor: "var(--text-primary)",
-        color: "var(--bg-primary)",
-        padding: "12px 24px",
-        borderRadius: 8,
-        fontWeight: 600,
-        textDecoration: "none",
-        transition: "transform 0.2s, opacity 0.2s"
-      }}>
-        <ArrowLeft size={18} />
-        Return to Dashboard
-      </Link>
+      <div style={{ display: 'flex', gap: '16px' }}>
+        <button 
+          onClick={() => reset()}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            backgroundColor: "#ef4444",
+            color: "#ffffff",
+            padding: "12px 24px",
+            borderRadius: 8,
+            fontWeight: 600,
+            border: "none",
+            cursor: "pointer",
+            transition: "transform 0.2s, opacity 0.2s"
+          }}
+        >
+          <RefreshCw size={18} />
+          Try again
+        </button>
+
+        <Link href="/" style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          backgroundColor: "var(--text-primary)",
+          color: "var(--bg-primary)",
+          padding: "12px 24px",
+          borderRadius: 8,
+          fontWeight: 600,
+          textDecoration: "none",
+          transition: "transform 0.2s, opacity 0.2s"
+        }}>
+          <ArrowLeft size={18} />
+          Dashboard
+        </Link>
+      </div>
     </div>
   );
 }
