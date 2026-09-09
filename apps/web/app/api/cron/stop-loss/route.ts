@@ -34,11 +34,25 @@ export async function GET(request: Request) {
       }
     }
 
+    // Fetch USDINR rate for converting foreign prices
+    let usdInrRate: number | null = null;
+    const usdInrQuote = await fetchStockQuote("USDINR", "FX_IDC");
+    if (usdInrQuote?.regularMarketPrice) {
+      usdInrRate = usdInrQuote.regularMarketPrice;
+    }
+
     const closedTrades = [];
 
     for (const trade of openTrades) {
-      const livePrice = quotes.get(`${trade.symbol}:${trade.exchange}`);
+      let livePrice = quotes.get(`${trade.symbol}:${trade.exchange}`);
       if (!livePrice || !trade.stopLoss) continue;
+
+      // Convert USD live price to INR for CRYPTO/NASDAQ/NYSE trades
+      // because SL is stored in INR
+      const isForeignExchange = ["NASDAQ", "NYSE", "CRYPTO"].includes(trade.exchange.toUpperCase());
+      if (isForeignExchange && usdInrRate) {
+        livePrice = livePrice * usdInrRate;
+      }
 
       let isHit = false;
       if (trade.direction === "LONG" && livePrice <= trade.stopLoss) {
@@ -57,7 +71,7 @@ export async function GET(request: Request) {
 
         const exitSide = trade.direction === "LONG" ? "SELL" : "BUY";
         const exitTime = new Date();
-        const exitPrice = livePrice;
+        const exitPrice = livePrice; // Already in INR after conversion
 
         await prisma.$transaction(async (tx) => {
           // 1. Create Execution
