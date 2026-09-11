@@ -91,18 +91,13 @@ export async function POST() {
           const totalBuyQty = isLong ? trade.totalBuyQty : trade.totalBuyQty + openQty;
           const totalSellQty = isLong ? trade.totalSellQty + openQty : trade.totalSellQty;
           
-          let grossPnl = 0;
-          let netPnl = 0;
-          let pnlPercentage = 0;
-
-          if (isLong) {
-            grossPnl = (exitPrice - trade.avgEntryPrice) * totalBuyQty;
-          } else {
-            grossPnl = (trade.avgEntryPrice - exitPrice) * totalSellQty;
-          }
-          netPnl = grossPnl;
-          const investment = trade.avgEntryPrice * (isLong ? totalBuyQty : totalSellQty);
-          pnlPercentage = investment > 0 ? (grossPnl / investment) * 100 : 0;
+          // Use openQty for P&L — correct for partial positions
+          const grossPnl = isLong
+            ? (exitPrice - trade.avgEntryPrice) * openQty
+            : (trade.avgEntryPrice - exitPrice) * openQty;
+          const netPnl = grossPnl;
+          const investment = trade.avgEntryPrice * openQty;
+          const pnlPercentage = investment > 0 ? (grossPnl / investment) * 100 : 0;
           
           const holdingPeriodMs = BigInt(exitTime.getTime() - trade.entryTime.getTime());
           
@@ -114,7 +109,7 @@ export async function POST() {
           await tx.trade.update({
             where: { id: trade.id },
             data: {
-              status: "CLOSED",
+              status: slHit ? "STOP_LOSS_HIT" : "CLOSED",
               totalBuyQty,
               totalSellQty,
               avgExitPrice: exitPrice,

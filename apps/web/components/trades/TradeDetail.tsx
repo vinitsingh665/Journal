@@ -213,7 +213,7 @@ export default function TradeDetail({ trade }: { trade: TradeData }) {
           <div className="card-body flex items-center justify-between">
             <div>
               <div className="text-secondary" style={{ fontSize: "var(--text-xs)", marginBottom: 4 }}>
-                {quoteFetching ? "Fetching live price..." : "Live Price (Yahoo Finance)"}
+                {quoteFetching ? "Fetching live price..." : "Live Price (TradingView)"}
               </div>
               <div className="flex items-center gap-4">
                 <span
