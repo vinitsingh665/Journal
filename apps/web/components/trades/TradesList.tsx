@@ -144,8 +144,14 @@ export default function TradesList({
   const openTrades = useMemo(() => trades.filter((t) => t.status === "OPEN" || t.status === "PARTIAL"), [trades]);
   const { livePnl } = useEnrichedPnl(openTrades);
 
+  // Sum live (unrealized) P&L for all open trades
+  const liveTotalPnl = useMemo(
+    () => Array.from(livePnl.values()).reduce((sum, p) => sum + p.netPnl, 0),
+    [livePnl]
+  );
+
   // Use server-provided KPIs or fallback
-  const kpis = serverKpis || {
+  const baseKpis = serverKpis || {
     total: trades.length,
     winRate: 0,
     totalPnl: trades.reduce((s, t) => s + t.netPnl, 0),
@@ -155,6 +161,48 @@ export default function TradesList({
     openCount: 0,
     closedCount: 0,
   };
+
+  // Merge live P&L into KPI display values
+  const kpis = useMemo(() => {
+    const effectivePnlByTrade = new Map<string, number>();
+    const effectiveRByTrade = new Map<string, number>();
+
+    for (const t of trades) {
+      const live = livePnl.get(t.id);
+      const livePnlVal = live ? live.netPnl : t.netPnl;
+      effectivePnlByTrade.set(t.id, livePnlVal);
+
+      // Compute live R for open trades the same way the row does
+      if (live && t.stopLoss) {
+        const openQty = t.totalBuyQty - t.totalSellQty;
+        const riskPerUnit = Math.abs(t.avgEntryPrice - t.stopLoss);
+        const riskAmount = riskPerUnit * (openQty || 1);
+        if (riskAmount > 0) effectiveRByTrade.set(t.id, livePnlVal / riskAmount);
+      } else if (t.rMultiple !== null && t.rMultiple !== undefined) {
+        effectiveRByTrade.set(t.id, t.rMultiple);
+      }
+    }
+
+    const allPnls = Array.from(effectivePnlByTrade.values());
+    const totalPnl = allPnls.reduce((s, v) => s + v, 0);
+    const tradesWithPnl = allPnls.filter((v) => v !== 0);
+    const winners = tradesWithPnl.filter((v) => v > 0);
+    const winRate = tradesWithPnl.length > 0 ? (winners.length / tradesWithPnl.length) * 100 : baseKpis.winRate;
+    const best = allPnls.length > 0 ? Math.max(...allPnls) : baseKpis.best;
+    const worst = allPnls.length > 0 ? Math.min(...allPnls) : baseKpis.worst;
+
+    const rValues = Array.from(effectiveRByTrade.values());
+    const avgR = rValues.length > 0 ? rValues.reduce((s, v) => s + v, 0) / rValues.length : baseKpis.avgR;
+
+    return {
+      ...baseKpis,
+      totalPnl,
+      avgR,
+      winRate: tradesWithPnl.length > 0 ? winRate : baseKpis.winRate,
+      best: allPnls.length > 0 ? best : baseKpis.best,
+      worst: allPnls.length > 0 && worst < 0 ? worst : (allPnls.length > 0 && allPnls.every(v => v >= 0) ? null : baseKpis.worst),
+    };
+  }, [baseKpis, livePnl, trades]);
 
   // Trades are already paginated from server
   const paginated = trades;
@@ -255,29 +303,29 @@ export default function TradesList({
         </div>
         <div className="trades-kpi-card">
           <span className="trades-kpi-label">WIN RATE</span>
-          <span className="trades-kpi-value">{kpis.winRate.toFixed(1)}%</span>
+          <span className="trades-kpi-value" style={{ color: kpis.winRate >= 50 ? "var(--color-positive)" : "var(--text-primary)" }}>{kpis.winRate.toFixed(1)}%</span>
         </div>
         <div className="trades-kpi-card">
           <span className="trades-kpi-label">TOTAL P&L</span>
-          <span className={cn("trades-kpi-value", kpis.totalPnl >= 0 ? "text-positive" : "text-negative")}>
+          <span className="trades-kpi-value" style={{ color: kpis.totalPnl >= 0 ? "var(--color-positive)" : "var(--color-negative)" }}>
             {formatINR(kpis.totalPnl, { showSign: true })}
           </span>
         </div>
         <div className="trades-kpi-card">
           <span className="trades-kpi-label">AVG R-MULTIPLE</span>
-          <span className={cn("trades-kpi-value", kpis.avgR >= 0 ? "text-positive" : "text-negative")}>
+          <span className="trades-kpi-value" style={{ color: kpis.avgR >= 0 ? "var(--color-positive)" : "var(--color-negative)" }}>
             {kpis.avgR >= 0 ? "+" : ""}{kpis.avgR.toFixed(2)}R
           </span>
         </div>
         <div className="trades-kpi-card">
           <span className="trades-kpi-label">BEST TRADE</span>
-          <span className="trades-kpi-value text-positive">
+          <span className="trades-kpi-value" style={{ color: "var(--color-positive)" }}>
             {kpis.best !== null ? formatINR(kpis.best, { showSign: true, compact: true }) : "—"}
           </span>
         </div>
         <div className="trades-kpi-card">
           <span className="trades-kpi-label">WORST TRADE</span>
-          <span className="trades-kpi-value text-negative">
+          <span className="trades-kpi-value" style={{ color: kpis.worst !== null ? "var(--color-negative)" : "var(--text-primary)" }}>
             {kpis.worst !== null ? formatINR(kpis.worst, { showSign: true, compact: true }) : "—"}
           </span>
         </div>
@@ -665,7 +713,7 @@ export default function TradesList({
                   : selectedTrade.rMultiple;
                   
                 return (
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "var(--space-3)", padding: "var(--space-4) var(--space-5)", borderBottom: "1px solid var(--border-secondary)" }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1.7fr 1fr", gap: "var(--space-3)", padding: "var(--space-4) var(--space-5)", borderBottom: "1px solid var(--border-secondary)" }}>
                     <div>
                       <div className="text-muted" style={{ fontSize: "var(--text-xs)", marginBottom: 2 }}>R-Multiple</div>
                       <div className={cn("text-positive", (displayR ?? 0) < 0 && "text-negative")} style={{ fontSize: "var(--text-lg)", fontWeight: 700, fontFamily: "var(--font-mono)" }}>

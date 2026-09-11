@@ -1,11 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { useMemo } from "react";
 import { formatINR, formatDate, cn } from "@/lib/utils";
+import { useEnrichedPnl } from "@/hooks/useEnrichedPnl";
 
 interface Trade {
   id: string;
   symbol: string;
+  exchange: string;
   direction: string;
   entryPrice: number;
   exitPrice: number | null;
@@ -14,9 +17,17 @@ interface Trade {
   pnlPercentage?: number;
   entryTime: string;
   status: string;
+  totalBuyQty: number;
+  totalSellQty: number;
 }
 
 export default function RecentTrades({ trades }: { trades: Trade[] }) {
+  const openTrades = useMemo(
+    () => trades.filter((t) => t.status === "OPEN" || t.status === "PARTIAL"),
+    [trades]
+  );
+  const { livePnl } = useEnrichedPnl(openTrades);
+
   return (
     <div className="card" id="recent-trades">
       <div className="card-header">
@@ -40,7 +51,15 @@ export default function RecentTrades({ trades }: { trades: Trade[] }) {
               </tr>
             </thead>
             <tbody>
-              {trades.map((trade) => (
+              {trades.map((trade) => {
+                const live = livePnl.get(trade.id);
+                const displayPnl = live ? live.netPnl : trade.pnl;
+                const investment = trade.entryPrice * (trade.totalBuyQty - trade.totalSellQty);
+                const displayPnlPct = live
+                  ? (investment > 0 ? (live.netPnl / investment) * 100 : 0)
+                  : (trade.pnlPercentage ?? 0);
+
+                return (
                 <tr key={trade.id}>
                   <td>
                     <Link
@@ -86,30 +105,30 @@ export default function RecentTrades({ trades }: { trades: Trade[] }) {
                   <td className="col-numeric">
                     <span
                       className={cn(
-                        trade.pnl >= 0 ? "text-positive" : "text-negative"
+                        displayPnl >= 0 ? "text-positive" : "text-negative"
                       )}
                       style={{ fontWeight: 600 }}
                     >
-                      {formatINR(trade.pnl, { showSign: true, compact: true })}
+                      {formatINR(displayPnl, { showSign: true, compact: true })}
                     </span>
                   </td>
                   <td className="col-numeric">
                     <span
                       className={cn(
-                        (trade.pnlPercentage ?? 0) >= 0
-                          ? "text-positive"
-                          : "text-negative"
+                        displayPnlPct >= 0 ? "text-positive" : "text-negative"
                       )}
                     >
-                      {(trade.pnlPercentage ?? 0) >= 0 ? "+" : ""}
-                      {(trade.pnlPercentage ?? 0).toFixed(2)}%
+                      {displayPnlPct >= 0 ? "+" : ""}
+                      {displayPnlPct.toFixed(2)}%
                     </span>
                   </td>
                   <td style={{ color: "var(--text-secondary)", fontSize: "var(--text-sm)" }}>
                     {formatDate(trade.entryTime)}
                   </td>
                 </tr>
-              ))}
+                );
+              })}
+
             </tbody>
           </table>
         ) : (

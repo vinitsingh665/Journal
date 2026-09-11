@@ -79,6 +79,28 @@ export default function KpiCards({
     };
   }, [livePnl, totalPnl, todayPnl, totalReturnPercent, todayReturnPercent, allTimeInvestment]);
 
+  // Compute live-adjusted win rate: closed trades use server winRate, open trades use live P&L sign
+  const liveWinRate = useMemo(() => {
+    const openCount = openTrades?.length || 0;
+    const closedCount = totalTrades - openCount;
+
+    if (livePnl.size === 0) {
+      // No live data yet — fall back to server win rate
+      return winRate;
+    }
+
+    const liveWins = Array.from(livePnl.values()).filter((p) => p.netPnl > 0).length;
+    const liveLosses = Array.from(livePnl.values()).filter((p) => p.netPnl < 0).length;
+    const liveTradesWithPnl = liveWins + liveLosses;
+
+    // Estimate closed winners from server win rate
+    const closedWins = Math.round((winRate / 100) * closedCount);
+    const totalWithPnl = closedCount + liveTradesWithPnl;
+
+    if (totalWithPnl === 0) return 0;
+    return ((closedWins + liveWins) / totalWithPnl) * 100;
+  }, [livePnl, winRate, totalTrades, openTrades]);
+
   const kpis = [
     {
       label: "Total Capital",
@@ -163,16 +185,16 @@ export default function KpiCards({
     },
     {
       label: "Win Rate",
-      value: `${winRate.toFixed(1)}%`,
+      value: `${liveWinRate.toFixed(1)}%`,
       change: `${totalTrades} trades`,
-      positive: winRate >= 50,
+      positive: liveWinRate >= 50,
       icon: (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
           <polyline points="22 4 12 14.01 9 11.01" />
         </svg>
       ),
-      accentColor: winRate >= 50 ? "#10B981" : "#EF4444",
+      accentColor: liveWinRate >= 50 ? "#10B981" : "#EF4444",
     },
   ];
 
