@@ -200,7 +200,7 @@ export default function TradesList({
       avgR,
       winRate: tradesWithPnl.length > 0 ? winRate : baseKpis.winRate,
       best: allPnls.length > 0 ? best : baseKpis.best,
-      worst: allPnls.length > 0 && worst < 0 ? worst : (allPnls.length > 0 && allPnls.every(v => v >= 0) ? null : baseKpis.worst),
+      worst: allPnls.length > 0 && worst != null && worst < 0 ? worst : (allPnls.length > 0 && allPnls.every(v => v >= 0) ? null : baseKpis.worst),
     };
   }, [baseKpis, livePnl, trades]);
 
