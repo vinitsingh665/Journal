@@ -117,6 +117,7 @@ async function SharedDashboardContent({ userId }: { userId: string }) {
   const recentTrades = enrichedTrades.slice(0, 8).map((t) => ({
     id: t.id,
     symbol: t.symbol,
+    exchange: t.exchange,
     direction: t.direction,
     entryPrice: t.avgEntryPrice,
     exitPrice: t.avgExitPrice,
@@ -125,6 +126,8 @@ async function SharedDashboardContent({ userId }: { userId: string }) {
     pnlPercentage: t.pnlPercentage,
     entryTime: t.entryTime.toISOString(),
     status: t.status,
+    totalBuyQty: t.totalBuyQty,
+    totalSellQty: t.totalSellQty,
   }));
 
   // Total risk on open positions
@@ -183,7 +186,27 @@ async function SharedDashboardContent({ userId }: { userId: string }) {
       <div className="dashboard-grid mt-6">
         {/* Performance Overview */}
         <div className="col-span-4">
-          <PerformanceOverview metrics={metrics} />
+          <PerformanceOverview
+            metrics={metrics}
+            allTrades={enrichedTrades.map((t) => ({
+              id: t.id,
+              symbol: t.symbol,
+              exchange: t.exchange,
+              direction: t.direction,
+              status: t.status,
+              avgEntryPrice: t.avgEntryPrice,
+              totalBuyQty: t.totalBuyQty,
+              totalSellQty: t.totalSellQty,
+              grossPnl: t.grossPnl,
+              netPnl: t.netPnl,
+              rMultiple: t.rMultiple,
+              holdingPeriodMs: t.holdingPeriodMs ? Number(t.holdingPeriodMs) : null,
+              entryTime: t.entryTime.toISOString(),
+              exitTime: t.exitTime?.toISOString() || null,
+              strategy: t.strategy,
+              stopLoss: t.stopLoss,
+            }))}
+          />
         </div>
 
         {/* Equity Curve */}
