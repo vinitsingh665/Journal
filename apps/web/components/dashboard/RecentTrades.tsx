@@ -11,6 +11,7 @@ interface Trade {
   exchange: string;
   direction: string;
   entryPrice: number;
+  avgEntryPrice: number;
   exitPrice: number | null;
   rMultiple: number | null;
   pnl: number;

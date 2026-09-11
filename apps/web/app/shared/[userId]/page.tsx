@@ -120,6 +120,7 @@ async function SharedDashboardContent({ userId }: { userId: string }) {
     exchange: t.exchange,
     direction: t.direction,
     entryPrice: t.avgEntryPrice,
+    avgEntryPrice: t.avgEntryPrice,
     exitPrice: t.avgExitPrice,
     rMultiple: t.rMultiple,
     pnl: t.netPnl,
