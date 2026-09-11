@@ -1,4 +1,4 @@
-﻿import { prisma } from "@repo/database";
+import { prisma } from "@repo/database";
 
 function yahooTicker(symbol: string, exchange: string): string {
   const ex = exchange.toUpperCase();
@@ -84,8 +84,8 @@ export async function syncPricesForUser(userId: string): Promise<{ synced: numbe
       let closeINR = closeUSD;
       if (isForeign) { usdInrRate = await getUsdInr(date); closeINR = closeUSD * usdInrRate; }
       await prisma.priceHistory.upsert({
-        where: { symbol_date: { symbol, date: toUTCMidnight(date) } },
-        create: { symbol, date: toUTCMidnight(date), closeUSD, closeINR, usdInrRate },
+        where: { symbol_exchange_date: { symbol, exchange, date: toUTCMidnight(date) } },
+        create: { symbol, exchange, date: toUTCMidnight(date), closeUSD, closeINR, usdInrRate },
         update: { closeUSD, closeINR, usdInrRate },
       });
       existingSet.add(key);
