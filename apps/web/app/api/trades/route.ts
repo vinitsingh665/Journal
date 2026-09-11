@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { generateFingerprint } from "@repo/trading-engine";
 import { fetchStockQuote } from "@/lib/finance";
 import { formatINR } from "@/lib/utils";
+import { syncPricesForUser } from "@/lib/sync-prices";
 
 // Create a manual trade
 export async function POST(request: NextRequest) {
@@ -261,6 +262,9 @@ export async function POST(request: NextRequest) {
 
       return trade;
     });
+
+    // Trigger background price sync — fire and forget, doesn't block the response.
+    syncPricesForUser(userId).catch(() => {});
 
     return NextResponse.json({ success: true, tradeId: result.id });
   } catch (error) {

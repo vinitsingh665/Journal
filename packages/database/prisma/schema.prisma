@@ -447,3 +447,24 @@ model PasswordResetToken {
 
   @@index([userId])
 }
+
+// ─── PRICE HISTORY ───────────────────────────────────
+// Stores end-of-day closing prices for symbols held in open positions.
+// Used by the daily P&L performance chart to calculate mark-to-market
+// gains/losses per day without calling Yahoo Finance on every request.
+
+model PriceHistory {
+  id        String   @id @default(cuid())
+  symbol    String   // e.g. "ETHUSDT", "RELIANCE"
+  exchange  String   // e.g. "CRYPTO", "NSE"
+  date      DateTime // Midnight UTC of the trading day
+  closeUSD  Float    // Closing price in native currency (USD for CRYPTO, INR for NSE)
+  closeINR  Float    // Closing price converted to INR using USDINR rate of that day
+  usdInrRate Float   @default(1) // USDINR rate used for conversion (1 for INR-native symbols)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([symbol, exchange, date])
+  @@index([symbol, exchange])
+  @@index([date])
+}

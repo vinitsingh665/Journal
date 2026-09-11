@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useRef, useEffect } from "react";
 import { formatINR, cn } from "@/lib/utils";
 import { useEnrichedPnl } from "@/hooks/useEnrichedPnl";
 import {
@@ -50,9 +50,183 @@ interface TradeData {
   holdingPeriodMs: number | null;
 }
 
+
+// ─── SCROLLABLE PERFORMANCE CHART ────────────────────────────────────────────
+// Daily view: responsive:false + explicit pixel width inside horizontal-scroll div.
+// All other views: responsive:true so the chart fills the card naturally.
+function PerfChart({
+  labels,
+  data,
+  perfMetric,
+  isDailyView,
+}: {
+  labels: string[];
+  data: number[];
+  perfMetric: string;
+  isDailyView?: boolean;
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const CHART_HEIGHT = 260;
+  // 44px per bar → ~15 bars visible before scrolling
+  const dailyCanvasWidth = Math.max(labels.length * 44, 400);
+
+  // Auto-scroll to most-recent bars when data changes
+  useEffect(() => {
+    if (isDailyView && scrollRef.current) {
+      scrollRef.current.scrollLeft = scrollRef.current.scrollWidth;
+    }
+  }, [labels.length, isDailyView]);
+
+  const yTickCallback = (value: any) => {
+    if (value === 0) return perfMetric === "P&L" ? "₹0" : "0R";
+    if (perfMetric === "R-Multiple") return (value > 0 ? "+" : "") + Number(value).toFixed(1) + "R";
+    if (Math.abs(value) >= 100000) return (value < 0 ? "-" : "") + "₹" + (Math.abs(value) / 100000).toFixed(1) + "L";
+    if (Math.abs(value) >= 1000) return (value < 0 ? "-" : "") + "₹" + (Math.abs(value) / 1000).toFixed(1) + "K";
+    return (value < 0 ? "-" : "") + "₹" + Math.abs(value);
+  };
+
+  const tooltipLabel = (ctx: any) => {
+    const v = ctx.parsed.y;
+    if (perfMetric === "R-Multiple") return `${v >= 0 ? "+" : ""}${v.toFixed(2)}R`;
+    if (Math.abs(v) >= 100000) return `${v < 0 ? "-" : ""}₹${(Math.abs(v) / 100000).toFixed(2)}L`;
+    if (Math.abs(v) >= 1000) return `${v < 0 ? "-" : ""}₹${(Math.abs(v) / 1000).toFixed(1)}K`;
+    return `${v < 0 ? "-" : ""}₹${Math.abs(v).toFixed(0)}`;
+  };
+
+  const chartData = {
+    labels,
+    datasets: [
+      {
+        data,
+        backgroundColor: data.map((v) =>
+          v > 0
+            ? "rgba(16, 185, 129, 0.9)"
+            : v < 0
+            ? "rgba(239, 68, 68, 0.9)"
+            : "rgba(113,113,122,0.25)"
+        ),
+        borderRadius: 3,
+        barPercentage: 0.65,
+        categoryPercentage: 0.75,
+      },
+    ],
+  };
+
+  const yAxis = {
+    position: "right" as const,
+    grid: { color: "rgba(128,128,128,0.1)" },
+    border: { dash: [5, 5] },
+    ticks: { font: { size: 10 }, color: "#71717a", callback: yTickCallback },
+  };
+
+  if (isDailyView) {
+    // ── Daily: two-div scroll pattern ────────────────────────────────────────
+    // Outer div: clips to card width and scrolls horizontally.
+    // Inner div: has exact pixel width so the chart expands to fill it fully.
+    // Using responsive:true avoids the DPI/CSS scaling bugs of responsive:false.
+    return (
+      <div
+        ref={scrollRef}
+        className="perf-scroll"
+        style={{
+          width: 0,
+          minWidth: "100%",
+          overflowX: "auto",
+          overflowY: "hidden",
+          scrollbarWidth: "thin",
+          scrollbarColor: "rgba(120,120,130,0.4) transparent",
+        }}
+      >
+        <style>{`
+          .perf-scroll::-webkit-scrollbar { height: 4px; }
+          .perf-scroll::-webkit-scrollbar-track { background: transparent; border-radius: 99px; }
+          .perf-scroll::-webkit-scrollbar-thumb { background: rgba(120,120,130,0.4); border-radius: 99px; }
+          .perf-scroll::-webkit-scrollbar-thumb:hover { background: rgba(120,120,130,0.7); }
+        `}</style>
+        <div style={{ width: `${dailyCanvasWidth}px`, height: `${CHART_HEIGHT}px` }}>
+          <Bar
+            data={chartData}
+            options={{
+              responsive: true,
+              maintainAspectRatio: false,
+              animation: false,
+              plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: tooltipLabel } },
+              },
+              scales: {
+                x: {
+                  grid: { display: false },
+                  ticks: {
+                    font: { size: 10 },
+                    color: "#71717a",
+                    maxRotation: 45,
+                    minRotation: 0,
+                    autoSkip: true,
+                    maxTicksLimit: 10,
+                  },
+                },
+                y: yAxis,
+              },
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // Weekly / Monthly / Yearly — fill the card naturally
+  return (
+    <div style={{ height: CHART_HEIGHT, width: "100%" }}>
+      <Bar
+        data={chartData}
+        options={{
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: tooltipLabel } },
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { font: { size: 10 }, color: "#71717a", maxRotation: 45, minRotation: 0 },
+            },
+            y: yAxis,
+          },
+        }}
+      />
+    </div>
+  );
+}
+
+
+
+
+
 export default function AnalyticsDashboard({ initialTrades: rawTrades }: { initialTrades: TradeData[] }) {
   const [perfView, setPerfView] = useState("Monthly");
   const [perfMetric, setPerfMetric] = useState("P&L");
+
+  // Daily MTM P&L fetched from the API (historical prices for open positions).
+  // Fetched once on mount so ALL views (Daily/Weekly/Monthly/Yearly) use accurate MTM data.
+  const [dailyPnlData, setDailyPnlData] = useState<{ date: string; pnl: number }[] | null>(null);
+  const [dailyPnlLoading, setDailyPnlLoading] = useState(false);
+
+  useEffect(() => {
+    // 1. Fire background sync first (fills any missing PriceHistory rows).
+    //    We don't await the result — the chart will show existing DB data immediately,
+    //    and newly synced rows will appear on the next load.
+    fetch("/api/jobs/sync-prices", { method: "POST" }).catch(() => {});
+
+    // 2. Fetch the daily P&L chart data from the DB.
+    setDailyPnlLoading(true);
+    fetch("/api/analytics/daily-pnl")
+      .then((r) => r.json())
+      .then((d) => setDailyPnlData(d.days ?? []))
+      .catch(() => setDailyPnlData([]))
+      .finally(() => setDailyPnlLoading(false));
+  }, []); // Fetch once; all views aggregate from this data
 
   const openTrades = useMemo(() => rawTrades.filter((t) => t.status === "OPEN" || t.status === "PARTIAL"), [rawTrades]);
   const { livePnl } = useEnrichedPnl(openTrades);
@@ -216,61 +390,135 @@ export default function AnalyticsDashboard({ initialTrades: rawTrades }: { initi
     let labels: string[] = [];
     let data: number[] = [];
 
+    // Use exitTime for closed trades (when P&L was actually realized),
+    // fall back to entryTime for open/partial trades
+    const getDate = (t: TradeData) => {
+      const isClosed = t.status !== "OPEN" && t.status !== "PARTIAL";
+      return new Date(isClosed && t.exitTime ? t.exitTime : t.entryTime);
+    };
+
     if (perfView === "Daily") {
       const dayMap: Record<string, number> = {};
       initialTrades.forEach(t => {
-        const d = new Date(t.entryTime);
-        const key = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        const d = getDate(t);
+        // key = YYYY-MM-DD for reliable sorting
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         const val = perfMetric === "P&L" ? t.netPnl : (t.rMultiple || 0);
         dayMap[key] = (dayMap[key] || 0) + val;
       });
-      const sortedKeys = Object.keys(dayMap).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
-      labels = sortedKeys.map(k => new Date(k).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }));
-      data = sortedKeys.map(k => dayMap[k]);
+
+      // Fill all calendar days from first to today
+      if (Object.keys(dayMap).length > 0) {
+        const sortedKeys = Object.keys(dayMap).sort();
+        const start = new Date(sortedKeys[0]);
+        const end = new Date(); // today
+        const cursor = new Date(start);
+        while (cursor <= end) {
+          const key = `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, '0')}-${String(cursor.getDate()).padStart(2, '0')}`;
+          if (!(key in dayMap)) dayMap[key] = 0;
+          cursor.setDate(cursor.getDate() + 1);
+        }
+        const allKeys = Object.keys(dayMap).sort();
+        labels = allKeys.map(k => {
+          const [y, m, d] = k.split('-').map(Number);
+          return new Date(y, m - 1, d).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        });
+        data = allKeys.map(k => dayMap[k]);
+      }
     } else if (perfView === "Weekly") {
       const weekMap: Record<string, number> = {};
       initialTrades.forEach(t => {
-        const d = new Date(t.entryTime);
+        const d = getDate(t);
         const day = d.getDay();
         const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Get Monday
-        const monday = new Date(new Date(d).setDate(diff));
-        const key = monday.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        const monday = new Date(d);
+        monday.setDate(diff);
+        const key = `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, '0')}-${String(monday.getDate()).padStart(2, '0')}`;
         const val = perfMetric === "P&L" ? t.netPnl : (t.rMultiple || 0);
         weekMap[key] = (weekMap[key] || 0) + val;
       });
-      const sortedKeys = Object.keys(weekMap).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
-      labels = sortedKeys.map(k => `Wk of ${new Date(k).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`);
-      data = sortedKeys.map(k => weekMap[k]);
+
+      // Fill all weeks from first to current week
+      if (Object.keys(weekMap).length > 0) {
+        const sortedKeys = Object.keys(weekMap).sort();
+        const start = new Date(sortedKeys[0]);
+        const now = new Date();
+        // get current week's monday
+        const curDay = now.getDay();
+        const curDiff = now.getDate() - curDay + (curDay === 0 ? -6 : 1);
+        const curMonday = new Date(now);
+        curMonday.setDate(curDiff);
+
+        const cursor = new Date(start);
+        while (cursor <= curMonday) {
+          const key = `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, '0')}-${String(cursor.getDate()).padStart(2, '0')}`;
+          if (!(key in weekMap)) weekMap[key] = 0;
+          cursor.setDate(cursor.getDate() + 7);
+        }
+        const allKeys = Object.keys(weekMap).sort();
+        labels = allKeys.map(k => {
+          const [y, m, d] = k.split('-').map(Number);
+          return `Wk ${new Date(y, m - 1, d).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`;
+        });
+        data = allKeys.map(k => weekMap[k]);
+      }
     } else if (perfView === "Yearly") {
       const yearMap: Record<string, number> = {};
       initialTrades.forEach(t => {
-        const year = new Date(t.entryTime).getFullYear().toString();
+        const year = getDate(t).getFullYear().toString();
         const val = perfMetric === "P&L" ? t.netPnl : (t.rMultiple || 0);
         yearMap[year] = (yearMap[year] || 0) + val;
       });
-      labels = Object.keys(yearMap).sort();
-      data = labels.map(y => yearMap[y]);
+
+      // Fill all years from first to current
+      if (Object.keys(yearMap).length > 0) {
+        const sortedKeys = Object.keys(yearMap).sort();
+        const startYear = parseInt(sortedKeys[0]);
+        const endYear = new Date().getFullYear();
+        for (let y = startYear; y <= endYear; y++) {
+          if (!(y.toString() in yearMap)) yearMap[y.toString()] = 0;
+        }
+        labels = Object.keys(yearMap).sort();
+        data = labels.map(y => yearMap[y]);
+      }
     } else {
       // Monthly
       const monthMap: Record<string, number> = {};
       initialTrades.forEach(t => {
-        const d = new Date(t.entryTime);
-        const key = `${d.getFullYear()}-${d.getMonth()}`; 
+        const d = getDate(t);
+        const key = `${d.getFullYear()}-${String(d.getMonth()).padStart(2, '0')}`;
         const val = perfMetric === "P&L" ? t.netPnl : (t.rMultiple || 0);
         monthMap[key] = (monthMap[key] || 0) + val;
       });
-      const sortedKeys = Object.keys(monthMap).sort((a, b) => {
-         const [yA, mA] = a.split('-');
-         const [yB, mB] = b.split('-');
-         if (yA !== yB) return Number(yA) - Number(yB);
-         return Number(mA) - Number(mB);
-      });
-      labels = sortedKeys.map(k => {
-         const [y, m] = k.split('-');
-         const d = new Date(Number(y), Number(m), 1);
-         return d.toLocaleDateString(undefined, { month: 'short', year: '2-digit' });
-      });
-      data = sortedKeys.map(k => monthMap[k]);
+
+      // Fill all months from first to current
+      if (Object.keys(monthMap).length > 0) {
+        const sortedKeys = Object.keys(monthMap).sort();
+        const [startY, startM] = sortedKeys[0].split('-').map(Number);
+        const now = new Date();
+        const endKey = `${now.getFullYear()}-${String(now.getMonth()).padStart(2, '0')}`;
+        let cy = startY, cm = startM;
+        while (true) {
+          const key = `${cy}-${String(cm).padStart(2, '0')}`;
+          if (!(key in monthMap)) monthMap[key] = 0;
+          if (key === endKey) break;
+          cm++;
+          if (cm > 11) { cm = 0; cy++; }
+          if (cy > now.getFullYear() + 1) break; // safety
+        }
+        const allKeys = Object.keys(monthMap).sort((a, b) => {
+          const [yA, mA] = a.split('-').map(Number);
+          const [yB, mB] = b.split('-').map(Number);
+          if (yA !== yB) return yA - yB;
+          return mA - mB;
+        });
+        labels = allKeys.map(k => {
+          const [y, m] = k.split('-').map(Number);
+          const d = new Date(y, m, 1);
+          return d.toLocaleDateString(undefined, { month: 'short', year: '2-digit' });
+        });
+        data = allKeys.map(k => monthMap[k]);
+      }
     }
 
     if (labels.length === 0) {
@@ -280,6 +528,95 @@ export default function AnalyticsDashboard({ initialTrades: rawTrades }: { initi
 
     return { labels, data };
   }, [initialTrades, perfView, perfMetric]);
+
+  // Aggregate daily MTM P&L data into the correct time buckets for all views.
+  // All views use the accurate API data (realized + unrealized MTM), not just Daily.
+  const activePerfChartData = useMemo(() => {
+    // Only applies to P&L metric; R-Multiple still uses trade-based perfChartData
+    if (perfMetric !== "P&L" || !dailyPnlData || dailyPnlData.length === 0) {
+      return perfChartData;
+    }
+
+    // Live intraday override for today's date
+    let liveTodayPnl: number | null = null;
+    if (livePnl && livePnl.size > 0) {
+      liveTodayPnl = 0;
+      for (const pnl of livePnl.values()) {
+        liveTodayPnl += pnl.todayPnl;
+      }
+    }
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+    // Apply live override to today's entry in dailyPnlData
+    const resolvedDaily = dailyPnlData.map((d) => ({
+      ...d,
+      pnl: d.date === todayStr && liveTodayPnl !== null ? liveTodayPnl : d.pnl,
+    }));
+
+    if (perfView === "Daily") {
+      return {
+        labels: resolvedDaily.map(d => {
+          const [y, m, day] = d.date.split('-').map(Number);
+          return new Date(y, m - 1, day).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        }),
+        data: resolvedDaily.map(d => d.pnl),
+      };
+    }
+
+    if (perfView === "Weekly") {
+      const weekMap: Record<string, number> = {};
+      resolvedDaily.forEach(({ date, pnl }) => {
+        const d = new Date(date);
+        const day = d.getDay();
+        const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+        const monday = new Date(d);
+        monday.setDate(diff);
+        const key = `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, '0')}-${String(monday.getDate()).padStart(2, '0')}`;
+        weekMap[key] = (weekMap[key] || 0) + pnl;
+      });
+      const allKeys = Object.keys(weekMap).sort();
+      return {
+        labels: allKeys.map(k => {
+          const [y, m, d] = k.split('-').map(Number);
+          return `Wk ${new Date(y, m - 1, d).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`;
+        }),
+        data: allKeys.map(k => weekMap[k]),
+      };
+    }
+
+    if (perfView === "Monthly") {
+      const monthMap: Record<string, number> = {};
+      resolvedDaily.forEach(({ date, pnl }) => {
+        const key = date.slice(0, 7); // "YYYY-MM"
+        monthMap[key] = (monthMap[key] || 0) + pnl;
+      });
+      const allKeys = Object.keys(monthMap).sort();
+      return {
+        labels: allKeys.map(k => {
+          const [y, m] = k.split('-').map(Number);
+          return new Date(y, m - 1, 1).toLocaleDateString(undefined, { month: 'short', year: '2-digit' });
+        }),
+        data: allKeys.map(k => monthMap[k]),
+      };
+    }
+
+    if (perfView === "Yearly") {
+      const yearMap: Record<string, number> = {};
+      resolvedDaily.forEach(({ date, pnl }) => {
+        const key = date.slice(0, 4); // "YYYY"
+        yearMap[key] = (yearMap[key] || 0) + pnl;
+      });
+      const allKeys = Object.keys(yearMap).sort();
+      return {
+        labels: allKeys,
+        data: allKeys.map(k => yearMap[k]),
+      };
+    }
+
+    return perfChartData;
+  }, [perfView, perfMetric, dailyPnlData, perfChartData, livePnl]);
+
 
   // R-Multiple Bins
   const rBins = useMemo(() => {
@@ -426,7 +763,7 @@ export default function AnalyticsDashboard({ initialTrades: rawTrades }: { initi
           </div>
         </div>
 
-        <div className="card" style={{ flex: "1 1 300px", padding: "var(--space-5)", minWidth: 0 }}>
+        <div className="card" style={{ flex: "1 1 300px", padding: "var(--space-5)", minWidth: 0, overflow: "hidden" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-4)" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "var(--space-4)" }}>
               <div style={{ fontSize: "var(--text-sm)", fontWeight: 700 }}>PERFORMANCE <span className="text-muted">ⓘ</span></div>
@@ -437,61 +774,22 @@ export default function AnalyticsDashboard({ initialTrades: rawTrades }: { initi
                 <option>Yearly</option>
               </select>
             </div>
-            <div style={{ display: "flex", background: "var(--bg-secondary)", borderRadius: 6, padding: 2 }}>
-              <button onClick={() => setPerfMetric("P&L")} style={{ background: perfMetric === "P&L" ? "var(--bg-primary)" : "transparent", color: perfMetric === "P&L" ? "var(--text-primary)" : "var(--text-muted)", border: "none", padding: "4px 8px", fontSize: 10, fontWeight: 600, borderRadius: 4, boxShadow: perfMetric === "P&L" ? "0 1px 2px rgba(0,0,0,0.05)" : "none", cursor: "pointer" }}>P&L</button>
-              <button onClick={() => setPerfMetric("R-Multiple")} style={{ background: perfMetric === "R-Multiple" ? "var(--bg-primary)" : "transparent", color: perfMetric === "R-Multiple" ? "var(--text-primary)" : "var(--text-muted)", border: "none", padding: "4px 8px", fontSize: 10, fontWeight: 600, borderRadius: 4, boxShadow: perfMetric === "R-Multiple" ? "0 1px 2px rgba(0,0,0,0.05)" : "none", cursor: "pointer" }}>R-Multiple</button>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <div style={{ display: "flex", background: "var(--bg-secondary)", borderRadius: 6, padding: 2 }}>
+                <button onClick={() => setPerfMetric("P&L")} style={{ background: perfMetric === "P&L" ? "var(--bg-primary)" : "transparent", color: perfMetric === "P&L" ? "var(--text-primary)" : "var(--text-muted)", border: "none", padding: "4px 8px", fontSize: 10, fontWeight: 600, borderRadius: 4, cursor: "pointer" }}>P&L</button>
+                <button onClick={() => setPerfMetric("R-Multiple")} style={{ background: perfMetric === "R-Multiple" ? "var(--bg-primary)" : "transparent", color: perfMetric === "R-Multiple" ? "var(--text-primary)" : "var(--text-muted)", border: "none", padding: "4px 8px", fontSize: 10, fontWeight: 600, borderRadius: 4, cursor: "pointer" }}>R-Multiple</button>
+              </div>
             </div>
           </div>
-          <div style={{ height: 280, overflowX: "auto", overflowY: "hidden" }}>
-            <div style={{ 
-              height: "100%", 
-              width: perfView === "Daily" 
-                ? `${Math.max(100, (perfChartData.labels.length / 15) * 100)}%` 
-                : perfView === "Weekly" || perfView === "Monthly"
-                ? `${Math.max(100, (perfChartData.labels.length / 12) * 100)}%`
-                : "100%",
-              minWidth: "100%" 
-            }}>
-              <Bar
-              data={{
-                labels: perfChartData.labels,
-                datasets: [{
-                  data: perfChartData.data,
-                  backgroundColor: perfChartData.data.map((v: number) => v >= 0 ? "rgba(16, 185, 129, 0.9)" : "rgba(239, 68, 68, 0.9)"),
-                  borderRadius: 2,
-                  barPercentage: 0.6,
-                }]
-              }}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                  x: { 
-                    grid: { display: false },
-                    ticks: { font: { size: 10 }, color: "#71717a" }
-                  },
-                  y: { 
-                    position: "right",
-                    grid: { color: "rgba(128,128,128,0.1)" },
-                    border: { dash: [5, 5] },
-                    ticks: { 
-                      font: { size: 10 }, 
-                      color: "#71717a",
-                      callback: function(value: any) {
-                        if (value === 0) return perfMetric === "P&L" ? '₹0' : '0R';
-                        if (perfMetric === "R-Multiple") return (value > 0 ? '+' : '') + value.toFixed(1) + 'R';
-                        if (Math.abs(value) >= 100000) return (value < 0 ? '-' : '') + '₹' + (Math.abs(value) / 100000).toFixed(1) + 'L';
-                        if (Math.abs(value) >= 1000) return (value < 0 ? '-' : '') + '₹' + (Math.abs(value) / 1000).toFixed(1) + 'K';
-                        return (value < 0 ? '-' : '') + '₹' + Math.abs(value);
-                      }
-                    }
-                  }
-                }
-              }}
-            />
-          </div>
-          </div>
+          {dailyPnlLoading ? (
+            <div style={{ height: 260, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 8 }}>
+              <svg style={{ animation: "spin 1s linear infinite" }} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+              <span className="text-muted" style={{ fontSize: 12 }}>Fetching historical prices…</span>
+              <style>{`@keyframes spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }`}</style>
+            </div>
+          ) : (
+            <PerfChart labels={activePerfChartData.labels} data={activePerfChartData.data} perfMetric={perfMetric} isDailyView={perfView === "Daily"} />
+          )}
         </div>
       </div>
 
