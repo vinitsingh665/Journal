@@ -209,10 +209,23 @@ export async function PUT(
       postTradeReview,
     } = body;
 
-    // NOTE: No currency conversion here.
-    // The TradeForm pre-fills values from the DB, which are already stored in the user's
-    // base currency (INR). Re-converting would double-multiply crypto prices by the FX rate.
-    // Currency conversion is handled ONLY at trade creation (POST /api/trades).
+    // USD→INR conversion for CRYPTO/NASDAQ/NYSE trades:
+    // The edit page reverse-converts stored INR prices to USD before pre-filling the form,
+    // so all submitted values are in USD — convert them all back to INR, same as POST does.
+    if (baseCurrency === "INR" && ["NASDAQ", "NYSE", "CRYPTO"].includes(exchange.toUpperCase())) {
+      const quote = await fetchStockQuote("USDINR", "FX_IDC");
+      if (!quote || !quote.regularMarketPrice) {
+        return NextResponse.json(
+          { error: "Failed to fetch live exchange rate for USD to INR conversion. Please try again." },
+          { status: 500 }
+        );
+      }
+      const rate = quote.regularMarketPrice;
+      price = price * rate;
+      if (exitPrice) exitPrice = exitPrice * rate;
+      if (stopLoss) stopLoss = stopLoss * rate;
+      if (target) target = target * rate;
+    }
 
     const execTime = executionTime ? new Date(executionTime) : new Date();
     const direction = side === "BUY" ? "LONG" : "SHORT";

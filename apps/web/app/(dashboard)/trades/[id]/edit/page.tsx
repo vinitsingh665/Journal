@@ -22,12 +22,18 @@ export default async function EditTradePage({
     redirect("/trades");
   }
 
-  // For CRYPTO/NASDAQ/NYSE trades stored in INR, reverse-convert to USD for editing
+  // For CRYPTO/NASDAQ/NYSE trades stored in INR, reverse-convert to USD so the
+  // edit form shows USD prices (which the user enters naturally for crypto/foreign assets).
+  // The PUT handler will convert back to INR on save.
   let tradeData: any = { ...trade };
-  const needsReverseConversion = ["NASDAQ", "NYSE", "CRYPTO"].includes(trade.exchange.toUpperCase());
+  const needsReverseConversion = ["NASDAQ", "NYSE", "CRYPTO"].includes(
+    trade.exchange.toUpperCase()
+  );
 
   if (needsReverseConversion) {
-    const userSettings = await prisma.userSettings.findUnique({ where: { userId } });
+    const userSettings = await prisma.userSettings.findUnique({
+      where: { userId },
+    });
     const baseCurrency = userSettings?.currency || "INR";
 
     if (baseCurrency === "INR") {
@@ -37,14 +43,21 @@ export default async function EditTradePage({
           const rate = quote.regularMarketPrice;
           tradeData = {
             ...trade,
-            avgEntryPrice: Math.round((trade.avgEntryPrice / rate) * 100) / 100,
-            avgExitPrice: trade.avgExitPrice ? Math.round((trade.avgExitPrice / rate) * 100) / 100 : null,
-            stopLoss: trade.stopLoss ? Math.round((trade.stopLoss / rate) * 100) / 100 : null,
-            target: trade.target ? Math.round((trade.target / rate) * 100) / 100 : null,
+            avgEntryPrice:
+              Math.round((trade.avgEntryPrice / rate) * 100) / 100,
+            avgExitPrice: trade.avgExitPrice
+              ? Math.round((trade.avgExitPrice / rate) * 100) / 100
+              : null,
+            stopLoss: trade.stopLoss
+              ? Math.round((trade.stopLoss / rate) * 100) / 100
+              : null,
+            target: trade.target
+              ? Math.round((trade.target / rate) * 100) / 100
+              : null,
           };
         }
       } catch {
-        // If rate fetch fails, show stored INR values as fallback
+        // If rate fetch fails, show stored values as-is (they'll be in INR)
       }
     }
   }
