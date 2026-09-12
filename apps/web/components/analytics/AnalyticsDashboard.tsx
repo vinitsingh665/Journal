@@ -719,7 +719,7 @@ export default function AnalyticsDashboard({ initialTrades: rawTrades, sharedUse
           <h1 className="page-title" style={{ margin: 0 }}>Analytics</h1>
           <p className="page-description text-muted" style={{ margin: 0, marginTop: "var(--space-1)" }}>Deep dive into your trading performance.</p>
         </div>
-        <div style={{ position: "relative", zIndex: 100 }} ref={dropdownRef}>
+        <div style={{ position: "relative", zIndex: 10 }} ref={dropdownRef}>
           <button
             onClick={() => setFilterDropdownOpen(o => !o)}
             className="input"

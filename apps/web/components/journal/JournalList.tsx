@@ -57,15 +57,14 @@ export default function JournalList({
   const searchQuery = initialSearch || "";
   const [localSearch, setLocalSearch] = useState(searchQuery);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showEmptyTrashModal, setShowEmptyTrashModal] = useState(false);
 
   const handleEmptyTrash = async () => {
-    if (!window.confirm("Are you sure you want to permanently delete all items in the trash? This action cannot be undone.")) {
-      return;
-    }
     setIsDeleting(true);
     try {
       const res = await fetch("/api/trades/deleted", { method: "DELETE" });
       if (res.ok) {
+        setShowEmptyTrashModal(false);
         router.refresh();
       } else {
         alert("Failed to empty trash. Please try again.");
@@ -160,10 +159,10 @@ export default function JournalList({
             <button
               className="btn btn-sm"
               style={{ background: "rgba(239, 68, 68, 0.15)", color: "#ef4444", border: "1px solid rgba(239, 68, 68, 0.3)" }}
-              onClick={handleEmptyTrash}
+              onClick={() => setShowEmptyTrashModal(true)}
               disabled={isDeleting}
             >
-              {isDeleting ? "Emptying..." : "Empty Trash"}
+              Empty Trash
             </button>
           )}
           <div className="search-input" style={{ width: 200 }}>
@@ -326,6 +325,38 @@ export default function JournalList({
                 ? "Start by adding a trade. Each trade automatically becomes a journal entry."
                 : "No entries match your current filters."}
             </p>
+          </div>
+        </div>
+      )}
+      {/* Empty Trash Modal */}
+      {showEmptyTrashModal && (
+        <div className="modal-overlay">
+          <div className="modal" style={{ maxWidth: 400 }}>
+            <div className="modal-header">
+              <h3 className="modal-title">Empty Trash</h3>
+            </div>
+            <div className="modal-body">
+              <p style={{ margin: 0, color: "var(--text-secondary)", fontSize: "var(--text-sm)", lineHeight: 1.5 }}>
+                Are you sure you want to permanently delete all items in the trash? This action cannot be undone.
+              </p>
+            </div>
+            <div className="modal-footer">
+              <button 
+                className="btn btn-outline" 
+                onClick={() => setShowEmptyTrashModal(false)}
+                disabled={isDeleting}
+              >
+                Cancel
+              </button>
+              <button 
+                className="btn btn-primary" 
+                style={{ background: "var(--color-negative)", color: "#fff", border: "none" }}
+                onClick={handleEmptyTrash}
+                disabled={isDeleting}
+              >
+                {isDeleting ? "Emptying..." : "Delete Permanently"}
+              </button>
+            </div>
           </div>
         </div>
       )}

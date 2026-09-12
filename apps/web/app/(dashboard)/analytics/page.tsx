@@ -10,7 +10,7 @@ async function AnalyticsContent() {
   if (!userId) redirect("/login");
 
   const trades = await prisma.trade.findMany({
-    where: { userId },
+    where: { userId, isArchived: false },
     select: {
       id: true,
       symbol: true,
