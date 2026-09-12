@@ -57,7 +57,7 @@ async function SharedAnalyticsContent({ userId }: { userId: string }) {
           <p className="page-description text-muted">Deep dive into trading performance.</p>
         </div>
       </div>
-      <AnalyticsDashboard initialTrades={serializedTrades as any} />
+      <AnalyticsDashboard initialTrades={serializedTrades as any} sharedUserId={userId} />
     </>
   );
 }

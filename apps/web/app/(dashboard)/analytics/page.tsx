@@ -58,12 +58,6 @@ async function AnalyticsContent() {
 export default function AnalyticsPage() {
   return (
     <>
-      <div className="page-header" style={{ marginBottom: "var(--space-6)" }}>
-        <div>
-          <h1 className="page-title">Analytics</h1>
-          <p className="page-description text-muted">Deep dive into your trading performance.</p>
-        </div>
-      </div>
       <Suspense fallback={<DashboardLoading />}>
         <AnalyticsContent />
       </Suspense>

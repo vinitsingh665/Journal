@@ -204,9 +204,34 @@ function PerfChart({
 
 
 
-export default function AnalyticsDashboard({ initialTrades: rawTrades }: { initialTrades: TradeData[] }) {
+export default function AnalyticsDashboard({ initialTrades: rawTrades, sharedUserId }: { initialTrades: TradeData[], sharedUserId?: string }) {
   const [perfView, setPerfView] = useState("Monthly");
   const [perfMetric, setPerfMetric] = useState("P&L");
+  const [selectedTradeIds, setSelectedTradeIds] = useState<Set<string>>(new Set());
+  const [filterDropdownOpen, setFilterDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setFilterDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Toggle a single trade in/out of selection
+  const toggleTrade = (id: string) => {
+    setSelectedTradeIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+  const clearFilter = () => setSelectedTradeIds(new Set());
+  const selectAll = () => setSelectedTradeIds(new Set(rawTrades.map(t => t.id)));
 
   // Daily MTM P&L fetched from the API (historical prices for open positions).
   // Fetched once on mount so ALL views (Daily/Weekly/Monthly/Yearly) use accurate MTM data.
@@ -215,41 +240,49 @@ export default function AnalyticsDashboard({ initialTrades: rawTrades }: { initi
 
   useEffect(() => {
     // 1. Fire background sync first (fills any missing PriceHistory rows).
-    //    We don't await the result — the chart will show existing DB data immediately,
-    //    and newly synced rows will appear on the next load.
-    fetch("/api/jobs/sync-prices", { method: "POST" }).catch(() => {});
+    //    For shared pages, pass the userId as a query param since there's no session.
+    const syncUrl = sharedUserId
+      ? `/api/jobs/sync-prices?userId=${sharedUserId}`
+      : "/api/jobs/sync-prices";
+    fetch(syncUrl, { method: "POST" }).catch(() => {});
 
     // 2. Fetch the daily P&L chart data from the DB.
+    const dailyPnlUrl = sharedUserId
+      ? `/api/analytics/daily-pnl?userId=${sharedUserId}`
+      : "/api/analytics/daily-pnl";
     setDailyPnlLoading(true);
-    fetch("/api/analytics/daily-pnl")
+    fetch(dailyPnlUrl)
       .then((r) => r.json())
       .then((d) => setDailyPnlData(d.days ?? []))
       .catch(() => setDailyPnlData([]))
       .finally(() => setDailyPnlLoading(false));
-  }, []); // Fetch once; all views aggregate from this data
+  }, [sharedUserId]); // Re-fetch if sharedUserId changes
 
+  // ── LIVE PNL FOR OPEN TRADES ──────────────────────────────────────────────
   const openTrades = useMemo(() => rawTrades.filter((t) => t.status === "OPEN" || t.status === "PARTIAL"), [rawTrades]);
   const { livePnl } = useEnrichedPnl(openTrades);
 
+  // Merge live P&L into trades
   const initialTrades = useMemo(() => {
     return rawTrades.map((t) => {
       if (t.status !== "OPEN" && t.status !== "PARTIAL") return t;
       const liveQuote = livePnl.get(t.id);
       if (!liveQuote) return t;
-
       const displayPnl = liveQuote.netPnl;
       let displayR = t.rMultiple;
       if (t.stopLoss) {
         displayR = displayPnl / (Math.abs(t.avgEntryPrice - t.stopLoss) * (t.totalBuyQty - t.totalSellQty));
       }
-
-      return {
-        ...t,
-        netPnl: displayPnl,
-        rMultiple: displayR
-      };
+      return { ...t, netPnl: displayPnl, rMultiple: displayR };
     });
   }, [rawTrades, livePnl]);
+
+  // Apply trade selection filter — empty set = show all
+  const filteredTrades = useMemo(() => {
+    if (selectedTradeIds.size === 0) return initialTrades;
+    return initialTrades.filter(t => selectedTradeIds.has(t.id));
+  }, [initialTrades, selectedTradeIds]);
+
   // ─── AGGREGATE MATH ──────────────────────────────────────────────────────────
   const {
     totalPnl,
@@ -289,7 +322,7 @@ export default function AnalyticsDashboard({ initialTrades: rawTrades }: { initi
     let maxWinStreak = 0;
     let maxLossStreak = 0;
 
-    const sorted = [...initialTrades].sort((a, b) => new Date(a.entryTime).getTime() - new Date(b.entryTime).getTime());
+    const sorted = [...filteredTrades].sort((a, b) => new Date(a.entryTime).getTime() - new Date(b.entryTime).getTime());
 
     sorted.forEach((t) => {
       totalPnl += t.netPnl;
@@ -357,7 +390,7 @@ export default function AnalyticsDashboard({ initialTrades: rawTrades }: { initi
       maxWinStreak,
       maxLossStreak,
     };
-  }, [initialTrades]);
+  }, [filteredTrades]);
 
   // ─── FORMATTERS ──────────────────────────────────────────────────────────────
   const formatTime = (ms: number) => {
@@ -375,7 +408,7 @@ export default function AnalyticsDashboard({ initialTrades: rawTrades }: { initi
     let cum = 0;
     const labels: string[] = [];
     const data: number[] = [];
-    [...initialTrades]
+    [...filteredTrades]
       .sort((a, b) => new Date(a.entryTime).getTime() - new Date(b.entryTime).getTime())
       .forEach((t) => {
         cum += t.netPnl;
@@ -383,7 +416,7 @@ export default function AnalyticsDashboard({ initialTrades: rawTrades }: { initi
         data.push(cum);
       });
     return { labels, data };
-  }, [initialTrades]);
+  }, [filteredTrades]);
 
   // Performance Chart Data
   const perfChartData = useMemo(() => {
@@ -399,7 +432,7 @@ export default function AnalyticsDashboard({ initialTrades: rawTrades }: { initi
 
     if (perfView === "Daily") {
       const dayMap: Record<string, number> = {};
-      initialTrades.forEach(t => {
+      filteredTrades.forEach(t => {
         const d = getDate(t);
         // key = YYYY-MM-DD for reliable sorting
         const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -427,7 +460,7 @@ export default function AnalyticsDashboard({ initialTrades: rawTrades }: { initi
       }
     } else if (perfView === "Weekly") {
       const weekMap: Record<string, number> = {};
-      initialTrades.forEach(t => {
+      filteredTrades.forEach(t => {
         const d = getDate(t);
         const day = d.getDay();
         const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Get Monday
@@ -464,7 +497,7 @@ export default function AnalyticsDashboard({ initialTrades: rawTrades }: { initi
       }
     } else if (perfView === "Yearly") {
       const yearMap: Record<string, number> = {};
-      initialTrades.forEach(t => {
+      filteredTrades.forEach(t => {
         const year = getDate(t).getFullYear().toString();
         const val = perfMetric === "P&L" ? t.netPnl : (t.rMultiple || 0);
         yearMap[year] = (yearMap[year] || 0) + val;
@@ -484,7 +517,7 @@ export default function AnalyticsDashboard({ initialTrades: rawTrades }: { initi
     } else {
       // Monthly
       const monthMap: Record<string, number> = {};
-      initialTrades.forEach(t => {
+      filteredTrades.forEach(t => {
         const d = getDate(t);
         const key = `${d.getFullYear()}-${String(d.getMonth()).padStart(2, '0')}`;
         const val = perfMetric === "P&L" ? t.netPnl : (t.rMultiple || 0);
@@ -621,7 +654,7 @@ export default function AnalyticsDashboard({ initialTrades: rawTrades }: { initi
   // R-Multiple Bins
   const rBins = useMemo(() => {
     const bins = { '< -3R': 0, '-3R to -2R': 0, '-2R to -1R': 0, '-1R to 0': 0, '0 to 1R': 0, '1R to 2R': 0, '2R to 3R': 0, '> 3R': 0 };
-    initialTrades.forEach(t => {
+    filteredTrades.forEach(t => {
       if (t.rMultiple === null) return;
       const r = t.rMultiple;
       if (r < -3) bins['< -3R']++;
@@ -634,12 +667,12 @@ export default function AnalyticsDashboard({ initialTrades: rawTrades }: { initi
       else bins['> 3R']++;
     });
     return bins;
-  }, [initialTrades]);
+  }, [filteredTrades]);
 
   // Tables Data Grouping
   const groupData = (keyFn: (t: TradeData) => string) => {
     const groups: Record<string, { count: number; wins: number; pnl: number; rSum: number; rCount: number }> = {};
-    initialTrades.forEach(t => {
+    filteredTrades.forEach(t => {
       const k = keyFn(t);
       if (!k) return;
       if (!groups[k]) groups[k] = { count: 0, wins: 0, pnl: 0, rSum: 0, rCount: 0 };
@@ -662,21 +695,102 @@ export default function AnalyticsDashboard({ initialTrades: rawTrades }: { initi
       .sort((a, b) => b.trades - a.trades);
   };
 
-  const bySetup = useMemo(() => groupData(t => t.setup || "No Setup"), [initialTrades]);
-  const bySymbol = useMemo(() => groupData(t => t.symbol), [initialTrades]);
-  const byDayOfWeek = useMemo(() => groupData(t => new Date(t.entryTime).toLocaleDateString('en-US', { weekday: 'long' })), [initialTrades]);
+  const bySetup = useMemo(() => groupData(t => t.setup || "No Setup"), [filteredTrades]);
+  const bySymbol = useMemo(() => groupData(t => t.symbol), [filteredTrades]);
+  const byDayOfWeek = useMemo(() => groupData(t => new Date(t.entryTime).toLocaleDateString('en-US', { weekday: 'long' })), [filteredTrades]);
   const byTimeOfDay = useMemo(() => groupData(t => {
     const hour = new Date(t.entryTime).getHours();
     if (hour < 11) return "9:15 AM - 11:00 AM";
     if (hour < 13) return "11:00 AM - 1:00 PM";
     if (hour < 15) return "1:00 PM - 3:00 PM";
     return "After 3:00 PM";
-  }), [initialTrades]);
+  }), [filteredTrades]);
 
   // ─── RENDER ──────────────────────────────────────────────────────────────────
+  const isFiltered = selectedTradeIds.size > 0;
+  const activeCount = isFiltered ? selectedTradeIds.size : rawTrades.length;
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-6)" }}>
-      {/* 1. TOP KPI ROW */}
+
+      {/* 0. HEADER & ACTIONS ROW */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "var(--space-4)" }}>
+        <div>
+          <h1 className="page-title" style={{ margin: 0 }}>Analytics</h1>
+          <p className="page-description text-muted" style={{ margin: 0, marginTop: "var(--space-1)" }}>Deep dive into your trading performance.</p>
+        </div>
+        <div style={{ position: "relative", zIndex: 100 }} ref={dropdownRef}>
+          <button
+            onClick={() => setFilterDropdownOpen(o => !o)}
+            className="input"
+            style={{ 
+              display: "flex", alignItems: "center", gap: "var(--space-2)", 
+              padding: "6px 12px", fontSize: "var(--text-sm)", fontWeight: 600,
+              backgroundColor: isFiltered ? "var(--accent-primary)" : "var(--bg-secondary)",
+              color: isFiltered ? "white" : "var(--text-primary)",
+              border: "none", cursor: "pointer"
+            }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+            {isFiltered ? `${activeCount} Trades Selected` : "Filter by Trade"}
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ transition: "transform 0.2s", transform: filterDropdownOpen ? "rotate(180deg)" : "rotate(0deg)" }}><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+
+          {/* Dropdown Menu */}
+          {filterDropdownOpen && (
+            <div className="card" style={{ 
+              position: "absolute", top: "100%", right: 0, marginTop: "var(--space-2)", 
+              width: 320, maxHeight: 400, overflowY: "auto", zIndex: 50,
+              padding: "var(--space-3)", display: "flex", flexDirection: "column", gap: "var(--space-2)",
+              boxShadow: "0 10px 25px -5px rgba(0,0,0,0.5)"
+            }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: "var(--space-2)", borderBottom: "1px solid var(--border-secondary)", marginBottom: "var(--space-1)" }}>
+                <span style={{ fontSize: "var(--text-xs)", fontWeight: 600, color: "var(--text-secondary)" }}>
+                  {isFiltered ? `${activeCount} of ${rawTrades.length} selected` : `All ${rawTrades.length} trades`}
+                </span>
+                <div style={{ display: "flex", gap: "var(--space-2)" }}>
+                  <button onClick={selectAll} style={{ fontSize: 10, fontWeight: 600, color: "var(--accent-primary)", background: "none", border: "none", cursor: "pointer", padding: 0 }}>All</button>
+                  <button onClick={clearFilter} style={{ fontSize: 10, fontWeight: 600, color: "var(--text-muted)", background: "none", border: "none", cursor: "pointer", padding: 0 }}>Clear</button>
+                </div>
+              </div>
+              
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                {[...rawTrades].sort((a, b) => new Date(b.entryTime).getTime() - new Date(a.entryTime).getTime()).map(t => {
+                  const checked = selectedTradeIds.has(t.id);
+                  const isOpen = t.status === "OPEN" || t.status === "PARTIAL";
+                  return (
+                    <label
+                      key={t.id}
+                      style={{
+                        display: "flex", alignItems: "center", gap: "var(--space-3)",
+                        padding: "8px 10px", borderRadius: 6,
+                        background: checked ? "rgba(99,102,241,0.1)" : "transparent",
+                        cursor: "pointer", transition: "background 0.15s ease"
+                      }}
+                      className="hover:bg-secondary"
+                    >
+                      <input 
+                        type="checkbox" 
+                        checked={checked} 
+                        onChange={() => toggleTrade(t.id)} 
+                        style={{ accentColor: "var(--accent-primary)" }}
+                      />
+                      <div style={{ flex: 1, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          <span style={{ fontSize: "var(--text-sm)", fontWeight: checked ? 700 : 500, color: checked ? "var(--text-primary)" : "var(--text-secondary)" }}>{t.symbol}</span>
+                          {isOpen && <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#10b981", display: "inline-block" }} title="Open" />}
+                        </div>
+                        <span style={{ fontSize: 10, color: "var(--text-muted)" }}>{new Date(t.entryTime).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}</span>
+                      </div>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "var(--space-4)" }}>
         {[
           { label: "TOTAL P&L", value: formatINR(totalPnl, { showSign: true, compact: true }), color: totalPnl >= 0 ? "var(--color-positive)" : "var(--color-negative)", rawValue: formatINR(totalPnl, { showSign: true }) },

@@ -16,13 +16,31 @@ import { Suspense } from "react";
 import DashboardLoading from "../../(dashboard)/loading";
 
 async function SharedDashboardContent({ userId }: { userId: string }) {
-  // Fetch user settings and trades in parallel
-  const [userSettings, trades] = await Promise.all([
+  // Fetch user settings, all trades, and open trades in parallel
+  const [userSettings, trades, openTradesForKpi] = await Promise.all([
     prisma.userSettings.findUnique({ where: { userId } }),
     prisma.trade.findMany({
       where: { userId, isArchived: false },
       include: {
         mistakes: { include: { mistakeTag: true } },
+      },
+      orderBy: { entryTime: "desc" },
+    }),
+    // Fetch open trades with the exact shape KpiCards / useEnrichedPnl needs
+    prisma.trade.findMany({
+      where: { userId, isArchived: false, status: { in: ["OPEN", "PARTIAL"] } },
+      select: {
+        id: true,
+        symbol: true,
+        exchange: true,
+        direction: true,
+        avgEntryPrice: true,
+        totalBuyQty: true,
+        totalSellQty: true,
+        stopLoss: true,
+        target: true,
+        entryTime: true,
+        pnlPercentage: true,
       },
       orderBy: { entryTime: "desc" },
     }),
@@ -32,8 +50,7 @@ async function SharedDashboardContent({ userId }: { userId: string }) {
 
   if (!trades) notFound();
 
-  // Fetch open positions
-  const openTrades = trades.filter((t) => t.status === "OPEN" || t.status === "PARTIAL");
+
 
   // Use database-stored P&L values (live prices will be fetched client-side)
   const enrichedTrades = trades.map((t) => ({
@@ -107,8 +124,8 @@ async function SharedDashboardContent({ userId }: { userId: string }) {
     .sort((a, b) => b.count - a.count)
     .slice(0, 5);
 
-  // Calculate total investment
-  const openInvestment = openTrades.reduce(
+  // Calculate total investment (from open trades fetched for KpiCards)
+  const openInvestment = openTradesForKpi.reduce(
     (sum, t) => sum + t.avgEntryPrice * t.totalBuyQty,
     0
   );
@@ -132,7 +149,7 @@ async function SharedDashboardContent({ userId }: { userId: string }) {
   }));
 
   // Total risk on open positions
-  const totalRisk = openTrades.reduce((sum, t) => {
+  const totalRisk = openTradesForKpi.reduce((sum, t) => {
     if (t.stopLoss && t.avgEntryPrice) {
       const riskPerShare = Math.abs(t.avgEntryPrice - t.stopLoss);
       const openQty = t.totalBuyQty - t.totalSellQty;
@@ -163,12 +180,23 @@ async function SharedDashboardContent({ userId }: { userId: string }) {
         totalTrades={metrics.totalTrades}
         totalReturnPercent={totalReturnPercent}
         todayReturnPercent={todayReturnPercent}
+        allTimeInvestment={allTimeInvestment}
+        openTrades={openTradesForKpi.map((t) => ({
+          id: t.id,
+          symbol: t.symbol,
+          exchange: t.exchange,
+          direction: t.direction,
+          avgEntryPrice: t.avgEntryPrice,
+          totalBuyQty: t.totalBuyQty,
+          totalSellQty: t.totalSellQty,
+          entryTime: t.entryTime.toISOString(),
+        }))}
       />
 
       {/* Open Positions */}
-      {openTrades.length > 0 && (
+      {openTradesForKpi.length > 0 && (
         <OpenPositions
-          positions={openTrades.map((t) => ({
+          positions={openTradesForKpi.map((t) => ({
             id: t.id,
             symbol: t.symbol,
             exchange: t.exchange,

@@ -22,8 +22,12 @@ function formatDateKey(d: Date): string {
  * All values returned in user's base currency (INR for Indian users).
  * Uses persisted PriceHistory records from DB for instant response time.
  */
-export async function GET() {
-  const userId = await getCurrentUser();
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const queryUserId = searchParams.get("userId");
+
+  // Accept a userId query param (for shared pages with no session) or fall back to session
+  const userId = queryUserId || (await getCurrentUser());
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

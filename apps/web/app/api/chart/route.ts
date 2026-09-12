@@ -4,11 +4,9 @@ import { toYahooSymbol } from "@/lib/yahoo-finance";
 import { prisma } from "@repo/database";
 
 // GET /api/chart?symbol=RELIANCE&exchange=NSE&range=1mo&interval=1d
+// NOTE: Auth is optional — chart data is public market data.
+// Authenticated users get their preferred currency; unauthenticated visitors fall back to INR.
 export async function GET(request: NextRequest) {
-  const userId = await getCurrentUser();
-  if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
 
   const searchParams = request.nextUrl.searchParams;
   const symbol = searchParams.get("symbol");
@@ -52,8 +50,18 @@ export async function GET(request: NextRequest) {
     }
 
     const meta = result.meta;
-    const userSettings = await prisma.userSettings.findUnique({ where: { userId } });
-    const baseCurrency = userSettings?.currency || "INR";
+
+    // Try to get the user's currency preference; fall back to INR for unauthenticated visitors.
+    let baseCurrency = "INR";
+    try {
+      const userId = await getCurrentUser();
+      if (userId) {
+        const userSettings = await prisma.userSettings.findUnique({ where: { userId } });
+        baseCurrency = userSettings?.currency || baseCurrency;
+      }
+    } catch {
+      // Non-fatal — continue with fallback currency
+    }
 
     let rate = 1;
     if (meta?.currency && meta.currency !== baseCurrency) {

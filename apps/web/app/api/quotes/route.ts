@@ -57,24 +57,32 @@ export async function GET(request: NextRequest) {
 }
 
 // POST /api/quotes
-// Body: { symbols: { symbol: string, exchange: string }[] }
+// Body: { symbols: { symbol: string, exchange: string }[], currency?: string }
+// NOTE: Auth is optional — stock quotes are public market data.
+// Authenticated users get their preferred currency; unauthenticated users (e.g.
+// viewing a shared dashboard) fall back to INR.
 export async function POST(request: NextRequest) {
-  const userId = await getCurrentUser();
-  if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   try {
-    const userSettings = await prisma.userSettings.findUnique({ where: { userId } });
-    const baseCurrency = userSettings?.currency || "INR";
-
-    const { symbols } = await request.json();
+    const { symbols, currency: bodyCurrency } = await request.json();
     if (!symbols || !Array.isArray(symbols)) {
       return NextResponse.json({ error: "symbols array required" }, { status: 400 });
     }
 
+    // Try to resolve the user's preferred currency. Falls back to INR for
+    // unauthenticated visitors (e.g. shared-link recipients).
+    let baseCurrency = bodyCurrency || "INR";
+    try {
+      const userId = await getCurrentUser();
+      if (userId) {
+        const userSettings = await prisma.userSettings.findUnique({ where: { userId } });
+        baseCurrency = userSettings?.currency || baseCurrency;
+      }
+    } catch {
+      // Non-fatal — continue with fallback currency
+    }
+
     const quotes = await fetchMultipleQuotes(symbols, baseCurrency);
-    
+
     const result: Record<string, any> = {};
     for (const [key, quote] of quotes) {
       result[key] = quote;
