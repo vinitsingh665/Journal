@@ -388,7 +388,7 @@ export default function TradeForm({ userId, tradeId, initialData }: TradeFormPro
                 />
               </div>
               <div className="form-group">
-                <label className="form-label">Price * {isCrypto && <span style={{ color: "var(--color-warning, #f59e0b)", fontWeight: 500 }}>(USD)</span>}</label>
+                <label className="form-label">Price * {isCrypto && <span style={{ color: "var(--text-muted)", fontWeight: 400, fontSize: "11px" }}>(USD)</span>}</label>
                 <input
                   type="number"
                   className="form-input"
@@ -435,7 +435,7 @@ export default function TradeForm({ userId, tradeId, initialData }: TradeFormPro
               </div>
               <div className="grid-2" style={{ marginBottom: "var(--space-4)" }}>
                 <div className="form-group">
-                <label className="form-label">Exit Price {isCrypto && <span style={{ color: "var(--color-warning, #f59e0b)", fontWeight: 500 }}>(USD)</span>}</label>
+                <label className="form-label">Exit Price {isCrypto && <span style={{ color: "var(--text-muted)", fontWeight: 400, fontSize: "11px" }}>(USD)</span>}</label>
                   <input
                     type="number"
                     className="form-input"
@@ -459,7 +459,7 @@ export default function TradeForm({ userId, tradeId, initialData }: TradeFormPro
 
               <div className="grid-2">
                 <div className="form-group">
-                <label className="form-label">Stop Loss (Price) {isCrypto && <span style={{ color: "var(--color-warning, #f59e0b)", fontWeight: 500 }}>(USD)</span>}</label>
+                <label className="form-label">Stop Loss (Price) {isCrypto && <span style={{ color: "var(--text-muted)", fontWeight: 400, fontSize: "11px" }}>(USD)</span>}</label>
                   <input type="number" className="form-input" placeholder="1380.00" value={form.stopLoss} onChange={handleSlPriceChange} step="0.01" />
                 </div>
                 <div className="form-group">
@@ -470,7 +470,7 @@ export default function TradeForm({ userId, tradeId, initialData }: TradeFormPro
 
               <div className="grid-2">
                 <div className="form-group">
-                <label className="form-label">Target (Price) {isCrypto && <span style={{ color: "var(--color-warning, #f59e0b)", fontWeight: 500 }}>(USD)</span>}</label>
+                <label className="form-label">Target (Price) {isCrypto && <span style={{ color: "var(--text-muted)", fontWeight: 400, fontSize: "11px" }}>(USD)</span>}</label>
                   <input type="number" className="form-input" placeholder="1540.00" value={form.target} onChange={handleTargetPriceChange} step="0.01" />
                 </div>
                 <div className="form-group">

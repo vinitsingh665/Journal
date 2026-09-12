@@ -253,7 +253,7 @@ export default function JournalList({
                         {/* Right: P&L + R */}
                         {(() => {
                           const liveQuote = livePnl.get(trade.id);
-                          const displayPnl = liveQuote ? liveQuote.netPnl : trade.netPnl;
+                          const displayPnl = liveQuote ? (trade.netPnl + liveQuote.netPnl) : trade.netPnl;
                           const displayPct = liveQuote ? liveQuote.pnlPercentage : trade.pnlPercentage;
                           const openQty = trade.totalBuyQty - trade.totalSellQty;
                           const riskPerUnit = trade.stopLoss ? Math.abs(trade.avgEntryPrice - trade.stopLoss) : 0;

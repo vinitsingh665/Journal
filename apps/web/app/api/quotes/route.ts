@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
     let baseCurrency = bodyCurrency || "INR";
     try {
       const userId = await getCurrentUser();
-      if (userId) {
+      if (userId && !bodyCurrency) {
         const userSettings = await prisma.userSettings.findUnique({ where: { userId } });
         baseCurrency = userSettings?.currency || baseCurrency;
       }

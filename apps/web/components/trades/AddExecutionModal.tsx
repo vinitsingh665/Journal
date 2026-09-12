@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { EXCHANGES } from "@/lib/constants";
 
@@ -19,16 +19,40 @@ export default function AddExecutionModal({ tradeId, symbol, exchange, direction
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const isCrypto = exchange === "CRYPTO";
+  const isForeign = ["NASDAQ", "NYSE", "CRYPTO"].includes(exchange?.toUpperCase() || "");
+
   const [form, setForm] = useState({
     side: direction === "LONG" ? "SELL" : "BUY", // Default to exit
     quantity: "",
-    price: currentPrice ? Number(currentPrice.toFixed(2)).toString() : "",
+    price: (!isForeign && currentPrice) ? Number(currentPrice.toFixed(2)).toString() : "",
     executionTime: new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16),
   });
 
-  const isCrypto = exchange === "CRYPTO";
   const isExit = form.side === (direction === "LONG" ? "SELL" : "BUY");
   const maxQty = isExit ? openQty : undefined;
+
+  // Fetch the correct raw price for foreign exchanges (since currentPrice prop is already converted to INR)
+  useEffect(() => {
+    if (isForeign) {
+      fetch("/api/quotes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          symbols: [{ symbol, exchange }],
+          currency: "USD" // Force USD so the API skips INR auto-conversion
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        const quote = data[`${symbol}:${exchange}`] || Object.values(data)[0];
+        if (quote && quote.regularMarketPrice) {
+          setForm(prev => ({ ...prev, price: Number(quote.regularMarketPrice.toFixed(2)).toString() }));
+        }
+      })
+      .catch(console.error);
+    }
+  }, [isForeign, symbol, exchange]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -123,7 +147,7 @@ export default function AddExecutionModal({ tradeId, symbol, exchange, direction
                 />
               </div>
               <div className="form-group">
-                <label className="form-label">Price *</label>
+                <label className="form-label">Price * {isForeign && <span style={{ color: "var(--text-muted)", fontWeight: 400, fontSize: "11px" }}>(USD)</span>}</label>
                 <input
                   type="number"
                   className="form-input"

@@ -105,7 +105,7 @@ export default function JournalDetail({ trade, isShared, sharedUserId }: { trade
   const { livePnl } = useEnrichedPnl(openTrades);
   const liveQuote = livePnl.get(trade.id);
 
-  const displayPnl = liveQuote ? liveQuote.netPnl : trade.netPnl;
+  const displayPnl = liveQuote ? (trade.netPnl + liveQuote.netPnl) : trade.netPnl;
   const displayPct = liveQuote ? liveQuote.pnlPercentage : trade.pnlPercentage;
   const jdOpenQty = trade.totalBuyQty - trade.totalSellQty;
   const jdRiskPerUnit = trade.stopLoss ? Math.abs(trade.avgEntryPrice - trade.stopLoss) : 0;
@@ -577,8 +577,14 @@ export default function JournalDetail({ trade, isShared, sharedUserId }: { trade
               {/* Qty / Hold Time / Net P&L */}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", borderBottom: "1px solid var(--border-secondary)" }}>
                 <div style={{ padding: "var(--space-3) var(--space-4)" }}>
-                  <div className="text-muted" style={{ fontSize: "var(--text-xs)", marginBottom: 2 }}>Quantity</div>
-                  <div style={{ fontWeight: 600, fontFamily: "var(--font-mono)" }}>{trade.totalBuyQty}</div>
+                  <div className="text-muted" style={{ fontSize: "var(--text-xs)", marginBottom: 2 }}>
+                    {trade.status === "PARTIAL" ? "Open / Total Qty" : "Total Qty"}
+                  </div>
+                  <div style={{ fontWeight: 600, fontFamily: "var(--font-mono)" }}>
+                    {trade.status === "PARTIAL" 
+                      ? `${Math.abs(trade.totalBuyQty - trade.totalSellQty)} / ${trade.direction === "LONG" ? trade.totalBuyQty : trade.totalSellQty}` 
+                      : trade.direction === "LONG" ? trade.totalBuyQty : trade.totalSellQty}
+                  </div>
                 </div>
                 <div style={{ padding: "var(--space-3) var(--space-4)" }}>
                   <div className="text-muted" style={{ fontSize: "var(--text-xs)", marginBottom: 2 }}>Holding Time</div>

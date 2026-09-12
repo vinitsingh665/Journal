@@ -216,7 +216,7 @@ export default function ErrorPage({
         Something went wrong!
       </h1>
 
-      <div style={{ margin: "2rem 0" }}>
+      <div style={{ margin: "2rem 0", pointerEvents: "none" }}>
         <Loader />
       </div>
       
@@ -230,7 +230,7 @@ export default function ErrorPage({
         Please try again or return to the dashboard.
       </p>
       
-      <div style={{ display: 'flex', gap: '16px' }}>
+      <div style={{ display: 'flex', gap: '16px', position: 'relative', zIndex: 10 }}>
         <button 
           onClick={() => reset()}
           style={{

@@ -54,7 +54,7 @@ export default function RecentTrades({ trades }: { trades: Trade[] }) {
             <tbody>
               {trades.map((trade) => {
                 const live = livePnl.get(trade.id);
-                const displayPnl = live ? live.netPnl : trade.pnl;
+                const displayPnl = live ? (trade.pnl + live.netPnl) : trade.pnl;
                 const investment = trade.entryPrice * (trade.totalBuyQty - trade.totalSellQty);
                 const displayPnlPct = live
                   ? (investment > 0 ? (live.netPnl / investment) * 100 : 0)
@@ -63,17 +63,15 @@ export default function RecentTrades({ trades }: { trades: Trade[] }) {
                 return (
                 <tr key={trade.id}>
                   <td>
-                    <Link
-                      href={`/trades/${trade.id}`}
+                    <span
                       style={{
                         fontWeight: 600,
                         color: "var(--text-primary)",
-                        textDecoration: "none",
                       }}
                     >
                       {trade.symbol}
-                    </Link>
-                    {(trade.status === "OPEN" || trade.status === "PARTIAL") && (
+                    </span>
+                    {(trade.status === "OPEN" || trade.status === "PARTIAL") ? (
                       <span
                         style={{
                           marginLeft: 6,
@@ -87,6 +85,21 @@ export default function RecentTrades({ trades }: { trades: Trade[] }) {
                         }}
                       >
                         LIVE
+                      </span>
+                    ) : (
+                      <span
+                        style={{
+                          marginLeft: 6,
+                          fontSize: "9px",
+                          fontWeight: 700,
+                          color: "var(--text-muted)",
+                          background: "var(--bg-secondary)",
+                          padding: "1px 5px",
+                          borderRadius: "var(--radius-sm)",
+                          letterSpacing: "0.03em",
+                        }}
+                      >
+                        CLOSED
                       </span>
                     )}
                   </td>

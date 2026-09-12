@@ -145,5 +145,20 @@ export function useEnrichedPnl(
     }
   }, [fetchPrices, refreshInterval]);
 
+  // Ensure stale positions are removed immediately when openPositions changes (e.g. after AI command or router.refresh)
+  useEffect(() => {
+    setLivePnl(prev => {
+      let changed = false;
+      const next = new Map(prev);
+      for (const key of Array.from(next.keys())) {
+        if (!openPositions.find(p => p.id === key)) {
+          next.delete(key);
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [openPositions]);
+
   return { livePnl, loading, lastUpdated, refresh: fetchPrices };
 }

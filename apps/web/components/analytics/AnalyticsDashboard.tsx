@@ -268,7 +268,7 @@ export default function AnalyticsDashboard({ initialTrades: rawTrades, sharedUse
       if (t.status !== "OPEN" && t.status !== "PARTIAL") return t;
       const liveQuote = livePnl.get(t.id);
       if (!liveQuote) return t;
-      const displayPnl = liveQuote.netPnl;
+      const displayPnl = t.netPnl + liveQuote.netPnl; // Realized (from DB) + Unrealized (from live prices)
       let displayR = t.rMultiple;
       if (t.stopLoss) {
         displayR = displayPnl / (Math.abs(t.avgEntryPrice - t.stopLoss) * (t.totalBuyQty - t.totalSellQty));

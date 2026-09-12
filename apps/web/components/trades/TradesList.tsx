@@ -169,7 +169,7 @@ export default function TradesList({
 
     for (const t of trades) {
       const live = livePnl.get(t.id);
-      const livePnlVal = live ? live.netPnl : t.netPnl;
+      const livePnlVal = live ? (t.netPnl + live.netPnl) : t.netPnl;
       effectivePnlByTrade.set(t.id, livePnlVal);
 
       // Compute live R for open trades the same way the row does
@@ -423,7 +423,7 @@ export default function TradesList({
                   <tbody>
                     {paginated.map((trade) => {
                       const liveQuote = livePnl.get(trade.id);
-                      const displayPnl = liveQuote ? liveQuote.netPnl : trade.netPnl;
+                      const displayPnl = liveQuote ? (trade.netPnl + liveQuote.netPnl) : trade.netPnl;
                       const openQty = trade.totalBuyQty - trade.totalSellQty;
                       const riskPerUnit = trade.stopLoss ? Math.abs(trade.avgEntryPrice - trade.stopLoss) : 0;
                       const riskAmount = riskPerUnit * (openQty || 1);
@@ -703,7 +703,7 @@ export default function TradesList({
               {/* Key Metrics */}
               {(() => {
                 const liveQuote = livePnl.get(selectedTrade.id);
-                const displayPnl = liveQuote ? liveQuote.netPnl : selectedTrade.netPnl;
+                const displayPnl = liveQuote ? (selectedTrade.netPnl + liveQuote.netPnl) : selectedTrade.netPnl;
                 const displayPct = liveQuote ? liveQuote.pnlPercentage : selectedTrade.pnlPercentage;
                 const detailOpenQty = selectedTrade.totalBuyQty - selectedTrade.totalSellQty;
                 const detailRiskPerUnit = selectedTrade.stopLoss ? Math.abs(selectedTrade.avgEntryPrice - selectedTrade.stopLoss) : 0;
@@ -741,7 +741,7 @@ export default function TradesList({
                 {[
                   { label: "Entry", value: formatINR(selectedTrade.avgEntryPrice), sub: formatDate(selectedTrade.entryTime) },
                   { label: "Exit", value: selectedTrade.avgExitPrice ? formatINR(selectedTrade.avgExitPrice) : "—", sub: selectedTrade.exitTime ? formatDate(selectedTrade.exitTime) : "" },
-                  { label: "Quantity", value: selectedTrade.totalBuyQty.toString() },
+                  { label: selectedTrade.status === "PARTIAL" ? "Open Qty" : "Quantity", value: selectedTrade.status === "PARTIAL" ? `${Math.abs(selectedTrade.totalBuyQty - selectedTrade.totalSellQty)} / ${selectedTrade.direction === "LONG" ? selectedTrade.totalBuyQty : selectedTrade.totalSellQty}` : (selectedTrade.direction === "LONG" ? selectedTrade.totalBuyQty : selectedTrade.totalSellQty).toString() },
                   { label: "Hold Time", value: liveDuration.node },
                   { label: "Stop Loss", value: selectedTrade.stopLoss ? formatINR(selectedTrade.stopLoss) : "—", color: "var(--color-negative)" },
                   { label: "Target", value: selectedTrade.target ? formatINR(selectedTrade.target) : "—", color: "var(--color-positive)" },

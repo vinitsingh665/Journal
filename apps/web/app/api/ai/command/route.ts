@@ -118,6 +118,17 @@ export async function POST(req: NextRequest) {
     const userId = await getCurrentUser();
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+    const userSettings = await prisma.userSettings.findUnique({ where: { userId } });
+    const baseCurrency = userSettings?.currency || "INR";
+
+    const getConversionRate = async (exchange: string | null) => {
+      if (baseCurrency === "INR" && exchange && ["NASDAQ", "NYSE", "CRYPTO"].includes(exchange.toUpperCase())) {
+        const rateQuote = await fetchStockQuote("USDINR", "FX_IDC");
+        return rateQuote?.regularMarketPrice || 1;
+      }
+      return 1;
+    };
+
     const { messages, prompt } = await req.json();
     if (!messages && !prompt) return NextResponse.json({ error: "Messages or Prompt is required" }, { status: 400 });
 
@@ -126,7 +137,7 @@ export async function POST(req: NextRequest) {
     // Fetch open trades context to help the AI understand what "exit reliance" means
     const openTrades = await prisma.trade.findMany({
       where: { userId, status: { in: ["OPEN", "PARTIAL"] } },
-      select: { id: true, symbol: true, exchange: true, direction: true, totalBuyQty: true, totalSellQty: true, riskAmount: true, entryTime: true, grossPnl: true, netPnl: true, pnlPercentage: true, rMultiple: true, stopLoss: true },
+      select: { id: true, symbol: true, exchange: true, direction: true, totalBuyQty: true, totalSellQty: true, riskAmount: true, entryTime: true, grossPnl: true, netPnl: true, pnlPercentage: true, rMultiple: true, stopLoss: true, avgEntryPrice: true },
     });
 
     const openTradesContext = openTrades.length > 0 
@@ -176,6 +187,9 @@ export async function POST(req: NextRequest) {
             }, { status: 400 });
           }
         }
+        
+        const rate = await getConversionRate(trade.exchange);
+        exitPrice = exitPrice * rate;
 
         const openQty = trade.direction === "LONG" ? trade.totalBuyQty - trade.totalSellQty : trade.totalSellQty - trade.totalBuyQty;
         const exitQty = parsed.data.quantity || openQty;
@@ -283,9 +297,10 @@ export async function POST(req: NextRequest) {
     if (parsed.intent === "UPDATE_TRADE" && parsed.data.symbol) {
       const trade = openTrades.find((t) => t.symbol.toUpperCase() === parsed.data.symbol.toUpperCase());
       if (trade) {
+        const rate = await getConversionRate(trade.exchange);
         const updates: any = {};
-        if (parsed.data.stopLoss) updates.stopLoss = parsed.data.stopLoss;
-        if (parsed.data.target) updates.target = parsed.data.target;
+        if (parsed.data.stopLoss) updates.stopLoss = parsed.data.stopLoss * rate;
+        if (parsed.data.target) updates.target = parsed.data.target * rate;
         if (parsed.data.thesis) updates.thesis = parsed.data.thesis;
         if (parsed.data.notes) updates.notes = parsed.data.notes;
         if (parsed.data.reasonForEntry) updates.reasonForEntry = parsed.data.reasonForEntry;
@@ -338,6 +353,9 @@ export async function POST(req: NextRequest) {
             }, { status: 400 });
           }
         }
+        
+        const rate = await getConversionRate(trade.exchange);
+        entryPrice = entryPrice * rate;
 
         const addQty = parsed.data.quantity;
         if (!addQty) {
@@ -345,6 +363,18 @@ export async function POST(req: NextRequest) {
         }
 
         const addSide = trade.direction === "LONG" ? "BUY" : "SELL"; // Add in the same direction
+
+        const totalValue = entryPrice * addQty;
+        const totalCapital = userSettings?.defaultCapital || 500000;
+        const openInvestment = openTrades.reduce((sum, t) => sum + (t.avgEntryPrice * t.totalBuyQty), 0);
+        const availableCapital = totalCapital - openInvestment;
+
+        if (totalValue > availableCapital) {
+          const formatINR = (val: number) => new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(val);
+          return NextResponse.json({ 
+            error: `Capital Exceeded: Adding this position requires ${formatINR(totalValue)} but your available capital is only ${formatINR(availableCapital)}.` 
+          }, { status: 400 });
+        }
 
         // Create execution
         await prisma.execution.create({

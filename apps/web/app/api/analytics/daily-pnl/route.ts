@@ -114,41 +114,34 @@ export async function GET(request: Request) {
         const entryDate = new Date(trade.entryTime);
         const entryDateKey = formatDateKey(entryDate);
 
-        // Determine baseline entry price
-        // For foreign trades where trade.avgEntryPrice is stored in INR:
-        const firstHist = symbolHistory.get(entryDateKey) ?? Array.from(symbolHistory.values())[0];
-        const entryUsdInr = firstHist?.usdInrRate ?? 84;
-        const entryPriceNative = needsConversion
-          ? trade.avgEntryPrice / entryUsdInr
-          : trade.avgEntryPrice;
+        // Determine baseline entry price in Base Currency (INR)
+        // trade.avgEntryPrice is already in INR for foreign trades!
+        const entryPriceBase = trade.avgEntryPrice;
 
         const sortedDates = [...symbolHistory.keys()].sort();
-        let prevPrice = entryPriceNative;
+        let prevPriceBase = entryPriceBase;
 
         for (const dateKey of sortedDates) {
           if (dateKey < entryDateKey) {
             const hist = symbolHistory.get(dateKey)!;
-            prevPrice = needsConversion ? hist.closeUSD : hist.closeINR;
+            prevPriceBase = hist.closeINR;
             continue;
           }
 
           const hist = symbolHistory.get(dateKey)!;
-          const currentPrice = needsConversion ? hist.closeUSD : hist.closeINR;
+          const currentPriceBase = hist.closeINR;
 
-          // Daily price move
-          const dailyPriceMove =
+          // Daily price move in base currency (INR)
+          const dailyPriceMoveBase =
             trade.direction === "LONG"
-              ? currentPrice - prevPrice
-              : prevPrice - currentPrice;
+              ? currentPriceBase - prevPriceBase
+              : prevPriceBase - currentPriceBase;
 
-          const dailyChangeNative = dailyPriceMove * openQty;
-
-          // Convert to base currency (INR)
-          const usdInrRate = needsConversion ? hist.usdInrRate : 1;
-          const dailyChangeBase = dailyChangeNative * usdInrRate;
+          const dailyChangeBase = dailyPriceMoveBase * openQty;
 
           dailyPnl.set(dateKey, (dailyPnl.get(dateKey) ?? 0) + dailyChangeBase);
-          prevPrice = currentPrice;
+
+          prevPriceBase = currentPriceBase;
         }
       }
     }
