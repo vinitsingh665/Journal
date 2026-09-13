@@ -22,7 +22,7 @@ interface Trade {
   totalSellQty: number;
 }
 
-export default function RecentTrades({ trades }: { trades: Trade[] }) {
+export default function RecentTrades({ trades, isShared, sharedUserId }: { trades: Trade[], isShared?: boolean, sharedUserId?: string }) {
   const openTrades = useMemo(
     () => trades.filter((t) => t.status === "OPEN" || t.status === "PARTIAL"),
     [trades]
@@ -33,7 +33,7 @@ export default function RecentTrades({ trades }: { trades: Trade[] }) {
     <div className="card" id="recent-trades">
       <div className="card-header">
         <span className="card-title">Recent Trades</span>
-        <Link href="/trades" className="btn btn-ghost btn-sm">
+        <Link href={isShared ? `/shared/${sharedUserId}/trades` : "/trades"} className="btn btn-ghost btn-sm">
           View All
         </Link>
       </div>

@@ -179,14 +179,16 @@ export default function JournalDetail({ trade, isShared, sharedUserId }: { trade
   return (
     <>
       {/* Back link */}
-      <Link
-        href={isShared ? `/shared/${sharedUserId}/journal` : "/journal"}
-        className="text-muted"
-        style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: "var(--text-sm)", marginBottom: "var(--space-4)", textDecoration: "none" }}
-      >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6" /></svg>
-        {isShared ? "Back to Shared Journal" : "Back to Journal"}
-      </Link>
+      {!isShared && (
+        <Link
+          href="/journal"
+          className="text-muted"
+          style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: "var(--text-sm)", marginBottom: "var(--space-4)", textDecoration: "none" }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6" /></svg>
+          Back to Journal
+        </Link>
+      )}
 
       <div className="dashboard-grid">
         {/* ─── LEFT COLUMN ─── */}
@@ -230,20 +232,24 @@ export default function JournalDetail({ trade, isShared, sharedUserId }: { trade
                 </>
               )}
               {/* Prev / Next */}
-              <Link
-                href={trade.prevId ? (isShared ? `/shared/${sharedUserId}/journal/${trade.prevId}` : `/journal/${trade.prevId}`) : "#"}
-                className={cn("btn btn-ghost btn-sm btn-icon", !trade.prevId && "disabled")}
-                style={{ pointerEvents: trade.prevId ? "auto" : "none", opacity: trade.prevId ? 1 : 0.3 }}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6" /></svg>
-              </Link>
-              <Link
-                href={trade.nextId ? (isShared ? `/shared/${sharedUserId}/journal/${trade.nextId}` : `/journal/${trade.nextId}`) : "#"}
-                className={cn("btn btn-ghost btn-sm btn-icon", !trade.nextId && "disabled")}
-                style={{ pointerEvents: trade.nextId ? "auto" : "none", opacity: trade.nextId ? 1 : 0.3 }}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6" /></svg>
-              </Link>
+              {!isShared && (
+                <>
+                  <Link
+                    href={trade.prevId ? `/journal/${trade.prevId}` : "#"}
+                    className={cn("btn btn-ghost btn-sm btn-icon", !trade.prevId && "disabled")}
+                    style={{ pointerEvents: trade.prevId ? "auto" : "none", opacity: trade.prevId ? 1 : 0.3 }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6" /></svg>
+                  </Link>
+                  <Link
+                    href={trade.nextId ? `/journal/${trade.nextId}` : "#"}
+                    className={cn("btn btn-ghost btn-sm btn-icon", !trade.nextId && "disabled")}
+                    style={{ pointerEvents: trade.nextId ? "auto" : "none", opacity: trade.nextId ? 1 : 0.3 }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6" /></svg>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
 

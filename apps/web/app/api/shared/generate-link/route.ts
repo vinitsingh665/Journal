@@ -1,14 +1,17 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@repo/database";
 import crypto from "crypto";
 
-export async function POST() {
+export async function POST(req: NextRequest) {
   try {
     const userId = await getCurrentUser();
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const body = await req.json().catch(() => ({}));
+    const targetPath = body.targetPath || null;
 
     const token = crypto.randomBytes(4).toString("hex"); // e.g. "a1b2c3d4"
     const expiresAt = new Date();
@@ -18,6 +21,7 @@ export async function POST() {
       data: {
         userId,
         token,
+        targetPath,
         expiresAt,
       },
     });

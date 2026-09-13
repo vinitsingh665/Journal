@@ -38,23 +38,50 @@ export default function SnapshotTool({ userId }: { userId?: string }) {
           return;
         }
         try {
-          const res = await fetch("/api/shared/generate-link", { method: "POST" });
-          if (!res.ok) throw new Error("Failed to generate link");
-          
-          const { token } = await res.json();
           const currentPath = window.location.pathname;
-          
-          // Remove the /dashboard prefix if the user is in /dashboard/mistakes etc.
-          // Because shared routes don't have /dashboard prefix.
           let cleanPath = currentPath;
           if (cleanPath.startsWith('/dashboard')) {
              cleanPath = cleanPath.replace('/dashboard', '');
           }
+          
+          const targetPathForDb = cleanPath.startsWith('/') ? cleanPath.substring(1) : cleanPath;
+
+          const res = await fetch("/api/shared/generate-link", { 
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ targetPath: targetPathForDb || null })
+          });
+          if (!res.ok) throw new Error("Failed to generate link");
+          
+          const { token } = await res.json();
 
           const publicUrl = `${window.location.origin}/s/${token}${cleanPath === '/' ? '' : cleanPath}`;
           
           if (action === "copylink") {
-            await navigator.clipboard.writeText(publicUrl);
+            try {
+              if (navigator?.clipboard?.writeText) {
+                await navigator.clipboard.writeText(publicUrl);
+              } else {
+                throw new Error("clipboard API not available");
+              }
+            } catch (err) {
+              console.error("Clipboard API failed, using fallback:", err);
+              const textArea = document.createElement("textarea");
+              textArea.value = publicUrl;
+              textArea.style.position = "fixed";
+              textArea.style.left = "-9999px";
+              document.body.appendChild(textArea);
+              textArea.focus();
+              textArea.select();
+              try {
+                document.execCommand('copy');
+              } catch (fallbackErr) {
+                console.error("Fallback copy failed:", fallbackErr);
+                alert("Failed to copy link. Here it is: " + publicUrl);
+              }
+              document.body.removeChild(textArea);
+            }
+            
             setNotification("Link copied! It will expire in 24 hours.");
             setTimeout(() => setNotification(null), 4000);
             setIsCapturing(false);

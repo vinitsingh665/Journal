@@ -145,11 +145,17 @@ export function useEnrichedPnl(
     }
   }, [fetchPrices, refreshInterval]);
 
-  // Ensure stale positions are removed immediately when openPositions changes (e.g. after AI command or router.refresh)
+  // Ensure stale positions are removed immediately when openPositions changes
+  // and trigger a fetch if there are new positions we don't have prices for.
   useEffect(() => {
+    let needsFetch = false;
+    
+    // Check if we need to fetch (do we have positions that aren't in livePnl yet?)
     setLivePnl(prev => {
       let changed = false;
       const next = new Map(prev);
+      
+      // Remove stale
       for (const key of Array.from(next.keys())) {
         if (!openPositions.find(p => p.id === key)) {
           next.delete(key);
@@ -158,7 +164,19 @@ export function useEnrichedPnl(
       }
       return changed ? next : prev;
     });
-  }, [openPositions]);
+
+    // Check for new positions that aren't in the current livePnl state
+    // We can just look at livePnl because it's a dependency of this hook?
+    // Wait, no, we shouldn't add livePnl to deps. 
+    // We can just check if any openPosition is missing from the Map.
+    // However, since we can't reliably read the latest livePnl here without putting it in deps,
+    // let's just trigger a fetch if we don't have a lastUpdated OR if openPositions has changed
+    // since the last fetch.
+    // Actually, just fetchPrices() whenever openPositions changes and we have at least 1 open position!
+    if (openPositions.length > 0) {
+      fetchPrices();
+    }
+  }, [openPositions, fetchPrices]);
 
   return { livePnl, loading, lastUpdated, refresh: fetchPrices };
 }

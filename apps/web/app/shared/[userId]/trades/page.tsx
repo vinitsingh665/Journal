@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import DashboardLoading from "../../../(dashboard)/loading";
+import { verifySharedAccess } from "@/lib/shared-auth";
 import { prisma } from "@repo/database";
 import TradesList from "@/components/trades/TradesList";
 
@@ -56,13 +57,16 @@ async function SharedTradesContent({ userId }: { userId: string }) {
           </p>
         </div>
       </div>
-      <TradesList trades={serializedTrades} />
+      <TradesList trades={serializedTrades as any} isShared={true} sharedUserId={userId} />
     </>
   );
 }
 
-export default async function SharedTradesPage({ params }: { params: Promise<{ userId: string }> }) {
+export default async function SharedTradesPage({ params, searchParams }: { params: Promise<{ userId: string }>; searchParams: Promise<{ t?: string }> }) {
   const { userId } = await params;
+  const { t } = await searchParams;
+  
+  await verifySharedAccess(userId, "trades", t);
   
   return (
     <Suspense fallback={<DashboardLoading />}>

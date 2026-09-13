@@ -29,7 +29,7 @@ export default async function SharedTokenPage({
   try {
     link = await prisma.sharedLink.findUnique({
       where: { token },
-      select: { userId: true, expiresAt: true },
+      select: { userId: true, expiresAt: true, targetPath: true },
     });
   } catch (e) {
     console.error("[SharedToken] DB lookup failed:", e);
@@ -40,8 +40,14 @@ export default async function SharedTokenPage({
     redirect("/expired");
   }
 
-  // Reconstruct the full path with any search params
   const subPath = path ? path.join("/") : "";
+  
+  if ((link as any).targetPath) {
+    if (subPath !== (link as any).targetPath && !subPath.startsWith((link as any).targetPath + "/")) {
+      redirect("/expired");
+    }
+  }
+
   const targetBase = `/shared/${link.userId}${subPath ? `/${subPath}` : ""}`;
 
   // Forward query params (e.g. ?page=2&status=OPEN) so shared journal/trades
@@ -55,6 +61,9 @@ export default async function SharedTokenPage({
       qs.set(key, value);
     }
   }
+
+  // Always append the token for authorization downstream
+  qs.set("t", token);
 
   const queryString = qs.toString();
   const targetUrl = queryString ? `${targetBase}?${queryString}` : targetBase;

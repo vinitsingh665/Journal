@@ -41,12 +41,16 @@ export default function JournalList({
   trades, 
   counts, 
   initialStatus, 
-  initialSearch 
+  initialSearch,
+  isShared,
+  sharedUserId
 }: { 
   trades: JournalTrade[]; 
   counts: { openCount: number; closedCount: number; deletedCount: number };
   initialStatus?: string;
   initialSearch?: string;
+  isShared?: boolean;
+  sharedUserId?: string;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -155,7 +159,7 @@ export default function JournalList({
           )}
         </div>
         <div style={{ display: "flex", gap: "var(--space-2)", alignItems: "center" }}>
-          {statusFilter === "DELETED" && counts.deletedCount > 0 && (
+          {!isShared && statusFilter === "DELETED" && counts.deletedCount > 0 && (
             <button
               className="btn btn-sm"
               style={{ background: "rgba(239, 68, 68, 0.15)", color: "#ef4444", border: "1px solid rgba(239, 68, 68, 0.3)" }}
@@ -200,7 +204,7 @@ export default function JournalList({
                 {dateTrades.map((trade) => (
                   <Link
                     key={trade.id}
-                    href={`/journal/${trade.id}`}
+                    href={isShared ? `/shared/${sharedUserId}/journal/${trade.id}` : `/journal/${trade.id}`}
                     style={{ textDecoration: "none", color: "inherit" }}
                   >
                     <div className="card" style={{

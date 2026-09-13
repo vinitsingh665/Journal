@@ -2,6 +2,7 @@ import { prisma } from "@repo/database";
 import { notFound } from "next/navigation";
 import CalendarView from "@/components/calendar/CalendarView";
 import { Suspense } from "react";
+import { verifySharedAccess } from "@/lib/shared-auth";
 import DashboardLoading from "../../../(dashboard)/loading";
 
 async function SharedCalendarContent({ userId, searchParams }: { userId: string, searchParams: { month?: string; year?: string } }) {
@@ -23,8 +24,9 @@ async function SharedCalendarContent({ userId, searchParams }: { userId: string,
 
   // Fetch ONLY trades for the current month
   const trades = await prisma.trade.findMany({
-    where: { 
+    where: {
       userId,
+      isArchived: false,
       entryTime: {
         gte: startDate,
         lt: endDate
@@ -53,6 +55,13 @@ async function SharedCalendarContent({ userId, searchParams }: { userId: string,
 
   const serialized = trades.map((t) => ({
     id: t.id,
+    symbol: t.symbol,
+    exchange: t.exchange,
+    status: t.status,
+    direction: t.direction,
+    avgEntryPrice: t.avgEntryPrice,
+    totalBuyQty: t.totalBuyQty,
+    totalSellQty: t.totalSellQty,
     entryTime: t.entryTime.toISOString(),
     netPnl: t.netPnl,
     grossPnl: t.grossPnl,
@@ -72,16 +81,18 @@ async function SharedCalendarContent({ userId, searchParams }: { userId: string,
   );
 }
 
-export default async function SharedCalendarPage({ 
+export default async function SharedCalendarPage({
   params,
-  searchParams 
-}: { 
+  searchParams
+}: {
   params: Promise<{ userId: string }>;
-  searchParams: Promise<{ month?: string; year?: string }>;
+  searchParams: Promise<{ month?: string; year?: string; t?: string }>;
 }) {
   const { userId } = await params;
   const resolvedParams = await searchParams;
-  
+
+  await verifySharedAccess(userId, "calendar", resolvedParams.t);
+
   return (
     <Suspense fallback={<DashboardLoading />}>
       <SharedCalendarContent userId={userId} searchParams={resolvedParams} />

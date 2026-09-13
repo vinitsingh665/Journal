@@ -26,7 +26,7 @@ export default async function SharedTokenRootPage({
   try {
     link = await prisma.sharedLink.findUnique({
       where: { token },
-      select: { userId: true, expiresAt: true },
+      select: { userId: true, expiresAt: true, targetPath: true },
     });
   } catch (e) {
     console.error("[SharedToken] DB lookup failed:", e);
@@ -37,5 +37,10 @@ export default async function SharedTokenRootPage({
     redirect("/expired");
   }
 
-  redirect(`/shared/${link.userId}`);
+  if ((link as any).targetPath && (link as any).targetPath !== "") {
+    // This token was generated for a specific sub-path, root access is denied
+    redirect("/expired");
+  }
+
+  redirect(`/shared/${link.userId}?t=${token}`);
 }

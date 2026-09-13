@@ -31,9 +31,11 @@ async function CalendarContent({ searchParams }: { searchParams: { month?: strin
   const endDate = new Date(year, month + 1, 1);
 
   // Fetch only trades for the current month
+  console.time("Calendar DB Query");
   const trades = await prisma.trade.findMany({
     where: { 
       userId,
+      isArchived: false,
       entryTime: {
         gte: startDate,
         lt: endDate
@@ -57,6 +59,7 @@ async function CalendarContent({ searchParams }: { searchParams: { month?: strin
       entryTime: "asc",
     },
   });
+  console.timeEnd("Calendar DB Query");
 
   const serialized = trades.map((t) => ({
     id: t.id,

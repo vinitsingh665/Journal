@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import DashboardLoading from "../../../(dashboard)/loading";
 import { prisma } from "@repo/database";
 import PositionsClient from "@/components/positions/PositionsClient";
+import { verifySharedAccess } from "@/lib/shared-auth";
 
 async function SharedPositionsContent({ userId }: { userId: string }) {
   // Fetch all open positions (status OPEN or PARTIAL)
@@ -38,14 +39,23 @@ async function SharedPositionsContent({ userId }: { userId: string }) {
 
   return (
     <>
-      <PositionsClient initialPositions={serializedTrades} capital={capital} />
+      <PositionsClient initialPositions={serializedTrades as any} capital={capital} isShared={true} />
     </>
   );
 }
 
-export default async function SharedPositionsPage({ params }: { params: Promise<{ userId: string }> }) {
+export default async function SharedPositionsPage({ 
+  params,
+  searchParams
+}: { 
+  params: Promise<{ userId: string }>;
+  searchParams: Promise<{ t?: string }>;
+}) {
   const { userId } = await params;
+  const { t } = await searchParams;
   
+  await verifySharedAccess(userId, "positions", t);
+
   return (
     <Suspense fallback={<DashboardLoading />}>
       <SharedPositionsContent userId={userId} />

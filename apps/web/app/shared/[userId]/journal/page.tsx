@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import DashboardLoading from "../../../(dashboard)/loading";
+import { verifySharedAccess } from "@/lib/shared-auth";
 import { prisma } from "@repo/database";
 import { Prisma } from "@prisma/client";
 import JournalList from "@/components/journal/JournalList";
@@ -104,10 +105,12 @@ async function SharedJournalContent({
         </div>
       </div>
       <JournalList 
-        trades={serialized} 
+        trades={serialized as any} 
         initialStatus={statusFilter}
         initialSearch={searchQuery}
         counts={{ openCount, closedCount, deletedCount }}
+        isShared={true}
+        sharedUserId={userId}
       />
     </>
   );
@@ -118,10 +121,12 @@ export default async function SharedJournalPage({
   searchParams 
 }: { 
   params: Promise<{ userId: string }>;
-  searchParams: Promise<{ page?: string; status?: string; search?: string }>;
+  searchParams: Promise<{ page?: string; status?: string; search?: string; t?: string }>;
 }) {
   const { userId } = await params;
   const resolvedParams = await searchParams;
+  
+  await verifySharedAccess(userId, "journal", resolvedParams.t);
   
   return (
     <Suspense fallback={<DashboardLoading />}>

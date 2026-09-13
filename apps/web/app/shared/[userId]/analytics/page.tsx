@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import DashboardLoading from "../../../(dashboard)/loading";
+import { verifySharedAccess } from "@/lib/shared-auth";
 import { prisma } from "@repo/database";
 import { notFound } from "next/navigation";
 import AnalyticsDashboard from "@/components/analytics/AnalyticsDashboard";
@@ -62,8 +63,11 @@ async function SharedAnalyticsContent({ userId }: { userId: string }) {
   );
 }
 
-export default async function SharedAnalyticsPage({ params }: { params: Promise<{ userId: string }> }) {
+export default async function SharedAnalyticsPage({ params, searchParams }: { params: Promise<{ userId: string }>; searchParams: Promise<{ t?: string }> }) {
   const { userId } = await params;
+  const { t } = await searchParams;
+  
+  await verifySharedAccess(userId, "analytics", t);
   
   return (
     <Suspense fallback={<DashboardLoading />}>

@@ -32,7 +32,7 @@ interface ChartData {
   candles: any[]; // using for sparkline closes
 }
 
-export default function PositionsClient({ initialPositions, capital = 1000000 }: { initialPositions: TradeData[], capital?: number }) {
+export default function PositionsClient({ initialPositions, capital = 1000000, isShared }: { initialPositions: TradeData[], capital?: number, isShared?: boolean }) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("All");
   const [liveQuotes, setLiveQuotes] = useState<Map<string, StockQuote>>(new Map());
@@ -190,9 +190,6 @@ export default function PositionsClient({ initialPositions, capital = 1000000 }:
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-muted"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
               <input type="text" placeholder="Search positions..." style={{ background: "transparent", border: "none", outline: "none", width: "100%", fontSize: "var(--text-sm)", color: "var(--text-primary)" }} />
             </div>
-            <Link href="/trades/new" className="btn btn-primary btn-sm">
-              + New Trade
-            </Link>
           </div>
         </div>
       </div>

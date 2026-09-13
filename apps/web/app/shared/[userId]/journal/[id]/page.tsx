@@ -1,13 +1,19 @@
 import { prisma } from "@repo/database";
 import { notFound } from "next/navigation";
+import { verifySharedAccess } from "@/lib/shared-auth";
 import JournalDetail from "@/components/journal/JournalDetail";
 
 export default async function SharedJournalDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ userId: string; id: string }>;
+  searchParams: Promise<{ t?: string }>;
 }) {
   const { userId, id } = await params;
+  const { t } = await searchParams;
+
+  await verifySharedAccess(userId, `journal/${id}`, t);
 
   const [trade, allTradeIds] = await Promise.all([
     prisma.trade.findFirst({

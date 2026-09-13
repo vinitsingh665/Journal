@@ -1,5 +1,6 @@
 import { prisma } from "@repo/database";
 import { notFound } from "next/navigation";
+import { verifySharedAccess } from "@/lib/shared-auth";
 import {
   calculatePerformanceMetrics,
   calculateEquityCurve,
@@ -262,15 +263,18 @@ async function SharedDashboardContent({ userId }: { userId: string }) {
       <div className="dashboard-grid mt-4">
         {/* Recent Trades */}
         <div className="col-span-12">
-          <RecentTrades trades={recentTrades} />
+          <RecentTrades trades={recentTrades as any} isShared={true} sharedUserId={userId} />
         </div>
       </div>
     </>
   );
 }
 
-export default async function SharedDashboardPage({ params }: { params: Promise<{ userId: string }> }) {
+export default async function SharedDashboardPage({ params, searchParams }: { params: Promise<{ userId: string }>; searchParams: Promise<{ t?: string }> }) {
   const { userId } = await params;
+  const { t } = await searchParams;
+  
+  await verifySharedAccess(userId, "", t);
   
   return (
     <Suspense fallback={<div>Loading Dashboard...</div>}>
