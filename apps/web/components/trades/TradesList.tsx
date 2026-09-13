@@ -250,6 +250,22 @@ export default function TradesList({
     }
   };
 
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this trade?")) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/trades/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        if (selectedTradeId === id) setSelectedTradeId(null);
+        router.refresh();
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to delete trade");
+      }
+    } catch { alert("Failed to delete trade"); }
+    finally { setDeleting(false); }
+  };
+
   const handleBulkDelete = async () => {
     if (selectedIds.size === 0) return;
     setDeleting(true);
