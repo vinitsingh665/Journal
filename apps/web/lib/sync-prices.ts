@@ -46,10 +46,12 @@ async function fetchCandles(ticker: string, from: Date, to: Date): Promise<{ dat
           close = regularMarketPrice;
         } else if (i > 0) {
           close = closes[i - 1];
+        } else {
+          close = 0;
         }
       }
-      return { date: formatUTC(new Date(ts * 1000)), close };
-    }).filter((c: any) => c.close && !isNaN(c.close));
+      return { date: formatUTC(new Date(ts * 1000)), close: close as number };
+    }).filter((c: { date: string; close: number }) => c.close && !isNaN(c.close) && c.close > 0);
   } catch { return []; }
 }
 
