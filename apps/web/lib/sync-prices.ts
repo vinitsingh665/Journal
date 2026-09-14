@@ -2,7 +2,15 @@ import { prisma } from "@repo/database";
 
 function yahooTicker(symbol: string, exchange: string): string {
   const ex = exchange.toUpperCase();
-  if (ex === "CRYPTO") return symbol.toUpperCase() + "-USD";
+  if (ex === "CRYPTO") {
+    let base = symbol.toUpperCase();
+    if (base.endsWith("USDT")) {
+      base = base.replace("USDT", "");
+    } else if (base.endsWith("USD")) {
+      base = base.replace("USD", "");
+    }
+    return `${base}-USD`;
+  }
   if (ex === "NSE") return symbol.toUpperCase() + ".NS";
   if (ex === "BSE") return symbol.toUpperCase() + ".BO";
   return symbol.toUpperCase();
@@ -28,8 +36,20 @@ async function fetchCandles(ticker: string, from: Date, to: Date): Promise<{ dat
     const result = json?.chart?.result?.[0];
     if (!result) return [];
     const timestamps: number[] = result.timestamps ?? result.timestamp ?? [];
-    const closes: number[] = result.indicators?.quote?.[0]?.close ?? [];
-    return timestamps.map((ts: number, i: number) => ({ date: formatUTC(new Date(ts * 1000)), close: closes[i] })).filter((c: any) => c.close && !isNaN(c.close));
+    const closes: (number | null)[] = result.indicators?.quote?.[0]?.close ?? [];
+    const regularMarketPrice = result.meta?.regularMarketPrice;
+
+    return timestamps.map((ts: number, i: number) => {
+      let close = closes[i];
+      if (close === null || close === undefined) {
+        if (i === timestamps.length - 1 && regularMarketPrice) {
+          close = regularMarketPrice;
+        } else if (i > 0) {
+          close = closes[i - 1];
+        }
+      }
+      return { date: formatUTC(new Date(ts * 1000)), close };
+    }).filter((c: any) => c.close && !isNaN(c.close));
   } catch { return []; }
 }
 
@@ -58,8 +78,12 @@ export async function syncPricesForUser(userId: string): Promise<{ synced: numbe
   async function getUsdInr(date: string): Promise<number> {
     if (usdInrCache.has(date)) return usdInrCache.get(date)!;
     const d = toUTCMidnight(date);
-    const candles = await fetchCandles("USDINR=X", d, new Date(d.getTime() + 86400000));
-    const rate = candles[0]?.close ?? 84;
+    // Fetch last 5 days to ensure we get Friday's rate on weekends
+    const from = new Date(d.getTime() - 4 * 86400000);
+    const to = new Date(d.getTime() + 86400000);
+    const candles = await fetchCandles("USDINR=X", from, to);
+    // The last candle in the array is the most recent valid close
+    const rate = candles.length > 0 ? candles[candles.length - 1].close : 84;
     usdInrCache.set(date, rate);
     return rate;
   }

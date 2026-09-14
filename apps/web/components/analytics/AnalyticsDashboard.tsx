@@ -108,6 +108,7 @@ function PerfChart({
         borderRadius: 3,
         barPercentage: 0.65,
         categoryPercentage: 0.75,
+        minBarLength: 4,
       },
     ],
   };
@@ -162,8 +163,7 @@ function PerfChart({
                     color: "#71717a",
                     maxRotation: 45,
                     minRotation: 0,
-                    autoSkip: true,
-                    maxTicksLimit: 10,
+                    autoSkip: false,
                   },
                 },
                 y: yAxis,
@@ -235,27 +235,33 @@ export default function AnalyticsDashboard({ initialTrades: rawTrades, sharedUse
 
   // Daily MTM P&L fetched from the API (historical prices for open positions).
   // Fetched once on mount so ALL views (Daily/Weekly/Monthly/Yearly) use accurate MTM data.
-  const [dailyPnlData, setDailyPnlData] = useState<{ date: string; pnl: number }[] | null>(null);
+  const [dailyPnlByTrade, setDailyPnlByTrade] = useState<Record<string, { date: string; pnl: number }[]> | null>(null);
   const [dailyPnlLoading, setDailyPnlLoading] = useState(false);
 
   useEffect(() => {
-    // 1. Fire background sync first (fills any missing PriceHistory rows).
-    //    For shared pages, pass the userId as a query param since there's no session.
-    const syncUrl = sharedUserId
-      ? `/api/jobs/sync-prices?userId=${sharedUserId}`
-      : "/api/jobs/sync-prices";
-    fetch(syncUrl, { method: "POST" }).catch(() => {});
+    async function loadData() {
+      setDailyPnlLoading(true);
+      try {
+        // 1. Fire background sync first and WAIT for it to finish.
+        const syncUrl = sharedUserId
+          ? `/api/jobs/sync-prices?userId=${sharedUserId}`
+          : "/api/jobs/sync-prices";
+        await fetch(syncUrl, { method: "POST" });
 
-    // 2. Fetch the daily P&L chart data from the DB.
-    const dailyPnlUrl = sharedUserId
-      ? `/api/analytics/daily-pnl?userId=${sharedUserId}`
-      : "/api/analytics/daily-pnl";
-    setDailyPnlLoading(true);
-    fetch(dailyPnlUrl)
-      .then((r) => r.json())
-      .then((d) => setDailyPnlData(d.days ?? []))
-      .catch(() => setDailyPnlData([]))
-      .finally(() => setDailyPnlLoading(false));
+        // 2. Fetch the daily P&L chart data from the DB.
+        const dailyPnlUrl = sharedUserId
+          ? `/api/analytics/daily-pnl?userId=${sharedUserId}`
+          : "/api/analytics/daily-pnl";
+        const res = await fetch(dailyPnlUrl);
+        const data = await res.json();
+        setDailyPnlByTrade(data.trades ?? {});
+      } catch (e) {
+        setDailyPnlByTrade({});
+      } finally {
+        setDailyPnlLoading(false);
+      }
+    }
+    loadData();
   }, [sharedUserId]); // Re-fetch if sharedUserId changes
 
   // ── LIVE PNL FOR OPEN TRADES ──────────────────────────────────────────────
@@ -566,35 +572,79 @@ export default function AnalyticsDashboard({ initialTrades: rawTrades, sharedUse
   // All views use the accurate API data (realized + unrealized MTM), not just Daily.
   const activePerfChartData = useMemo(() => {
     // Only applies to P&L metric; R-Multiple still uses trade-based perfChartData
-    if (perfMetric !== "P&L" || !dailyPnlData || dailyPnlData.length === 0) {
+    if (perfMetric !== "P&L" || !dailyPnlByTrade || Object.keys(dailyPnlByTrade).length === 0) {
       return perfChartData;
     }
 
-    // Live intraday override for today's date
-    let liveTodayPnl: number | null = null;
-    if (livePnl && livePnl.size > 0) {
-      liveTodayPnl = 0;
-      for (const pnl of livePnl.values()) {
-        liveTodayPnl += pnl.todayPnl;
-      }
-    }
     const today = new Date();
     const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
-    // Apply live override to today's entry in dailyPnlData
-    const resolvedDaily = dailyPnlData.map((d) => ({
-      ...d,
-      pnl: d.date === todayStr && liveTodayPnl !== null ? liveTodayPnl : d.pnl,
-    }));
+    const resolvedDailyMap = new Map<string, number>();
+
+    // Sum up daily P&L for all FILTERED trades
+    filteredTrades.forEach(t => {
+      const history = dailyPnlByTrade[t.id] ?? [];
+      let liveTodayPnl = livePnl.get(t.id)?.todayPnl ?? null;
+      let hasToday = false;
+
+      history.forEach(d => {
+        let pnl = d.pnl;
+        if (d.date === todayStr) {
+          hasToday = true;
+          if (liveTodayPnl !== null) pnl = liveTodayPnl;
+        }
+        resolvedDailyMap.set(d.date, (resolvedDailyMap.get(d.date) ?? 0) + pnl);
+      });
+
+      // If history doesn't have today but we have liveTodayPnl for this open trade, add it!
+      if (liveTodayPnl !== null && !hasToday) {
+        resolvedDailyMap.set(todayStr, (resolvedDailyMap.get(todayStr) ?? 0) + liveTodayPnl);
+      }
+    });
+
+    const resolvedDaily = Array.from(resolvedDailyMap.entries())
+      .map(([date, pnl]) => ({ date, pnl }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    // If there are no data points after filtering, return early
+    if (resolvedDaily.length === 0) {
+      return { labels: ['No Data'], data: [0] };
+    }
 
     if (perfView === "Daily") {
-      return {
-        labels: resolvedDaily.map(d => {
-          const [y, m, day] = d.date.split('-').map(Number);
-          return new Date(y, m - 1, day).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-        }),
-        data: resolvedDaily.map(d => d.pnl),
-      };
+      const dayMap: Record<string, number> = {};
+      resolvedDaily.forEach(d => {
+        dayMap[d.date] = d.pnl;
+      });
+
+      if (Object.keys(dayMap).length > 0) {
+        const sortedKeys = Object.keys(dayMap).sort();
+        const start = new Date(sortedKeys[0]);
+        const end = new Date(); // today
+        const cursor = new Date(start);
+        
+        const hasCrypto = filteredTrades.some(t => t.exchange.toUpperCase() === "CRYPTO");
+
+        while (cursor <= end) {
+          const dayOfWeek = cursor.getDay();
+          const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+          
+          if (!isWeekend || hasCrypto) {
+            const key = `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, '0')}-${String(cursor.getDate()).padStart(2, '0')}`;
+            if (!(key in dayMap)) dayMap[key] = 0;
+          }
+          cursor.setDate(cursor.getDate() + 1);
+        }
+        const allKeys = Object.keys(dayMap).sort();
+        return {
+          labels: allKeys.map(k => {
+            const [y, m, d] = k.split('-').map(Number);
+            return new Date(y, m - 1, d).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+          }),
+          data: allKeys.map(k => dayMap[k]),
+        };
+      }
+      return { labels: ['No Data'], data: [0] };
     }
 
     if (perfView === "Weekly") {
@@ -608,14 +658,32 @@ export default function AnalyticsDashboard({ initialTrades: rawTrades, sharedUse
         const key = `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, '0')}-${String(monday.getDate()).padStart(2, '0')}`;
         weekMap[key] = (weekMap[key] || 0) + pnl;
       });
-      const allKeys = Object.keys(weekMap).sort();
-      return {
-        labels: allKeys.map(k => {
-          const [y, m, d] = k.split('-').map(Number);
-          return `Wk ${new Date(y, m - 1, d).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`;
-        }),
-        data: allKeys.map(k => weekMap[k]),
-      };
+
+      if (Object.keys(weekMap).length > 0) {
+        const sortedKeys = Object.keys(weekMap).sort();
+        const start = new Date(sortedKeys[0]);
+        const now = new Date();
+        const curDay = now.getDay();
+        const curDiff = now.getDate() - curDay + (curDay === 0 ? -6 : 1);
+        const curMonday = new Date(now);
+        curMonday.setDate(curDiff);
+
+        const cursor = new Date(start);
+        while (cursor <= curMonday) {
+          const key = `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, '0')}-${String(cursor.getDate()).padStart(2, '0')}`;
+          if (!(key in weekMap)) weekMap[key] = 0;
+          cursor.setDate(cursor.getDate() + 7);
+        }
+        const allKeys = Object.keys(weekMap).sort();
+        return {
+          labels: allKeys.map(k => {
+            const [y, m, d] = k.split('-').map(Number);
+            return `Wk ${new Date(y, m - 1, d).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`;
+          }),
+          data: allKeys.map(k => weekMap[k]),
+        };
+      }
+      return { labels: ['No Data'], data: [0] };
     }
 
     if (perfView === "Monthly") {
@@ -624,14 +692,36 @@ export default function AnalyticsDashboard({ initialTrades: rawTrades, sharedUse
         const key = date.slice(0, 7); // "YYYY-MM"
         monthMap[key] = (monthMap[key] || 0) + pnl;
       });
-      const allKeys = Object.keys(monthMap).sort();
-      return {
-        labels: allKeys.map(k => {
-          const [y, m] = k.split('-').map(Number);
-          return new Date(y, m - 1, 1).toLocaleDateString(undefined, { month: 'short', year: '2-digit' });
-        }),
-        data: allKeys.map(k => monthMap[k]),
-      };
+
+      if (Object.keys(monthMap).length > 0) {
+        const sortedKeys = Object.keys(monthMap).sort();
+        const [startY, startM] = sortedKeys[0].split('-').map(Number);
+        const now = new Date();
+        const endKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        let cy = startY, cm = startM;
+        while (true) {
+          const key = `${cy}-${String(cm).padStart(2, '0')}`;
+          if (!(key in monthMap)) monthMap[key] = 0;
+          if (key === endKey) break;
+          cm++;
+          if (cm > 12) { cm = 1; cy++; }
+          if (cy > now.getFullYear() + 1) break; // safety
+        }
+        const allKeys = Object.keys(monthMap).sort((a, b) => {
+          const [yA, mA] = a.split('-').map(Number);
+          const [yB, mB] = b.split('-').map(Number);
+          if (yA !== yB) return yA - yB;
+          return mA - mB;
+        });
+        return {
+          labels: allKeys.map(k => {
+            const [y, m] = k.split('-').map(Number);
+            return new Date(y, m - 1, 1).toLocaleDateString(undefined, { month: 'short', year: '2-digit' });
+          }),
+          data: allKeys.map(k => monthMap[k]),
+        };
+      }
+      return { labels: ['No Data'], data: [0] };
     }
 
     if (perfView === "Yearly") {
@@ -640,15 +730,25 @@ export default function AnalyticsDashboard({ initialTrades: rawTrades, sharedUse
         const key = date.slice(0, 4); // "YYYY"
         yearMap[key] = (yearMap[key] || 0) + pnl;
       });
-      const allKeys = Object.keys(yearMap).sort();
-      return {
-        labels: allKeys,
-        data: allKeys.map(k => yearMap[k]),
-      };
+
+      if (Object.keys(yearMap).length > 0) {
+        const sortedKeys = Object.keys(yearMap).sort();
+        const startYear = parseInt(sortedKeys[0]);
+        const endYear = new Date().getFullYear();
+        for (let y = startYear; y <= endYear; y++) {
+          if (!(y.toString() in yearMap)) yearMap[y.toString()] = 0;
+        }
+        const allKeys = Object.keys(yearMap).sort();
+        return {
+          labels: allKeys,
+          data: allKeys.map(k => yearMap[k]),
+        };
+      }
+      return { labels: ['No Data'], data: [0] };
     }
 
     return perfChartData;
-  }, [perfView, perfMetric, dailyPnlData, perfChartData, livePnl]);
+  }, [perfView, perfMetric, dailyPnlByTrade, perfChartData, livePnl, filteredTrades]);
 
 
   // R-Multiple Bins

@@ -60,13 +60,18 @@ export async function GET(request: Request) {
     }
 
     // ── Step 1: Realized P&L per day (closed trades) ──────────────────────────
-    const dailyPnl = new Map<string, number>(); // "YYYY-MM-DD" → total pnl
+    const perTradeDailyPnl = new Map<string, Map<string, number>>();
+    const getTradeMap = (id: string) => {
+      if (!perTradeDailyPnl.has(id)) perTradeDailyPnl.set(id, new Map());
+      return perTradeDailyPnl.get(id)!;
+    };
 
     for (const t of trades) {
       if (t.status === "OPEN" || t.status === "PARTIAL" || !t.exitTime) continue;
       const d = new Date(t.exitTime);
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-      dailyPnl.set(key, (dailyPnl.get(key) ?? 0) + t.netPnl);
+      const tMap = getTradeMap(t.id);
+      tMap.set(key, (tMap.get(key) ?? 0) + t.netPnl);
     }
 
     // ── Step 2: Daily MTM for OPEN trades ─────────────────────────────────────
@@ -120,6 +125,7 @@ export async function GET(request: Request) {
 
         const sortedDates = [...symbolHistory.keys()].sort();
         let prevPriceBase = entryPriceBase;
+        const tMap = getTradeMap(trade.id);
 
         for (const dateKey of sortedDates) {
           if (dateKey < entryDateKey) {
@@ -139,33 +145,21 @@ export async function GET(request: Request) {
 
           const dailyChangeBase = dailyPriceMoveBase * openQty;
 
-          dailyPnl.set(dateKey, (dailyPnl.get(dateKey) ?? 0) + dailyChangeBase);
+          tMap.set(dateKey, (tMap.get(dateKey) ?? 0) + dailyChangeBase);
 
           prevPriceBase = currentPriceBase;
         }
       }
     }
 
-    // ── Step 3: Fill all calendar days from earliest to today ─────────────────
-    if (dailyPnl.size > 0) {
-      const sortedAll = [...dailyPnl.keys()].sort();
-      const [sy, sm, sd] = sortedAll[0].split("-").map(Number);
-      const start = new Date(Date.UTC(sy, sm - 1, sd));
-      const end = new Date();
-      const cursor = new Date(start);
-
-      while (cursor <= end) {
-        const key = formatDateKey(cursor);
-        if (!dailyPnl.has(key)) dailyPnl.set(key, 0);
-        cursor.setUTCDate(cursor.getUTCDate() + 1);
-      }
+    const tradesResult: Record<string, { date: string; pnl: number }[]> = {};
+    for (const [tradeId, pnlMap] of perTradeDailyPnl.entries()) {
+      tradesResult[tradeId] = [...pnlMap.entries()]
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([date, pnl]) => ({ date, pnl: Math.round(pnl) }));
     }
 
-    const days = [...dailyPnl.entries()]
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([date, pnl]) => ({ date, pnl: Math.round(pnl) }));
-
-    return NextResponse.json({ days, count: days.length });
+    return NextResponse.json({ trades: tradesResult });
   } catch (error: any) {
     console.error("[daily-pnl] error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
