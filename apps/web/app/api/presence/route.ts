@@ -5,7 +5,7 @@ import crypto from 'crypto';
 
 export async function POST() {
   try {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     let sessionId = cookieStore.get('visitor_session_id')?.value;
 
     if (!sessionId) {
