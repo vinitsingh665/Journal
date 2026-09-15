@@ -469,3 +469,13 @@ model PriceHistory {
   @@index([symbol, exchange])
   @@index([date])
 }
+
+// ─── ACTIVE VISITORS (LIVE PRESENCE) ────────────────
+
+model ActiveVisitor {
+  id        String   @id @default(cuid())
+  sessionId String   @unique
+  lastSeen  DateTime @default(now())
+
+  @@index([lastSeen])
+}

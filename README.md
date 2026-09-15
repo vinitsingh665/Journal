@@ -1,10 +1,6 @@
-<div align="center">
-  <a href="https://traderlabs.in">
-    <img src="apps/web/public/logo.png" alt="TraderLabs Logo" width="150" />
-  </a>
-  <h1>Trading Journal</h1>
-  <p><strong>Website:</strong> <a href="https://traderlabs.in">traderlabs.in</a></p>
-</div>
+# 📈 Trading Journal
+
+**Website:** [traderlabs.in](https://traderlabs.in)
 
 A comprehensive, full-stack web application designed for traders to log, analyze, review, and optimize their trades. Built with modern web technologies, this journal provides an intuitive interface with powerful analytics and AI-driven insights.
 

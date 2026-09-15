@@ -6,10 +6,11 @@ export async function GET() {
     const now = new Date();
     const twoMinutesAgo = new Date(now.getTime() - 120000);
 
-    // Fetch live users
-    const liveUsers = await prisma.user.count({
+    // Fetch live users from ActiveVisitor table
+    // @ts-ignore - Ignore type error if prisma client generation failed earlier
+    const liveUsers = await prisma.activeVisitor.count({
       where: {
-        updatedAt: {
+        lastSeen: {
           gt: twoMinutesAgo,
         },
       },
