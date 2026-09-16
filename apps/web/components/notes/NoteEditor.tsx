@@ -113,7 +113,7 @@ export default function NoteEditor({
   // Re-set content when switching notes
   useEffect(() => {
     if (editor && initialContent) {
-      editor.commands.setContent(initialContent as any, false);
+      editor.commands.setContent(initialContent as any, { emitUpdate: false });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [noteId]);
