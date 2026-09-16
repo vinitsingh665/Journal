@@ -65,6 +65,7 @@ export const NAV_ITEMS = [
       { name: "Risk Calculator", href: "/risk-calculator", icon: "calculator" },
       { name: "Import Trades", href: "/import", icon: "import" },
       { name: "Screenshots", href: "/screenshots", icon: "screenshots" },
+      { name: "Notes", href: "/notes", icon: "notes" },
     ],
   },
   {

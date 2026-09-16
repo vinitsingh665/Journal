@@ -2,7 +2,9 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
+import NotesFAB from "@/components/notes/NotesFAB";
 import prisma from "@repo/database";
+import "@/app/notes.css";
 
 export default async function DashboardLayout({
   children,
@@ -29,7 +31,9 @@ export default async function DashboardLayout({
       <div className="app-main">
         <Topbar userName={userName} avatar={avatar} isGuest={user?.isGuest} userId={userId} />
         <main className="app-content">{children}</main>
+        <NotesFAB />
       </div>
     </div>
   );
 }
+

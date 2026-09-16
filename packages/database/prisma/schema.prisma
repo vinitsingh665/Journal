@@ -36,6 +36,7 @@ model User {
   actionPlans   ActionPlan[]
   mistakeLogs   MistakeLog[]
   riskTemplates RiskTemplate[]
+  notes         Note[]
   sharedLinks         SharedLink[]
   settings            UserSettings?
   passwordResetTokens PasswordResetToken[]
@@ -192,6 +193,7 @@ model Trade {
   events         TradeEvent[]
   mistakes       TradeMistake[]
   screenshots    Screenshot[]
+  tradeNotes     Note[]   @relation("TradeNotes")
 
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -478,4 +480,34 @@ model ActiveVisitor {
   lastSeen  DateTime @default(now())
 
   @@index([lastSeen])
+}
+
+// ─── NOTES ───────────────────────────────────────────
+
+model Note {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title     String   @default("Untitled")
+  content   Json     // Tiptap JSON format
+  color     String   @default("#1a1a2e") // note card accent color
+
+  tradeId   String?  // optional — link to a specific trade
+  trade     Trade?   @relation("TradeNotes", fields: [tradeId], references: [id], onDelete: SetNull)
+
+  isPinned  Boolean  @default(false)
+  isMinimized Boolean @default(false)
+  url       String?
+  positionX Float?
+  positionY Float?
+  width     Float?
+  height    Float?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([tradeId])
+  @@index([updatedAt])
 }

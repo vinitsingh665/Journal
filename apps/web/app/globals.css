@@ -1,12 +1,12 @@
-/* ═══════════════════════════════════════════════════
-   TRADING JOURNAL — PREMIUM DESIGN SYSTEM
-   ═══════════════════════════════════════════════════ */
+﻿/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   TRADING JOURNAL â€” PREMIUM DESIGN SYSTEM
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 @import url('https://cdn.jsdelivr.net/gh/JetBrains/JetBrainsMono/css/jetbrains-mono.css');
 
 @tailwind components;
 @tailwind utilities;
 
-/* ─── CSS CUSTOM PROPERTIES ─────────────────────── */
+/* â”€â”€â”€ CSS CUSTOM PROPERTIES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 :root {
   /* Backgrounds */
@@ -104,7 +104,7 @@
   --transition-spring: 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* ─── THEME CONFIGURATION ────────────────────────── */
+/* â”€â”€â”€ THEME CONFIGURATION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 /* DARK MODE */
 [data-theme='dark'] {
@@ -164,7 +164,7 @@
   --accent-primary-glow: rgba(139, 92, 246, 0.3);
 }
 
-/* ─── RESET & BASE ───────────────────────────────── */
+/* â”€â”€â”€ RESET & BASE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 *, *::before, *::after {
   box-sizing: border-box;
@@ -212,7 +212,7 @@ input, select, textarea {
   color: var(--text-primary);
 }
 
-/* ─── TYPOGRAPHY ─────────────────────────────────── */
+/* â”€â”€â”€ TYPOGRAPHY â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 h1, h2, h3, h4, h5, h6 {
   font-weight: 600;
@@ -237,7 +237,7 @@ h4 { font-size: var(--text-lg); }
 .text-muted { color: var(--text-muted); }
 .text-secondary { color: var(--text-secondary); }
 
-/* ─── LAYOUT ─────────────────────────────────────── */
+/* â”€â”€â”€ LAYOUT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .app-layout {
   display: flex;
@@ -262,7 +262,7 @@ h4 { font-size: var(--text-lg); }
   margin: 0 auto;
 }
 
-/* ─── SIDEBAR ────────────────────────────────────── */
+/* â”€â”€â”€ SIDEBAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .sidebar {
   position: fixed;
@@ -442,7 +442,7 @@ h4 { font-size: var(--text-lg); }
   color: var(--text-sidebar);
 }
 
-/* ─── TOPBAR ─────────────────────────────────────── */
+/* â”€â”€â”€ TOPBAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .topbar {
   position: fixed;
@@ -485,7 +485,7 @@ h4 { font-size: var(--text-lg); }
   gap: var(--space-3);
 }
 
-/* ─── CARDS ──────────────────────────────────────── */
+/* â”€â”€â”€ CARDS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .card {
   background: var(--bg-card);
@@ -526,7 +526,7 @@ h4 { font-size: var(--text-lg); }
   padding: var(--space-4);
 }
 
-/* ─── KPI CARDS ──────────────────────────────────── */
+/* â”€â”€â”€ KPI CARDS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .kpi-grid {
   display: grid;
@@ -628,7 +628,7 @@ h4 { font-size: var(--text-lg); }
   background: var(--color-negative-bg);
 }
 
-/* ─── BUTTONS ────────────────────────────────────── */
+/* â”€â”€â”€ BUTTONS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .btn {
   display: inline-flex;
@@ -711,7 +711,7 @@ h4 { font-size: var(--text-lg); }
   border-radius: var(--radius-md);
 }
 
-/* ─── FORM ELEMENTS ──────────────────────────────── */
+/* â”€â”€â”€ FORM ELEMENTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .form-group {
   display: flex;
@@ -766,7 +766,7 @@ h4 { font-size: var(--text-lg); }
   box-shadow: 0 0 0 3px var(--accent-primary-glow);
 }
 
-/* ─── BADGES ─────────────────────────────────────── */
+/* â”€â”€â”€ BADGES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .badge {
   display: inline-flex;
@@ -809,7 +809,7 @@ h4 { font-size: var(--text-lg); }
   color: var(--color-warning);
 }
 
-/* ─── TABLES ─────────────────────────────────────── */
+/* â”€â”€â”€ TABLES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .table-container {
   overflow-x: auto;
@@ -852,7 +852,7 @@ h4 { font-size: var(--text-lg); }
   font-size: var(--text-sm);
 }
 
-/* ─── TAGS ───────────────────────────────────────── */
+/* â”€â”€â”€ TAGS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .tag {
   display: inline-flex;
@@ -876,7 +876,7 @@ h4 { font-size: var(--text-lg); }
   color: var(--color-negative);
 }
 
-/* ─── STAT GRID ──────────────────────────────────── */
+/* â”€â”€â”€ STAT GRID â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .stat-grid {
   display: grid;
@@ -908,7 +908,7 @@ h4 { font-size: var(--text-lg); }
   color: var(--text-primary);
 }
 
-/* ─── MODAL ──────────────────────────────────────── */
+/* â”€â”€â”€ MODAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .modal-overlay {
   position: fixed;
@@ -959,7 +959,7 @@ h4 { font-size: var(--text-lg); }
   border-top: 1px solid var(--border-secondary);
 }
 
-/* ─── TOAST ──────────────────────────────────────── */
+/* â”€â”€â”€ TOAST â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .toast-container {
   position: fixed;
@@ -990,7 +990,7 @@ h4 { font-size: var(--text-lg); }
 .toast-warning { border-left: 3px solid var(--color-warning); }
 .toast-info { border-left: 3px solid var(--color-info); }
 
-/* ─── FILE UPLOAD ────────────────────────────────── */
+/* â”€â”€â”€ FILE UPLOAD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .upload-zone {
   border: 2px dashed var(--border-primary);
@@ -1026,7 +1026,7 @@ h4 { font-size: var(--text-lg); }
   margin-top: var(--space-1);
 }
 
-/* ─── EMPTY STATE ────────────────────────────────── */
+/* â”€â”€â”€ EMPTY STATE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .empty-state {
   display: flex;
@@ -1059,7 +1059,7 @@ h4 { font-size: var(--text-lg); }
   margin-bottom: var(--space-6);
 }
 
-/* ─── SKELETON LOADING ───────────────────────────── */
+/* â”€â”€â”€ SKELETON LOADING â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .skeleton {
   background: linear-gradient(
@@ -1073,7 +1073,7 @@ h4 { font-size: var(--text-lg); }
   border-radius: var(--radius-md);
 }
 
-/* ─── GRID LAYOUTS ───────────────────────────────── */
+/* â”€â”€â”€ GRID LAYOUTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-4); }
 .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); }
@@ -1092,7 +1092,7 @@ h4 { font-size: var(--text-lg); }
 .col-span-8 { grid-column: span 8; }
 .col-span-12 { grid-column: span 12; }
 
-/* ─── POSITION CARDS ─────────────────────────────── */
+/* â”€â”€â”€ POSITION CARDS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .position-grid {
   display: grid;
@@ -1160,7 +1160,7 @@ h4 { font-size: var(--text-lg); }
   font-weight: 600;
 }
 
-/* ─── CALENDAR ───────────────────────────────────── */
+/* â”€â”€â”€ CALENDAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .calendar-grid {
   display: grid;
@@ -1223,7 +1223,7 @@ h4 { font-size: var(--text-lg); }
   opacity: 0.3;
 }
 
-/* ─── SLIDER ─────────────────────────────────────── */
+/* â”€â”€â”€ SLIDER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .confidence-slider {
   display: flex;
@@ -1259,7 +1259,7 @@ h4 { font-size: var(--text-lg); }
   text-align: center;
 }
 
-/* ─── TABS ───────────────────────────────────────── */
+/* â”€â”€â”€ TABS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .tabs {
   display: flex;
@@ -1289,7 +1289,7 @@ h4 { font-size: var(--text-lg); }
   border-bottom-color: var(--accent-primary);
 }
 
-/* ─── PAGINATION ─────────────────────────────────── */
+/* â”€â”€â”€ PAGINATION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .pagination {
   display: flex;
@@ -1322,7 +1322,7 @@ h4 { font-size: var(--text-lg); }
   border-color: var(--accent-primary);
 }
 
-/* ─── LOGIN ──────────────────────────────────────── */
+/* â”€â”€â”€ LOGIN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .login-page {
   min-height: 100vh;
@@ -1453,7 +1453,7 @@ h4 { font-size: var(--text-lg); }
   text-align: center;
 }
 
-/* ─── DATE PICKER ────────────────────────────────── */
+/* â”€â”€â”€ DATE PICKER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .date-range-picker {
   display: flex;
@@ -1473,7 +1473,7 @@ h4 { font-size: var(--text-lg); }
   color: var(--text-muted);
 }
 
-/* ─── SEARCH ─────────────────────────────────────── */
+/* â”€â”€â”€ SEARCH â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .search-input {
   display: flex;
@@ -1513,7 +1513,7 @@ h4 { font-size: var(--text-lg); }
   color: var(--text-muted);
 }
 
-/* ─── CHART CONTAINERS ───────────────────────────── */
+/* â”€â”€â”€ CHART CONTAINERS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .chart-container {
   position: relative;
@@ -1529,7 +1529,7 @@ h4 { font-size: var(--text-lg); }
   height: 400px;
 }
 
-/* ─── RISK CALCULATOR ────────────────────────────── */
+/* â”€â”€â”€ RISK CALCULATOR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .calc-grid {
   display: grid;
@@ -1569,7 +1569,7 @@ h4 { font-size: var(--text-lg); }
   font-weight: 700;
 }
 
-/* ─── MISTAKE FREQUENCY ──────────────────────────── */
+/* â”€â”€â”€ MISTAKE FREQUENCY â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .mistake-item {
   display: flex;
@@ -1603,7 +1603,7 @@ h4 { font-size: var(--text-lg); }
   color: var(--text-secondary);
 }
 
-/* ─── TOOLTIP ────────────────────────────────────── */
+/* â”€â”€â”€ TOOLTIP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .tooltip {
   position: relative;
@@ -1630,7 +1630,7 @@ h4 { font-size: var(--text-lg); }
   opacity: 1;
 }
 
-/* ─── PAGE HEADER ────────────────────────────────── */
+/* â”€â”€â”€ PAGE HEADER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .page-header {
   display: flex;
@@ -1650,7 +1650,7 @@ h4 { font-size: var(--text-lg); }
   gap: var(--space-3);
 }
 
-/* ─── FILTERS BAR ────────────────────────────────── */
+/* â”€â”€â”€ FILTERS BAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .filters-bar {
   display: flex;
@@ -1661,7 +1661,7 @@ h4 { font-size: var(--text-lg); }
   flex-wrap: wrap;
 }
 
-/* ─── ANIMATIONS ─────────────────────────────────── */
+/* â”€â”€â”€ ANIMATIONS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 @keyframes fadeIn {
   from { opacity: 0; }
@@ -1693,7 +1693,7 @@ h4 { font-size: var(--text-lg); }
   50% { opacity: 0.5; }
 }
 
-/* ─── UTILITY CLASSES ────────────────────────────── */
+/* â”€â”€â”€ UTILITY CLASSES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .flex { display: flex; }
 .flex-col { flex-direction: column; }
@@ -1714,7 +1714,7 @@ h4 { font-size: var(--text-lg); }
 .w-full { width: 100%; }
 .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-/* ─── SCROLLBAR ──────────────────────────────────── */
+/* â”€â”€â”€ SCROLLBAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 ::-webkit-scrollbar {
   width: 6px;
@@ -1734,7 +1734,7 @@ h4 { font-size: var(--text-lg); }
   background: var(--text-muted);
 }
 
-/* ─── MODAL ──────────────────────────────────────── */
+/* â”€â”€â”€ MODAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .modal-overlay {
   position: fixed;
@@ -1790,7 +1790,7 @@ h4 { font-size: var(--text-lg); }
   border-top: 1px solid var(--border-secondary);
 }
 
-/* ─── DANGER BUTTON ──────────────────────────────── */
+/* â”€â”€â”€ DANGER BUTTON â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .btn-danger {
   background: linear-gradient(135deg, #ef4444, #dc2626);
@@ -1815,7 +1815,7 @@ h4 { font-size: var(--text-lg); }
   transform: none;
 }
 
-/* ─── ICON BUTTON ────────────────────────────────── */
+/* â”€â”€â”€ ICON BUTTON â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .btn-icon {
   padding: var(--space-2);
@@ -1825,7 +1825,7 @@ h4 { font-size: var(--text-lg); }
   justify-content: center;
 }
 
-/* ─── FORM TEXTAREA ──────────────────────────────── */
+/* â”€â”€â”€ FORM TEXTAREA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .form-textarea {
   resize: vertical;
@@ -1851,7 +1851,7 @@ h4 { font-size: var(--text-lg); }
   width: 100%;
 }
 
-/* ─── STAT GRID (trade detail) ───────────────────── */
+/* â”€â”€â”€ STAT GRID (trade detail) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .stat-grid {
   display: grid;
@@ -1891,7 +1891,7 @@ h4 { font-size: var(--text-lg); }
   color: var(--text-primary);
 }
 
-/* ─── RESPONSIVE ─────────────────────────────────── */
+/* â”€â”€â”€ RESPONSIVE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 @media (max-width: 1200px) {
   .grid-3 { grid-template-columns: repeat(2, 1fr); }
@@ -1963,7 +1963,7 @@ h4 { font-size: var(--text-lg); }
   }
 }
 
-/* ─── TRADES PAGE REDESIGN ──────────────────────────── */
+/* â”€â”€â”€ TRADES PAGE REDESIGN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .trades-kpi-row {
   display: grid;
@@ -2170,7 +2170,7 @@ h4 { font-size: var(--text-lg); }
   color: var(--color-warning, #F59E0B);
 }
 
-/* ─── SETTINGS UI ────────────────────────────────── */
+/* â”€â”€â”€ SETTINGS UI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .settings-grid {
   display: grid;
@@ -2312,7 +2312,7 @@ h4 { font-size: var(--text-lg); }
   opacity: 1 !important;
 }
 
-/* ─── COMPANION CAPSULE BUTTON ────────────────────── */
+/* â”€â”€â”€ COMPANION CAPSULE BUTTON â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .companion-capsule-btn {
   display: flex;
   align-items: center;
@@ -2343,9 +2343,9 @@ h4 { font-size: var(--text-lg); }
   transform: scale(0.92);
 }
 
-/* ═══════════════════════════════════════════════════
-   COMPANION / PETDEX DIALOG — THEME-AWARE STYLES
-   ═══════════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   COMPANION / PETDEX DIALOG â€” THEME-AWARE STYLES
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 /* --- CSS Variables for companion dialog (light mode defaults) --- */
 :root {
@@ -2411,7 +2411,7 @@ h4 { font-size: var(--text-lg); }
   --petdex-loading-border: rgba(255, 255, 255, 0.08);
 }
 
-/* Companion dialog — overlay backdrop */
+/* Companion dialog â€” overlay backdrop */
 .petdex-dialog-overlay {
   position: fixed;
   inset: 0;
@@ -2425,7 +2425,7 @@ h4 { font-size: var(--text-lg); }
   -webkit-backdrop-filter: blur(12px);
 }
 
-/* Companion dialog — main panel */
+/* Companion dialog â€” main panel */
 .petdex-dialog-panel {
   position: relative;
   display: flex;
@@ -2603,7 +2603,7 @@ h4 { font-size: var(--text-lg); }
   box-shadow: none !important;
 }
 
-/* Cancel button (ghost variant) — no background, no border, just text */
+/* Cancel button (ghost variant) â€” no background, no border, just text */
 .petdex-dialog-panel footer button[class*="bg-transparent"],
 .petdex-dialog-panel footer button[class*="border-none"] {
   background: transparent !important;
@@ -2615,7 +2615,7 @@ h4 { font-size: var(--text-lg); }
   color: var(--petdex-text) !important;
 }
 
-/* Confirm button (primary) — accent-colored */
+/* Confirm button (primary) â€” accent-colored */
 .petdex-dialog-panel footer button[class*="rounded-[9px]"] {
   background: var(--accent-primary) !important;
   color: #ffffff !important;
@@ -2661,4 +2661,4 @@ h4 { font-size: var(--text-lg); }
 /* Import description text */
 .petdex-dialog-panel p {
   color: var(--petdex-text-muted);
-}
+}

@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { Suspense } from "react";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import { PresenceTracker } from "@/components/PresenceTracker";
+import StickyNotesLayer from "@/components/notes/StickyNotesLayer";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: '--font-sans' });
@@ -83,6 +84,7 @@ export default function RootLayout({
       <body className={`${inter.variable} font-sans`}>
         <ThemeProvider>
           <PresenceTracker />
+          <StickyNotesLayer />
           {children}
         </ThemeProvider>
       </body>

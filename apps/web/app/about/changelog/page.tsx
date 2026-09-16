@@ -20,6 +20,18 @@ interface Release {
 
 const releases: Release[] = [
   {
+    version: "v1.5.0",
+    date: "September 16, 2026",
+    title: "Introducing Premium Sticky Notes",
+    icon: "📝",
+    items: [
+      { tag: "NEW", text: "Added a brand new Sticky Notes feature with a premium, draggable interface" },
+      { tag: "NEW", text: "Sticky Notes can be dynamically pinned to any specific page across the platform" },
+      { tag: "NEW", text: "Rich text formatting support including custom text colors, background colors, and typography" },
+      { tag: "NEW", text: "Real-time synchronization ensures pinned notes are instantly updated" }
+    ]
+  },
+  {
     version: "v1.4.0",
     date: "August 30, 2026",
     title: "Trade Journal Upgrades & Safety Checks",
@@ -128,7 +140,7 @@ export default function ChangelogPage() {
         {/* Vertical Line */}
         <div style={{
           position: "absolute",
-          top: "0",
+          top: "40px",
           bottom: "0",
           left: "31px",
           width: "2px",
