@@ -150,6 +150,31 @@ export default function StickyNoteModal({ open, onClose, existingNote }: Props) 
         window.dispatchEvent(new Event("notesUpdated"));
       }
     } else {
+      // ✅ For new pinned notes: immediately show a temp dot on screen — no waiting for API
+      const tempId = shouldPin ? `temp-${Date.now()}` : null;
+
+      if (tempId) {
+        window.dispatchEvent(new CustomEvent("noteOptimisticUpdate", {
+          detail: {
+            id: tempId,
+            changes: {
+              id: tempId,
+              title,
+              content,
+              color: color.bg,
+              url: window.location.pathname,
+              positionX: finalX,
+              positionY: finalY,
+              isPinned: true,
+              isMinimized: true,
+              width: 32,
+              height: 32,
+            },
+            addIfMissing: true,
+          },
+        }));
+      }
+
       try {
         const res = await fetch("/api/notes", {
           method: "POST",
@@ -168,7 +193,12 @@ export default function StickyNoteModal({ open, onClose, existingNote }: Props) 
 
         if (res.ok && shouldPin) {
           const newNote = await res.json();
-          // Instantly add the new pinned note to the floating layer
+          // Remove temp dot and add real note (with real DB id)
+          if (tempId) {
+            window.dispatchEvent(new CustomEvent("noteOptimisticUpdate", {
+              detail: { id: tempId, action: "delete" },
+            }));
+          }
           window.dispatchEvent(new CustomEvent("noteOptimisticUpdate", {
             detail: { id: newNote.id, changes: newNote, addIfMissing: true },
           }));
@@ -177,6 +207,12 @@ export default function StickyNoteModal({ open, onClose, existingNote }: Props) 
         router.refresh();
         window.dispatchEvent(new Event("notesUpdated"));
       } catch (err) {
+        // Remove temp dot on failure
+        if (tempId) {
+          window.dispatchEvent(new CustomEvent("noteOptimisticUpdate", {
+            detail: { id: tempId, action: "delete" },
+          }));
+        }
         console.error("Failed to save note:", err);
       }
     }
