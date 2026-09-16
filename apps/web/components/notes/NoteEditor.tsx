@@ -251,7 +251,7 @@ export default function NoteEditor({
                <div style={{ position: 'absolute', bottom: '100%', left: '50%', transform: 'translateX(-50%)', paddingBottom: '8px', zIndex: 50 }}>
                  <div style={{ background: '#18181b', border: '1px solid var(--border-secondary, #27272a)', borderRadius: '8px', padding: '4px', display: 'flex', flexDirection: 'column', gap: '2px', minWidth: '160px', boxShadow: '0 10px 25px rgba(0,0,0,0.5)', maxHeight: '300px', overflowY: 'auto' }}>
                    <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-muted, #71717a)', padding: '4px 8px', textTransform: 'uppercase' }}>Pin to page</div>
-                   {NAV_ITEMS.flatMap(s => s.items)
+                   {(NAV_ITEMS as any).flatMap((s: any) => s.items as { name: string, href: string, icon: string }[])
                      .filter(page => !['/notes', '/settings', '/risk-calculator', '/import', '/screenshots'].includes(page.href))
                      .map(page => (
                      <button 
