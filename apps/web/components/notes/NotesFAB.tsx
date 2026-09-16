@@ -98,7 +98,7 @@ export default function NotesFAB() {
             transform: open ? "translateY(0) scale(1)" : "translateY(10px) scale(0.95)",
             transition: "all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)",
             transformOrigin: "bottom right",
-            zIndex: 100
+            zIndex: 10002
           }}
         >
           <div style={{ padding: "12px", borderBottom: "1px solid var(--border-secondary, #374151)", fontSize: "14px", fontWeight: 600, color: "var(--text-primary, #f9fafb)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>

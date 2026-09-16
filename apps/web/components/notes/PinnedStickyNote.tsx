@@ -158,11 +158,20 @@ export default function PinnedStickyNote({ note, onUpdate }: PinnedNoteProps) {
   const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!confirm("Are you sure you want to delete this sticky note?")) return;
+
+    // ✅ Optimistic: immediately remove from floating layer — no waiting for API
+    window.dispatchEvent(new CustomEvent("noteOptimisticUpdate", {
+      detail: { id: note.id, action: "delete" },
+    }));
+
     try {
       await fetch(`/api/notes/${note.id}`, { method: "DELETE" });
+      // Sync NotesFAB notes list after API completes
       window.dispatchEvent(new Event("notesUpdated"));
     } catch (err) {
       console.error(err);
+      // Rollback on failure: refetch true state
+      window.dispatchEvent(new Event("notesUpdated"));
     }
   };
 

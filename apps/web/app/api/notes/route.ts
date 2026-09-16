@@ -25,6 +25,8 @@ export async function GET(request: NextRequest) {
       url: true,
       positionX: true,
       positionY: true,
+      width: true,
+      height: true,
       tradeId: true,
       createdAt: true,
       updatedAt: true,

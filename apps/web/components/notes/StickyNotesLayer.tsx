@@ -31,6 +31,32 @@ export default function StickyNotesLayer() {
     return () => window.removeEventListener("notesUpdated", handleUpdate);
   }, [fetchNotes]);
 
+  // Optimistic update — instantly apply changes from the edit modal without a full refetch
+  useEffect(() => {
+    const handleOptimistic = (e: Event) => {
+      const { id, changes, addIfMissing, action } = (e as CustomEvent).detail ?? {};
+      if (!id) return;
+
+      // Handle optimistic delete — remove note from layer instantly
+      if (action === "delete") {
+        setNotes(prev => prev.filter(n => n.id !== id));
+        return;
+      }
+
+      if (!changes) return;
+      setNotes(prev => {
+        const exists = prev.some(n => n.id === id);
+        if (!exists && addIfMissing) {
+          // New pinned note — add it straight to the layer
+          return [...prev, changes];
+        }
+        return prev.map(n => n.id === id ? { ...n, ...changes } : n);
+      });
+    };
+    window.addEventListener("noteOptimisticUpdate", handleOptimistic);
+    return () => window.removeEventListener("noteOptimisticUpdate", handleOptimistic);
+  }, []);
+
   const handleUpdateNote = async (id: string, updates: any) => {
     // Optimistic UI update
     setNotes(prev => {

@@ -37,7 +37,6 @@ export default function StickyNoteModal({ open, onClose, existingNote }: Props) 
     : 0;
     
   const [colorIdx, setColorIdx] = useState(initialColorIdx >= 0 ? initialColorIdx : 0);
-  const [saving, setSaving] = useState(false);
   const [textLength, setTextLength] = useState(0);
   
   // Drag state - initialize to 0,0 so it centers properly
@@ -111,51 +110,75 @@ export default function StickyNoteModal({ open, onClose, existingNote }: Props) 
   const handleSave = async (shouldPin: boolean = false) => {
     const text = editor?.getText() || "";
     if (!text.trim()) return;
-    setSaving(true);
+
     const content = editor?.getJSON() ?? { type: "doc", content: [] };
-    
-    // Get absolute screen coordinates
+    const title = text.trim().slice(0, 40) + (text.trim().length > 40 ? "…" : "");
+
+    // Capture modal position BEFORE closing (for new pinned notes)
     const modalEl = document.querySelector(".nm-sticky-modal .nm-modal-content");
     const rect = modalEl?.getBoundingClientRect();
     const finalX = rect ? rect.left : (window.innerWidth / 2) - 125;
     const finalY = rect ? rect.top : (window.innerHeight / 2) - 150;
 
-    try {
-      let res;
-      if (existingNote) {
-        res = await fetch(`/api/notes/${existingNote.id}`, {
+    // ✅ Close modal immediately — don't wait for the API response
+    handleClose();
+
+    if (existingNote) {
+      // ✅ Instantly reflect changes on the floating note (color, content, title)
+      const pinChanges = shouldPin && !existingNote.isPinned
+        ? { isPinned: true, isMinimized: true, url: window.location.pathname, positionX: finalX, positionY: finalY }
+        : {};
+
+      window.dispatchEvent(new CustomEvent("noteOptimisticUpdate", {
+        detail: {
+          id: existingNote.id,
+          changes: { title, content, color: color.bg, ...pinChanges },
+        },
+      }));
+
+      try {
+        await fetch(`/api/notes/${existingNote.id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            title: text.trim().slice(0, 40) + (text.trim().length > 40 ? "…" : ""),
-            content,
-            color: color.bg,
-            // don't change position when editing
-          }),
+          body: JSON.stringify({ title, content, color: color.bg, ...pinChanges }),
         });
-      } else {
-        res = await fetch("/api/notes", {
+        // Sync final server state
+        window.dispatchEvent(new Event("notesUpdated"));
+      } catch (err) {
+        console.error("Failed to save note:", err);
+        // Rollback: refetch true state
+        window.dispatchEvent(new Event("notesUpdated"));
+      }
+    } else {
+      try {
+        const res = await fetch("/api/notes", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            title: text.trim().slice(0, 40) + (text.trim().length > 40 ? "…" : ""),
+            title,
             content,
             color: color.bg,
             url: window.location.pathname,
             positionX: finalX,
             positionY: finalY,
             isPinned: shouldPin,
-            isMinimized: shouldPin
+            isMinimized: shouldPin,
           }),
         });
-      }
-      if (res.ok) { 
-        handleClose(); 
+
+        if (res.ok && shouldPin) {
+          const newNote = await res.json();
+          // Instantly add the new pinned note to the floating layer
+          window.dispatchEvent(new CustomEvent("noteOptimisticUpdate", {
+            detail: { id: newNote.id, changes: newNote, addIfMissing: true },
+          }));
+        }
+
+        router.refresh();
         window.dispatchEvent(new Event("notesUpdated"));
-        if (!existingNote) router.refresh(); 
+      } catch (err) {
+        console.error("Failed to save note:", err);
       }
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -293,19 +316,19 @@ export default function StickyNoteModal({ open, onClose, existingNote }: Props) 
               <button
                 className="nm-sticky-save"
                 onClick={() => handleSave(false)}
-                disabled={saving || textLength === 0}
+                disabled={textLength === 0}
                 style={{ background: "transparent", color: iconColor, border: `2px solid ${iconColor}`, marginLeft: 0 }}
               >
-                {saving ? "..." : "Save"}
+                Save
               </button>
             )}
             <button
               className="nm-sticky-save"
               onClick={() => handleSave(true)}
-              disabled={saving || textLength === 0}
+              disabled={textLength === 0}
               style={{ marginLeft: 0 }}
             >
-              {saving ? "..." : (existingNote ? "Save" : "Pin")}
+              {existingNote ? "Save" : "Pin"}
             </button>
           </div>
         </div>
