@@ -251,9 +251,9 @@ export default function NoteEditor({
                <div style={{ position: 'absolute', bottom: '100%', left: '50%', transform: 'translateX(-50%)', paddingBottom: '8px', zIndex: 50 }}>
                  <div style={{ background: '#18181b', border: '1px solid var(--border-secondary, #27272a)', borderRadius: '8px', padding: '4px', display: 'flex', flexDirection: 'column', gap: '2px', minWidth: '160px', boxShadow: '0 10px 25px rgba(0,0,0,0.5)', maxHeight: '300px', overflowY: 'auto' }}>
                    <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-muted, #71717a)', padding: '4px 8px', textTransform: 'uppercase' }}>Pin to page</div>
-                   {(NAV_ITEMS as any).flatMap((s: any) => s.items as { name: string, href: string, icon: string }[])
-                     .filter(page => !['/notes', '/settings', '/risk-calculator', '/import', '/screenshots'].includes(page.href))
-                     .map(page => (
+                   {(NAV_ITEMS.flatMap(s => (s as any).items) as { name: string; href: string; icon: string }[])
+                      .filter((page: { name: string; href: string; icon: string }) => !['/notes', '/settings', '/risk-calculator', '/import', '/screenshots'].includes(page.href))
+                      .map((page: { name: string; href: string; icon: string }) => (
                      <button 
                        key={page.href}
                        style={{ background: url === page.href ? 'var(--accent-primary-light, rgba(99,102,241,0.15))' : 'transparent', border: 'none', color: url === page.href ? 'var(--text-primary)' : 'var(--text-secondary, #a1a1aa)', padding: '6px 8px', textAlign: 'left', borderRadius: '4px', fontSize: '12px', cursor: 'pointer', transition: 'background 0.15s', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}

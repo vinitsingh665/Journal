@@ -11,6 +11,7 @@ interface NoteStub {
   isPinned: boolean;
   updatedAt: string;
   tradeId: string | null;
+  url: string | null;
   content: any;
   trade: { symbol: string } | null;
 }
