@@ -32,6 +32,19 @@ interface ChartData {
   symbol: string;
   candles: Candle[];
   currentPrice: number | null;
+  interval: string;
+}
+
+/** Pick the chart interval and range so the entry candle is always in view. */
+function getChartParams(entryTime: string): { range: string; interval: string } {
+  const holdingDays = (Date.now() - new Date(entryTime).getTime()) / (1000 * 60 * 60 * 24);
+  if (holdingDays < 30) {
+    return { range: "1mo", interval: "1d" };   // < 30 days  → daily candles
+  } else if (holdingDays < 210) {
+    return { range: "6mo", interval: "1wk" };  // 30 d – 7 mo → weekly candles
+  } else {
+    return { range: "2y",  interval: "1mo" };  // > 7 months → monthly candles
+  }
 }
 
 export default function OpenPositions({ positions }: { positions: Position[] }) {
@@ -85,10 +98,11 @@ export default function OpenPositions({ positions }: { positions: Position[] }) 
 
       const promises = uniquePositions.map(async (pos) => {
         try {
-          const res = await fetch(`/api/chart?symbol=${pos.symbol}&exchange=${pos.exchange}&range=1mo&interval=1d`);
+          const { range, interval } = getChartParams(pos.entryTime);
+          const res = await fetch(`/api/chart?symbol=${pos.symbol}&exchange=${pos.exchange}&range=${range}&interval=${interval}`);
           if (res.ok) {
             const data = await res.json();
-            newMap.set(pos.symbol, data);
+            newMap.set(pos.symbol, { ...data, interval });
           }
         } catch {
           // silently fail
@@ -179,12 +193,13 @@ export default function OpenPositions({ positions }: { positions: Position[] }) 
               {/* Mini Candlestick Chart */}
               {chartData && chartData.candles.length > 0 ? (
                 <div style={{ margin: "8px -8px 0 -8px" }}>
-                  <MiniCandleChart
+                                <MiniCandleChart
                     candles={chartData.candles}
                     entryPrice={pos.avgEntryPrice}
                     entryTime={new Date(pos.entryTime).getTime()}
                     currentPrice={currentPrice || chartData.currentPrice || undefined}
                     height={120}
+                    interval={chartData.interval}
                   />
                 </div>
               ) : (

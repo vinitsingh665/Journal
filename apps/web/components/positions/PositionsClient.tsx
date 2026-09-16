@@ -32,6 +32,18 @@ interface ChartData {
   candles: any[]; // using for sparkline closes
 }
 
+/** Pick the chart interval and range so the entry candle is always in view. */
+function getChartParams(entryTime: string): { range: string; interval: string } {
+  const holdingDays = (Date.now() - new Date(entryTime).getTime()) / (1000 * 60 * 60 * 24);
+  if (holdingDays < 30) {
+    return { range: "1mo", interval: "1d" };   // < 30 days  → daily candles
+  } else if (holdingDays < 210) {
+    return { range: "6mo", interval: "1wk" };  // 30 d – 7 mo → weekly candles
+  } else {
+    return { range: "2y",  interval: "1mo" };  // > 7 months → monthly candles
+  }
+}
+
 export default function PositionsClient({ initialPositions, capital = 1000000, isShared }: { initialPositions: TradeData[], capital?: number, isShared?: boolean }) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("All");
@@ -84,7 +96,8 @@ export default function PositionsClient({ initialPositions, capital = 1000000, i
 
       const promises = uniquePositions.map(async (pos) => {
         try {
-          const res = await fetch(`/api/chart?symbol=${pos.symbol}&exchange=${pos.exchange}&range=1mo&interval=1d`);
+          const { range, interval } = getChartParams(pos.entryTime);
+          const res = await fetch(`/api/chart?symbol=${pos.symbol}&exchange=${pos.exchange}&range=${range}&interval=${interval}`);
           if (res.ok) {
             const data = await res.json();
             // Map closes for the sparkline

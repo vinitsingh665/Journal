@@ -18,7 +18,14 @@ interface MiniCandleChartProps {
   exitTime?: number;  // epoch ms — to place exit arrow (if closed)
   currentPrice?: number;
   height?: number;
+  interval?: string;  // e.g. "1d", "1wk", "1mo" — shown as a badge on the chart
 }
+
+const INTERVAL_LABEL: Record<string, string> = {
+  "1d":  "1D",
+  "1wk": "1W",
+  "1mo": "1M",
+};
 
 export default function MiniCandleChart({
   candles,
@@ -27,7 +34,9 @@ export default function MiniCandleChart({
   exitTime,
   currentPrice,
   height = 120,
+  interval,
 }: MiniCandleChartProps) {
+  const intervalLabel = interval ? (INTERVAL_LABEL[interval] ?? interval.toUpperCase()) : null;
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
@@ -238,12 +247,32 @@ export default function MiniCandleChart({
   }, [candles, entryPrice, entryTime, exitTime, currentPrice, containerWidth, height]);
 
   return (
-    <div ref={containerRef} style={{ width: "100%", height: `${height}px` }}>
+    <div ref={containerRef} style={{ position: "relative", width: "100%", height: `${height}px` }}>
       {containerWidth > 0 && (
         <canvas
           ref={canvasRef}
           style={{ display: "block" }}
         />
+      )}
+      {intervalLabel && (
+        <span
+          style={{
+            position: "absolute",
+            top: 4,
+            left: 8,
+            fontSize: 9,
+            fontWeight: 700,
+            letterSpacing: "0.06em",
+            color: "var(--text-muted)",
+            background: "var(--bg-card, rgba(0,0,0,0.35))",
+            padding: "1px 4px",
+            borderRadius: 3,
+            pointerEvents: "none",
+            userSelect: "none",
+          }}
+        >
+          {intervalLabel}
+        </span>
       )}
     </div>
   );

@@ -39,6 +39,18 @@ interface ChartData {
   currentPrice: number | null;
 }
 
+/** Pick the chart interval and range so the entry candle is always in view. */
+function getChartParams(entryTime: string): { range: string; interval: string } {
+  const holdingDays = (Date.now() - new Date(entryTime).getTime()) / (1000 * 60 * 60 * 24);
+  if (holdingDays < 30) {
+    return { range: "1mo", interval: "1d" };   // < 30 days  → daily candles
+  } else if (holdingDays < 210) {
+    return { range: "6mo", interval: "1wk" };  // 30 d – 7 mo → weekly candles
+  } else {
+    return { range: "2y",  interval: "1mo" };  // > 7 months → monthly candles
+  }
+}
+
 function useLiveHoldingPeriod(entryTime: string | undefined, initialMs: number | null | undefined) {
   const [ms, setMs] = useState(initialMs ?? null);
 
@@ -108,6 +120,7 @@ export default function TradesList({
   const [selectedTradeId, setSelectedTradeId] = useState<string | null>(null);
   const [chartData, setChartData] = useState<ChartData | null>(null);
   const [chartLoading, setChartLoading] = useState(false);
+  const [chartInterval, setChartInterval] = useState<string>("1d");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [deleting, setDeleting] = useState(false);
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
@@ -215,17 +228,19 @@ export default function TradesList({
 
   // Fetch chart data when a trade is selected
   useEffect(() => {
-    if (!selectedTrade) { setChartData(null); return; }
+    if (!selectedTrade) { setChartData(null); setChartInterval("1d"); return; }
 
     const fetchChart = async () => {
       setChartLoading(true);
       try {
+        const { range, interval } = getChartParams(selectedTrade.entryTime);
         const res = await fetch(
-          `/api/chart?symbol=${selectedTrade.symbol}&exchange=${selectedTrade.exchange}&range=1mo&interval=1d`
+          `/api/chart?symbol=${selectedTrade.symbol}&exchange=${selectedTrade.exchange}&range=${range}&interval=${interval}`
         );
         if (res.ok) {
           const data = await res.json();
           setChartData(data);
+          setChartInterval(interval);
         }
       } catch { /* silent */ }
       finally { setChartLoading(false); }
@@ -795,6 +810,7 @@ export default function TradesList({
                     exitTime={selectedTrade.exitTime ? new Date(selectedTrade.exitTime).getTime() : undefined}
                     currentPrice={chartData.currentPrice || undefined}
                     height={160}
+                    interval={chartInterval}
                   />
                 ) : (
                   <div style={{ height: 140, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-muted)", fontSize: "var(--text-sm)" }}>
