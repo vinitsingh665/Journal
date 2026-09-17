@@ -95,6 +95,8 @@ export default function StickyNoteModal({ open, onClose, existingNote }: Props) 
     isDragging.current = true;
     dragStart.current = { x: e.clientX - position.x, y: e.clientY - position.y };
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    e.preventDefault();
+    e.stopPropagation();
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
@@ -239,7 +241,9 @@ export default function StickyNoteModal({ open, onClose, existingNote }: Props) 
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
-        style={{ display: "flex", flexDirection: "column", height: "100%" }}
+        onDoubleClick={(e) => e.preventDefault()}
+        onContextMenu={(e) => e.preventDefault()}
+        style={{ display: "flex", flexDirection: "column", height: "100%", touchAction: "none", userSelect: "none" }}
       >
         {/* Seamless Header */}
         <div className="nm-sticky-header" style={{ cursor: "move" }}>

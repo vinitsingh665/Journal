@@ -1,5 +1,20 @@
 /* --- NOTES PAGE REDESIGN -------------------------------------------------------- */
 
+/* Mobile/Touch: Prevent double-tap zoom and text selection on sticky notes */
+.pinned-note-minimized,
+.nm-sticky-modal,
+.nm-sticky-header {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+/* Sticky note editor area should allow normal text interaction (no touch-action none) */
+.nm-sticky-editor-content {
+  touch-action: pan-y;
+}
+
+
+
 .notes-page-root {
   display: flex;
   flex-direction: column;

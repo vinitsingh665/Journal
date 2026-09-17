@@ -97,6 +97,7 @@ export default function PinnedStickyNote({ note, onUpdate }: PinnedNoteProps) {
     clickStartPos.current = { x: e.clientX, y: e.clientY };
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
     e.preventDefault();
+    e.stopPropagation();
   };
 
   const handleResizePointerDown = (e: React.PointerEvent) => {
@@ -205,6 +206,8 @@ export default function PinnedStickyNote({ note, onUpdate }: PinnedNoteProps) {
         onPointerCancel={handlePointerUp}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
+        onDoubleClick={(e) => e.preventDefault()}
+        onContextMenu={(e) => e.preventDefault()}
         style={{
           position: "fixed",
           left: position.x,
@@ -221,7 +224,10 @@ export default function PinnedStickyNote({ note, onUpdate }: PinnedNoteProps) {
           justifyContent: "center",
           border: `1px solid ${borderColor}`,
           padding: isExpanded ? "8px" : "0",
-          flexDirection: "column"
+          flexDirection: "column",
+          touchAction: "none",
+          userSelect: "none",
+          WebkitUserSelect: "none"
         }}
         onClick={(e) => {
           if ((e.target as HTMLElement).closest("button, input, label, .nm-custom-checkbox")) return;
