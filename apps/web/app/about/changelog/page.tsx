@@ -1,565 +1,681 @@
 "use client";
 
-import React, { useState } from "react";
-
-// Types
-type TagType = "NEW" | "IMPROVED" | "FIXED";
-
-interface ChangelogItem {
-  tag: TagType;
-  text: string;
-}
-
-interface Release {
-  version: string;
-  date: string;
-  title: string;
-  color: string;
-  indent: number;
-  items: ChangelogItem[];
-}
-
-const releases: Release[] = [
-  {
-    version: "v1.5.0",
-    date: "SEP 16, 2026",
-    title: "Introducing Premium Sticky Notes",
-    color: "#3b82f6", // Blue
-    indent: 0,
-    items: [
-      { tag: "NEW", text: "Added a brand new Sticky Notes feature with a premium, draggable interface" },
-      { tag: "NEW", text: "Sticky Notes can be dynamically pinned to any specific page across the platform" },
-      { tag: "NEW", text: "Rich text formatting support including custom text colors, background colors, and typography" },
-      { tag: "NEW", text: "Real-time synchronization ensures pinned notes are instantly updated" }
-    ]
-  },
-  {
-    version: "v1.4.0",
-    date: "AUG 30, 2026",
-    title: "Trade Journal Upgrades & Safety Checks",
-    color: "#ef4444", // Red
-    indent: 1,
-    items: [
-      { tag: "NEW", text: "Added 'Deleted' status tracking for archived trades so they show up distinctly in your journal with custom badges" },
-      { tag: "IMPROVED", text: "The Trade Journey timeline now seamlessly connects deleted events and displays the date, time, and live price upon deletion" },
-      { tag: "FIXED", text: "Added strict frontend and backend validation to prevent scaling out (exiting) more shares than you currently hold in a trade" },
-      { tag: "FIXED", text: "Fixed an issue allowing fractional decimal quantities to be entered for non-crypto assets" }
-    ]
-  },
-  {
-    version: "v1.3.0",
-    date: "AUG 28, 2026",
-    title: "Smarter AI Assistant",
-    color: "#10b981", // Green
-    indent: 2,
-    items: [
-      { tag: "NEW", text: "The AI Assistant can now delete trades directly via natural language commands" },
-      { tag: "IMPROVED", text: "Refactored the AI command router to simplify intent processing and execution logic for better reliability" },
-      { tag: "FIXED", text: "Explicitly instructed the AI not to hallucinate 'Exit Trade' buttons, and correctly prompt for missing symbols instead of closing chats" }
-    ]
-  },
-  {
-    version: "v1.2.0",
-    date: "AUG 26, 2026",
-    title: "Global Currency & Chart Stability",
-    color: "#a855f7", // Purple
-    indent: 1,
-    items: [
-      { tag: "FIXED", text: "Fixed currency conversion (USD/INR) across the Calendar, Analytics, Trades, Journal, Dashboard P&L, and Chart formatting" },
-      { tag: "FIXED", text: "Fixed an edge case bug where missing price candles affected the Y-axis scale and chart rendering" }
-    ]
-  },
-  {
-    version: "v1.1.0",
-    date: "AUG 24, 2026",
-    title: "Trading Engine Foundations",
-    color: "#f59e0b", // Orange
-    indent: 0,
-    items: [
-      { tag: "NEW", text: "Added initial support for scaling in and out of positions via executions API" },
-      { tag: "IMPROVED", text: "Enhanced accuracy of R-Multiple and P&L calculations on partially closed trades" }
-    ]
-  },
-  {
-    version: "v1.0.0",
-    date: "AUG 22, 2026",
-    title: "The Beginning",
-    color: "#6b7280", // Gray
-    indent: 1,
-    items: [
-      { tag: "NEW", text: "Initial platform launch! Started building the most advanced AI-powered trading journal." }
-    ]
-  }
-];
+import React from "react";
 
 export default function ChangelogPage() {
   return (
-    <div className="changelog-root" style={{
-      width: "100vw",
-      position: "relative",
-      left: "50%",
-      transform: "translateX(-50%)",
-      marginTop: "calc(-1 * var(--space-8))", // Overcome layout padding
-      minHeight: "100vh",
-      backgroundColor: "#090a0f", // Very dark matching image
-      backgroundImage: `
-        linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px)
-      `,
-      backgroundSize: "80px 80px",
-      display: "flex",
-      color: "#fff",
-      overflowX: "hidden"
-    }}>
-      
-      {/* Background Ambient Glows */}
-      <div style={{ position: "fixed", top: "20%", left: "30%", width: "50vw", height: "50vw", background: "radial-gradient(circle, rgba(59,130,246,0.03) 0%, transparent 60%)", pointerEvents: "none", zIndex: 0 }} />
-      <div style={{ position: "fixed", bottom: "10%", right: "10%", width: "40vw", height: "40vw", background: "radial-gradient(circle, rgba(239,68,68,0.03) 0%, transparent 60%)", pointerEvents: "none", zIndex: 0 }} />
-
-      {/* Left Panel */}
-      <div className="changelog-left-panel" style={{
-        width: "40%",
-        minWidth: "350px",
-        padding: "160px 40px 80px 80px", // Align top padding with right side
-        position: "sticky",
-        top: 0,
-        height: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        zIndex: 10
-      }}>
-        <div style={{
-          fontSize: "11px",
-          fontWeight: 700,
-          letterSpacing: "3px",
-          textTransform: "uppercase",
-          color: "#94a3b8",
-          marginBottom: "16px"
-        }}>
-          Product Updates
-        </div>
-        
-        <h1 style={{ 
-          fontSize: "clamp(3.5rem, 6vw, 5rem)", 
-          fontWeight: 700, 
-          letterSpacing: "-2px",
-          lineHeight: 1.1,
-          marginBottom: "24px"
-        }}>
-          What's <span style={{ color: "#64748b" }}>New</span>
-        </h1>
-        
-        <p style={{ 
-          color: "#94a3b8", 
-          fontSize: "1.125rem", 
-          lineHeight: 1.6,
-          maxWidth: "340px",
-          marginBottom: "60px"
-        }}>
-          Small changes. A better experience.<br />
-          Here's what we've been working on.
-        </p>
-
-        <div style={{ display: "flex", alignItems: "center", gap: "16px", color: "#94a3b8", fontSize: "0.875rem" }}>
-          <div style={{ 
-            width: "36px", height: "36px", 
-            borderRadius: "50%", 
-            border: "1px solid rgba(255,255,255,0.1)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            background: "rgba(255,255,255,0.02)"
-          }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="12" y1="5" x2="12" y2="19"></line>
-              <polyline points="19 12 12 19 5 12"></polyline>
-            </svg>
-          </div>
-          Scroll to explore
-        </div>
-
-        <div className="changelog-footer-nav" style={{
-          marginTop: "auto",
-          display: "flex",
-          flexDirection: "column",
-          gap: "12px",
-          fontSize: "11px",
-          letterSpacing: "3px",
-          fontWeight: 600,
-          color: "#475569"
-        }}>
-          <div>BUILD</div>
-          <div>CREATE</div>
-          <div>IMPROVE</div>
-          <div>REPEAT</div>
-          <div style={{ width: "24px", height: "1px", background: "#475569", marginTop: "8px" }} />
-        </div>
-      </div>
-
-      {/* Right Panel - Timeline */}
-      <div className="changelog-right-panel" style={{
-        flex: 1,
-        padding: "160px 80px 140px 0", // Ensure top aligns with left panel
-        position: "relative",
-        zIndex: 1
-      }}>
-        {releases.map((release, index) => {
-          const prevRelease = index > 0 ? releases[index - 1] : null;
-          return (
-            <TimelineNode 
-              key={release.version} 
-              release={release} 
-              prevRelease={prevRelease}
-              isFirst={index === 0}
-              isLast={index === releases.length - 1}
-            />
-          );
-        })}
-        
-        {/* "More to come" node */}
-        <TimelineNode 
-          release={{
-            version: "",
-            date: "More to come",
-            title: "We're just getting started.",
-            color: "#475569",
-            indent: releases[releases.length - 1].indent,
-            items: []
-          }} 
-          prevRelease={releases[releases.length - 1]}
-          isFirst={false}
-          isLast={true}
-          isEndNode={true}
-        />
-      </div>
-      
+    <>
       <style>{`
-        .timeline-card {
-          transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        /* =========================================================
+           BREAKOUT OF LAYOUT CONTAINER
+        ========================================================= */
+        /* Force dark background + grid pattern across the FULL page including footer */
+        html {
+          overflow-x: hidden;
+          max-width: 100%;
         }
-        .timeline-card:hover {
-          transform: translateY(-4px);
+
+        body {
+          overflow-x: hidden;
+          max-width: 100%;
+          background-color: #0d0e12 !important;
+          background-image:
+            linear-gradient(rgba(255,255,255,.028) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,.028) 1px, transparent 1px) !important;
+          background-size: 32px 32px !important;
         }
-        @media (max-width: 1024px) {
-          .changelog-root {
-             flex-direction: column !important;
+
+        /* Make the layout wrapper transparent so body grid shows through everywhere */
+        body > div {
+          background: transparent !important;
+        }
+
+        /* Style the layout footer to match dark theme */
+        footer {
+          background: transparent !important;
+          border-color: rgba(255,255,255,0.06) !important;
+        }
+        footer p {
+          color: #4c4e57 !important;
+        }
+
+        .cl-wrapper {
+          width: 100vw;
+          position: relative;
+          left: 50%;
+          transform: translateX(-50%);
+          margin-top: calc(-1 * var(--space-8, 32px));
+          margin-bottom: calc(-1 * var(--space-8, 32px));
+          overflow: hidden;
+        }
+
+        /* =========================================================
+           RESET
+        ========================================================= */
+        .cl-page * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+
+        /* =========================================================
+           PAGE
+        ========================================================= */
+        .cl-page {
+          position: relative;
+          width: 100%;
+          min-height: 100vh;
+          overflow: hidden;
+          font-family: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+          /* Background handled by body; only keep the color glows here */
+          background:
+            radial-gradient(ellipse 600px 500px at 38% 78%, rgba(92, 26, 56, .24), transparent 72%),
+            radial-gradient(ellipse 450px 400px at 76% 18%, rgba(34, 44, 70, .10), transparent 70%),
+            transparent;
+          color: #fff;
+        }
+
+        /* =========================================================
+           CANVAS — 1536 × 1024 reference composition
+        ========================================================= */
+        .cl-canvas {
+          position: relative;
+          width: 1536px;
+          height: 1850px;
+          margin: 0 auto;
+          transform-origin: top center;
+        }
+
+        /* =========================================================
+           GRID
+        ========================================================= */
+        /* Radial gradient overlay — color tinting only, not the grid */
+        .cl-grid {
+          position: absolute;
+          inset: 0;
+          background:
+            radial-gradient(ellipse 600px 500px at 38% 78%, rgba(92, 26, 56, .22), transparent 72%),
+            radial-gradient(ellipse 450px 400px at 76% 18%, rgba(34, 44, 70, .10), transparent 70%);
+          pointer-events: none;
+          z-index: 0;
+        }
+
+        /* =========================================================
+           HERO
+        ========================================================= */
+        .cl-hero {
+          position: absolute;
+          left: 103px;
+          top: 250px;
+          width: 470px;
+          z-index: 15;
+        }
+
+        .cl-eyebrow {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          margin-bottom: 20px;
+          color: #d4d4d8;
+          font-size: 10px;
+          letter-spacing: 4px;
+        }
+
+        .cl-eyebrow::after {
+          content: "";
+          width: 43px;
+          height: 1px;
+          background: #777983;
+        }
+
+        .cl-hero h1 {
+          font-size: 74px;
+          line-height: .98;
+          letter-spacing: -4px;
+          font-weight: 600;
+          margin-bottom: 23px;
+          white-space: nowrap;
+          background: linear-gradient(90deg, #ffffff 0%, #ffffff 49%, #767887 88%);
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
+        }
+
+        .cl-hero-description {
+          width: 410px;
+          color: #777a86;
+          font-size: 18px;
+          line-height: 1.65;
+        }
+
+        .cl-scroll {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          margin-top: 62px;
+          color: #9799a2;
+          font-size: 12px;
+        }
+
+        .cl-scroll-button {
+          width: 51px;
+          height: 51px;
+          border-radius: 50%;
+          border: 1px solid rgba(255,255,255,.12);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 19px;
+        }
+
+        /* =========================================================
+           TIMELINE SVG CONTAINER
+        ========================================================= */
+        .cl-timeline {
+          position: absolute;
+          inset: 0;
+          width: 1536px;
+          height: 1850px;
+          z-index: 5;
+          pointer-events: none;
+        }
+
+        .cl-timeline svg {
+          width: 1536px;
+          height: 1850px;
+          overflow: visible;
+        }
+
+        .cl-line {
+          fill: none;
+          stroke: rgba(157,158,171,.52);
+          stroke-width: 2;
+          stroke-linecap: round;
+          stroke-linejoin: round;
+        }
+
+        /* =========================================================
+           DATES
+        ========================================================= */
+        .cl-date {
+          position: absolute;
+          z-index: 20;
+          color: #dedee3;
+          font-size: 10px;
+          letter-spacing: 4px;
+          white-space: nowrap;
+        }
+        .cl-date-one   { left: 549px; top: 133px; }
+        .cl-date-two   { left: 712px; top: 387px; }
+        .cl-date-three { left: 893px; top: 696px; }
+        .cl-date-four  { left: 549px; top: 941px; }
+        .cl-date-five  { left: 712px; top: 1195px; }
+        .cl-date-six   { left: 893px; top: 1504px; }
+
+        /* =========================================================
+           CARDS
+        ========================================================= */
+        .cl-card {
+          position: absolute;
+          z-index: 15;
+          border-radius: 24px;
+          background: linear-gradient(145deg, rgba(255,255,255,.045), rgba(255,255,255,.012));
+          border: 1px solid rgba(255,255,255,.115);
+          box-shadow:
+            inset 0 1px rgba(255,255,255,.025),
+            0 20px 60px rgba(0,0,0,.14);
+          backdrop-filter: blur(18px);
+          overflow-y: auto;
+          overflow-x: hidden;
+          transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.4s ease;
+        }
+
+        .cl-card-one:hover, .cl-card-four:hover {
+          border-color: rgba(63, 120, 219, 0.4);
+          box-shadow: inset 0 1px rgba(255,255,255,.025), 0 20px 60px rgba(0,0,0,.2), 0 0 30px rgba(63, 120, 219, 0.15);
+        }
+        
+        .cl-card-two:hover, .cl-card-five:hover {
+          border-color: rgba(224, 48, 101, 0.4);
+          box-shadow: inset 0 1px rgba(255,255,255,.025), 0 20px 60px rgba(0,0,0,.2), 0 0 30px rgba(224, 48, 101, 0.15);
+        }
+
+        .cl-card-three:hover, .cl-card-six:hover {
+          border-color: rgba(27, 176, 152, 0.4);
+          box-shadow: inset 0 1px rgba(255,255,255,.025), 0 20px 60px rgba(0,0,0,.2), 0 0 30px rgba(27, 176, 152, 0.15);
+        }
+
+        /* Custom Scrollbar for Cards */
+        .cl-card::-webkit-scrollbar {
+          width: 12px;
+        }
+        .cl-card::-webkit-scrollbar-track {
+          background: transparent;
+          margin-top: 20px;
+          margin-bottom: 20px;
+        }
+        .cl-card::-webkit-scrollbar-thumb {
+          background-color: transparent;
+          border: 4px solid transparent;
+          background-clip: content-box;
+          border-radius: 10px;
+        }
+        .cl-card:hover::-webkit-scrollbar-thumb {
+          background-color: rgba(255, 255, 255, 0.1);
+        }
+        .cl-card::-webkit-scrollbar-thumb:hover {
+          background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .cl-card-one   { left: 921px;  top: 119px; width: 454px; height: 244px; padding: 19px 30px; }
+        .cl-card-two   { left: 1025px; top: 388px; width: 415px; height: 240px; padding: 19px 30px; }
+        .cl-card-three { left: 1086px; top: 653px; width: 354px; height: 235px; padding: 19px 29px; }
+        .cl-card-four  { left: 921px;  top: 927px; width: 454px; height: 244px; padding: 19px 30px; }
+        .cl-card-five  { left: 1025px; top: 1196px; width: 415px; height: 240px; padding: 19px 30px; }
+        .cl-card-six   { left: 1086px; top: 1461px; width: 354px; height: 235px; padding: 19px 29px; }
+
+        /* =========================================================
+           VERSION PILLS
+        ========================================================= */
+        .cl-version {
+          display: inline-flex;
+          align-items: center;
+          height: 30px;
+          padding: 0 14px;
+          border-radius: 18px;
+          font-size: 12px;
+          font-weight: 600;
+          margin-bottom: 9px;
+        }
+
+        .cl-version-blue  { color: #d9e7ff; background: rgba(61,105,174,.31); border: 1px solid rgba(91,143,222,.22); }
+        .cl-version-pink  { color: #ffd4e2; background: rgba(171,31,77,.35);  border: 1px solid rgba(224,48,101,.2); }
+        .cl-version-green { color: #cafff2; background: rgba(14,130,111,.34); border: 1px solid rgba(27,176,152,.2); }
+
+        /* =========================================================
+           CARD CONTENT
+        ========================================================= */
+        .cl-card h2 {
+          color: #f3f3f5;
+          font-size: 20px;
+          line-height: 1.2;
+          letter-spacing: -.5px;
+          font-weight: 500;
+          margin-bottom: 9px;
+        }
+
+        .cl-card p {
+          color: #7d7f88;
+          font-size: 13px;
+          line-height: 1.55;
+          margin-bottom: 13px;
+        }
+
+        /* =========================================================
+           FEATURES
+        ========================================================= */
+        .cl-features {
+          list-style: none;
+          display: flex;
+          flex-direction: column;
+          gap: 7px;
+        }
+
+        .cl-features li {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          color: #c9cacf;
+          font-size: 12px;
+        }
+
+        .cl-feature-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          flex-shrink: 0;
+        }
+
+        .cl-blue-dot  { background: #6ba0ff; box-shadow: 0 0 7px #6ba0ff; }
+        .cl-pink-dot  { background: #ed4b82; box-shadow: 0 0 7px #ed4b82; }
+        .cl-green-dot { background: #3dd4bb; box-shadow: 0 0 7px #3dd4bb; }
+
+        /* =========================================================
+           DECORATIVE TEXT
+        ========================================================= */
+        .cl-decorative-text {
+          position: absolute;
+          left: 103px;
+          top: 1720px;
+          z-index: 10;
+          display: flex;
+          flex-direction: column;
+          gap: 9px;
+          color: #4c4e57;
+          font-size: 10px;
+          letter-spacing: 4px;
+        }
+
+        .cl-decorative-text::after {
+          content: "";
+          width: 26px;
+          height: 1px;
+          margin-top: 10px;
+          background: #555761;
+        }
+
+        /* =========================================================
+           MORE TO COME
+        ========================================================= */
+        .cl-more {
+          position: absolute;
+          left: 691px;
+          top: 1780px;
+          z-index: 15;
+          display: flex;
+          align-items: center;
+          gap: 14px;
+        }
+
+        .cl-more-pill {
+          width: 60px;
+          height: 32px;
+          border-radius: 18px;
+          border: 1px solid rgba(255,255,255,.10);
+          background: rgba(255,255,255,.025);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 5px;
+        }
+
+        .cl-more-pill span {
+          width: 3px;
+          height: 3px;
+          border-radius: 50%;
+          background: #e1e1e4;
+        }
+
+        .cl-more-copy { display: flex; flex-direction: column; gap: 5px; }
+        .cl-more-title { color: #747680; font-size: 14px; }
+        .cl-more-description { color: #555761; font-size: 12px; }
+
+        /* =========================================================
+           RESPONSIVE SCALING
+        ========================================================= */
+        @media (max-width: 1536px) {
+          .cl-canvas {
+            transform: scale(calc(100vw / 1536));
+            margin-left: 0;
+            margin-right: 0;
           }
-          .changelog-left-panel {
-             width: 100% !important;
-             height: auto !important;
-             position: relative !important;
-             padding: 60px 40px !important;
-          }
-          .changelog-footer-nav {
-             display: none !important;
-          }
-          .changelog-right-panel {
-             padding: 40px 20px 80px 20px !important;
-             overflow: hidden;
+          .cl-page {
+            /* Canvas height × scale + some buffer for the fixed layout header */
+            min-height: calc((1850px * (100vw / 1536)) + 100px);
           }
         }
-        @media (max-width: 600px) {
-          .changelog-card-content {
-             padding: 24px !important;
+
+        @media (max-width: 700px) {
+          .cl-canvas { transform: none; width: 100%; height: auto; padding: 30px 20px; }
+          .cl-grid, .cl-timeline, .cl-date, .cl-decorative-text, .cl-more { display: none; }
+          .cl-hero { position: relative; left: auto; top: auto; width: 100%; margin-bottom: 60px; }
+          .cl-hero h1 { font-size: 58px; white-space: normal; }
+          .cl-hero-description { width: 100%; }
+          .cl-card, .cl-card-one, .cl-card-two, .cl-card-three, .cl-card-four, .cl-card-five, .cl-card-six {
+            position: relative; left: auto; top: auto;
+            width: 100%; height: auto; min-height: 220px; margin-bottom: 20px;
           }
         }
       `}</style>
-    </div>
-  );
-}
 
-function TimelineNode({ 
-  release, 
-  prevRelease, 
-  isFirst, 
-  isLast,
-  isEndNode = false
-}: { 
-  release: Release; 
-  prevRelease: Release | null; 
-  isFirst: boolean;
-  isLast: boolean;
-  isEndNode?: boolean;
-}) {
-  // Layout constants
-  const BASE_X = 60;        // x position of indent=0 nodes
-  const INDENT_STEP = 140;  // px per indent level
+      <div className="cl-wrapper">
+        <div className="cl-page">
+          <div className="cl-grid" />
 
-  const currentX = BASE_X + release.indent * INDENT_STEP;
-  const prevX = prevRelease ? BASE_X + prevRelease.indent * INDENT_STEP : currentX;
+          <div className="cl-canvas">
 
-  // The dot sits at this Y from the top of its row
-  const DOT_Y = 72;
-  // Node circle radius (matches the big circle in the image ~32px radius)
-  const NODE_R = 32;
-  // Curve corner radius for the S-curves
-  const CURVE_R = 40;
-  // Gap between node edge and card left edge
-  const CARD_GAP = 60;
-
-  // Line style: very thin, muted
-  const LINE_COLOR = "rgba(255,255,255,0.18)";
-  const LINE_WIDTH = "2";
-
-  // ── SVG path logic ─────────────────────────────────────────────
-  // The incoming path draws the connector FROM the previous node
-  // down to this node. Strategy:
-  //   - Straight vertical drop from prevX at y=0 down to the curve start
-  //   - Bezier/quadratic curve turning horizontally
-  //   - Straight horizontal run to currentX at DOT_Y
-  let incomingPath = "";
-
-  if (isFirst) {
-    // First node: draw a long horizontal line from left edge to node center
-    incomingPath = `M -400 ${DOT_Y} L ${currentX - NODE_R} ${DOT_Y}`;
-  } else if (prevX === currentX) {
-    // Same column: straight vertical drop
-    incomingPath = `M ${prevX} 0 L ${currentX} ${DOT_Y - NODE_R}`;
-  } else if (prevX < currentX) {
-    // Moving RIGHT: drop down, curve right
-    incomingPath = `M ${prevX} 0 L ${prevX} ${DOT_Y - CURVE_R} Q ${prevX} ${DOT_Y} ${prevX + CURVE_R} ${DOT_Y} L ${currentX - NODE_R} ${DOT_Y}`;
-  } else {
-    // Moving LEFT: drop down, curve left
-    incomingPath = `M ${prevX} 0 L ${prevX} ${DOT_Y - CURVE_R} Q ${prevX} ${DOT_Y} ${prevX - CURVE_R} ${DOT_Y} L ${currentX + NODE_R} ${DOT_Y}`;
-  }
-
-  // Short horizontal connector from right edge of node to card
-  const connectorX1 = currentX + NODE_R;
-  const connectorX2 = currentX + NODE_R + CARD_GAP;
-
-  return (
-    <div style={{ position: "relative", minHeight: isEndNode ? "100px" : "300px" }}>
-
-      {/* ── SVG lines ── */}
-      <svg
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          overflow: "visible",
-          pointerEvents: "none",
-          zIndex: 0,
-        }}
-      >
-        {/* Incoming connector (from previous node down to this node) */}
-        <path d={incomingPath} fill="none" stroke={LINE_COLOR} strokeWidth={LINE_WIDTH} />
-
-        {/* Short horizontal stub: node → card */}
-        {!isEndNode && (
-          <line
-            x1={connectorX1}
-            y1={DOT_Y}
-            x2={connectorX2}
-            y2={DOT_Y}
-            stroke={LINE_COLOR}
-            strokeWidth={LINE_WIDTH}
-          />
-        )}
-
-        {/* Outgoing vertical: from bottom of this node's circle to the bottom of this div.
-            The NEXT node's incomingPath starts at y=0 from the same x, so they connect seamlessly. */}
-        {!isLast && (
-          <line
-            x1={currentX}
-            y1={DOT_Y + NODE_R}
-            x2={currentX}
-            y2="100%"
-            stroke={LINE_COLOR}
-            strokeWidth={LINE_WIDTH}
-          />
-        )}
-      </svg>
-
-      {/* ── Date label (above node) ── */}
-      {!isEndNode && (
-        <div
-          style={{
-            position: "absolute",
-            left: currentX,
-            top: DOT_Y - NODE_R - 8,
-            transform: "translate(-50%, -100%)",
-            fontSize: "11px",
-            fontWeight: 600,
-            letterSpacing: "1.5px",
-            color: "#64748b",
-            whiteSpace: "nowrap",
-            textTransform: "uppercase",
-          }}
-        >
-          {release.date}
-        </div>
-      )}
-
-      {/* ── Node circle ── */}
-      <div
-        style={{
-          position: "absolute",
-          left: currentX,
-          top: DOT_Y,
-          transform: "translate(-50%, -50%)",
-          width: isEndNode ? "40px" : `${NODE_R * 2}px`,
-          height: isEndNode ? "22px" : `${NODE_R * 2}px`,
-          borderRadius: isEndNode ? "11px" : "50%",
-          // Solid dark-blue fill matching the reference image
-          background: isEndNode
-            ? "rgba(30,41,59,0.8)"
-            : `radial-gradient(circle at 40% 35%, rgba(${hexToRgb(release.color)}, 0.55) 0%, rgba(15,23,42,0.95) 70%)`,
-          border: isEndNode
-            ? "1px solid rgba(255,255,255,0.12)"
-            : `1px solid rgba(${hexToRgb(release.color)}, 0.35)`,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          zIndex: 2,
-          boxShadow: isEndNode
-            ? "none"
-            : `0 0 0 6px rgba(${hexToRgb(release.color)}, 0.08), inset 0 1px 0 rgba(255,255,255,0.08)`,
-        }}
-      >
-        {isEndNode ? (
-          <div style={{ display: "flex", gap: "3px" }}>
-            {[0, 1, 2].map((i) => (
-              <div
-                key={i}
-                style={{
-                  width: "4px",
-                  height: "4px",
-                  borderRadius: "50%",
-                  background: "rgba(255,255,255,0.35)",
-                }}
-              />
-            ))}
-          </div>
-        ) : (
-          /* White center dot — exactly like the reference */
-          <div
-            style={{
-              width: "14px",
-              height: "14px",
-              borderRadius: "50%",
-              background: "#ffffff",
-              boxShadow: "0 0 8px rgba(255,255,255,0.9)",
-            }}
-          />
-        )}
-      </div>
-
-      {/* ── Card ── */}
-      <div
-        style={{
-          // Card starts at right edge of node + gap
-          paddingLeft: `${connectorX2}px`,
-          // Vertically center card against the node dot
-          paddingTop: `${DOT_Y - NODE_R}px`,
-          paddingBottom: "40px",
-          boxSizing: "border-box",
-          width: "100%",
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
-        {isEndNode ? (
-          <div style={{ paddingTop: "10px" }}>
-            <div style={{ color: "#64748b", fontSize: "13px", fontWeight: 500 }}>
-              {release.date}
-            </div>
-            <div style={{ color: "#475569", fontSize: "13px", marginTop: "4px" }}>
-              {release.title}
-            </div>
-          </div>
-        ) : (
-          <div
-            className="timeline-card changelog-card-content"
-            style={{
-              background: "rgba(17, 24, 39, 0.6)",
-              border: "1px solid rgba(255,255,255,0.06)",
-              borderTop: `1px solid rgba(${hexToRgb(release.color)}, 0.25)`,
-              borderRadius: "16px",
-              padding: "32px 36px",
-              maxWidth: "460px",
-              backdropFilter: "blur(16px)",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
-            }}
-          >
-            {/* Version pill */}
-            <div
-              style={{
-                display: "inline-block",
-                padding: "4px 12px",
-                borderRadius: "20px",
-                background: `rgba(${hexToRgb(release.color)}, 0.12)`,
-                color: release.color,
-                fontSize: "11px",
-                fontWeight: 700,
-                letterSpacing: "0.5px",
-                marginBottom: "18px",
-                border: `1px solid rgba(${hexToRgb(release.color)}, 0.2)`,
-              }}
-            >
-              {release.version}
-            </div>
-
-            <h3
-              style={{
-                fontSize: "1.4rem",
-                fontWeight: 600,
-                color: "#f1f5f9",
-                marginBottom: "12px",
-                letterSpacing: "-0.3px",
-                lineHeight: 1.3,
-              }}
-            >
-              {release.title}
-            </h3>
-
-            <p
-              style={{
-                color: "#94a3b8",
-                fontSize: "14px",
-                lineHeight: 1.65,
-                marginBottom: "20px",
-              }}
-            >
-              {release.items[0].text}
-            </p>
-
-            {release.items.length > 1 && (
-              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                {release.items.slice(1).map((item, i) => (
-                  <div
-                    key={i}
-                    style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}
-                  >
-                    <div
-                      style={{
-                        width: "6px",
-                        height: "6px",
-                        borderRadius: "50%",
-                        background: release.color,
-                        marginTop: "7px",
-                        flexShrink: 0,
-                        boxShadow: `0 0 6px ${release.color}`,
-                      }}
-                    />
-                    <span style={{ color: "#94a3b8", fontSize: "13.5px", lineHeight: 1.55 }}>
-                      {item.text}
-                    </span>
-                  </div>
-                ))}
+            {/* Hero */}
+            <section className="cl-hero">
+              <div className="cl-eyebrow">PRODUCT UPDATES</div>
+              <h1>What&apos;s New</h1>
+              <p className="cl-hero-description">
+                Small changes. A better experience.<br />
+                Here&apos;s what we&apos;ve been working on.
+              </p>
+              <div className="cl-scroll">
+                <div className="cl-scroll-button">↓</div>
+                <span>Scroll to explore</span>
               </div>
-            )}
+            </section>
+
+            {/* Timeline SVG */}
+            <div className="cl-timeline">
+              <svg viewBox="0 0 1536 1950" preserveAspectRatio="none">
+                <defs>
+                  <radialGradient id="cl-blueNode">
+                    <stop offset="0%" stopColor="#609bff" />
+                    <stop offset="100%" stopColor="#294f89" />
+                  </radialGradient>
+                  <radialGradient id="cl-pinkNode">
+                    <stop offset="0%" stopColor="#ef3b76" />
+                    <stop offset="100%" stopColor="#8d1b48" />
+                  </radialGradient>
+                  <radialGradient id="cl-greenNode">
+                    <stop offset="0%" stopColor="#1cc9aa" />
+                    <stop offset="100%" stopColor="#087766" />
+                  </radialGradient>
+                  <filter id="cl-blueGlow" x="-100%" y="-100%" width="300%" height="300%">
+                    <feGaussianBlur stdDeviation="10" />
+                  </filter>
+                  <filter id="cl-pinkGlow" x="-100%" y="-100%" width="300%" height="300%">
+                    <feGaussianBlur stdDeviation="10" />
+                  </filter>
+                  <filter id="cl-greenGlow" x="-100%" y="-100%" width="300%" height="300%">
+                    <feGaussianBlur stdDeviation="10" />
+                  </filter>
+                </defs>
+
+                {/* Top path: left edge → blue node → card */}
+                <path className="cl-line" d="
+                  M 288 131
+                  H 382
+                  C 417 131, 425 158, 441 180
+                  C 454 198, 473 230, 504 230
+                  H 618
+                  H 921
+                " />
+
+                {/* Blue → Pink (includes horizontal connector to card 2) */}
+                <path className="cl-line" d="
+                  M 618 230
+                  C 667 230, 704 244, 704 286
+                  V 433
+                  C 704 466, 728 483, 783 483
+                  H 1025
+                " />
+
+                {/* Pink → Green */}
+                <path className="cl-line" d="
+                  M 783 483
+                  C 832 483, 859 500, 859 536
+                  V 700
+                  C 859 731, 881 748, 919 748
+                  H 1086
+                " />
+
+                {/* Green → Node 4 (Blue) */}
+                <path className="cl-line" d="
+                  M 919 748
+                  C 919 787, 897 821, 852 821
+                  H 550
+                  C 517 821, 499 844, 499 872
+                  V 980
+                  C 499 1020, 520 1038, 560 1038
+                  H 921
+                " />
+
+                {/* Node 4 → Node 5 (Pink) */}
+                <path className="cl-line" d="
+                  M 618 1038
+                  C 667 1038, 704 1052, 704 1094
+                  V 1241
+                  C 704 1274, 728 1291, 783 1291
+                  H 1025
+                " />
+
+                {/* Node 5 → Node 6 (Green) */}
+                <path className="cl-line" d="
+                  M 783 1291
+                  C 832 1291, 859 1308, 859 1344
+                  V 1508
+                  C 859 1539, 881 1556, 919 1556
+                  H 1086
+                " />
+
+                {/* Node 6 → End node */}
+                <path className="cl-line" d="
+                  M 919 1556
+                  C 919 1595, 897 1629, 852 1629
+                  H 669
+                  C 636 1629, 618 1652, 618 1680
+                  V 1725
+                " />
+
+                {/* Blue node 1 */}
+                <circle cx="618" cy="230" r="43" fill="#3f78db" opacity=".18" filter="url(#cl-blueGlow)" />
+                <circle cx="618" cy="230" r="29" fill="url(#cl-blueNode)"
+                  style={{ filter: "drop-shadow(0 0 9px rgba(63,128,255,.85)) drop-shadow(0 0 23px rgba(63,128,255,.38))" }} />
+                <circle cx="618" cy="230" r="11" fill="#ffffff" />
+
+                {/* Pink node 2 */}
+                <circle cx="783" cy="483" r="43" fill="#e03065" opacity=".14" filter="url(#cl-pinkGlow)" />
+                <circle cx="783" cy="483" r="29" fill="url(#cl-pinkNode)"
+                  style={{ filter: "drop-shadow(0 0 9px rgba(224,48,101,.65)) drop-shadow(0 0 23px rgba(224,48,101,.25))" }} />
+                <circle cx="783" cy="483" r="11" fill="#ffffff" />
+
+                {/* Green node 3 */}
+                <circle cx="919" cy="748" r="43" fill="#1bb098" opacity=".14" filter="url(#cl-greenGlow)" />
+                <circle cx="919" cy="748" r="29" fill="url(#cl-greenNode)"
+                  style={{ filter: "drop-shadow(0 0 9px rgba(27,176,152,.65)) drop-shadow(0 0 23px rgba(27,176,152,.25))" }} />
+                <circle cx="919" cy="748" r="11" fill="#ffffff" />
+
+                {/* Blue node 4 */}
+                <circle cx="618" cy="1038" r="43" fill="#3f78db" opacity=".18" filter="url(#cl-blueGlow)" />
+                <circle cx="618" cy="1038" r="29" fill="url(#cl-blueNode)"
+                  style={{ filter: "drop-shadow(0 0 9px rgba(63,128,255,.85)) drop-shadow(0 0 23px rgba(63,128,255,.38))" }} />
+                <circle cx="618" cy="1038" r="11" fill="#ffffff" />
+
+                {/* Pink node 5 */}
+                <circle cx="783" cy="1291" r="43" fill="#e03065" opacity=".14" filter="url(#cl-pinkGlow)" />
+                <circle cx="783" cy="1291" r="29" fill="url(#cl-pinkNode)"
+                  style={{ filter: "drop-shadow(0 0 9px rgba(224,48,101,.65)) drop-shadow(0 0 23px rgba(224,48,101,.25))" }} />
+                <circle cx="783" cy="1291" r="11" fill="#ffffff" />
+
+                {/* Green node 6 */}
+                <circle cx="919" cy="1556" r="43" fill="#1bb098" opacity=".14" filter="url(#cl-greenGlow)" />
+                <circle cx="919" cy="1556" r="29" fill="url(#cl-greenNode)"
+                  style={{ filter: "drop-shadow(0 0 9px rgba(27,176,152,.65)) drop-shadow(0 0 23px rgba(27,176,152,.25))" }} />
+                <circle cx="919" cy="1556" r="11" fill="#ffffff" />
+
+                {/* End node */}
+                <circle cx="618" cy="1725" r="27" fill="rgba(91,93,108,.24)" />
+                <circle cx="618" cy="1725" r="10" fill="#999caa" />
+              </svg>
+            </div>
+
+            {/* Dates */}
+            <span className="cl-date cl-date-one">SEP 16, 2026</span>
+            <span className="cl-date cl-date-two">AUG 30, 2026</span>
+            <span className="cl-date cl-date-three">AUG 28, 2026</span>
+            <span className="cl-date cl-date-four">AUG 26, 2026</span>
+            <span className="cl-date cl-date-five">AUG 24, 2026</span>
+            <span className="cl-date cl-date-six">AUG 22, 2026</span>
+
+            {/* Card 1 — v1.5.0 */}
+            <article className="cl-card cl-card-one">
+              <span className="cl-version cl-version-blue">v1.5.0</span>
+              <h2>Introducing Premium Sticky Notes</h2>
+              <p>Added a brand new Sticky Notes feature with a premium, draggable interface.</p>
+              <ul className="cl-features">
+                <li><span className="cl-feature-dot cl-blue-dot" />Sticky Notes can be dynamically pinned to any specific page across the platform</li>
+                <li><span className="cl-feature-dot cl-blue-dot" />Rich text formatting with custom text colors, background colors, and typography</li>
+                <li><span className="cl-feature-dot cl-blue-dot" />Real-time synchronization ensures pinned notes are instantly updated</li>
+              </ul>
+            </article>
+
+            {/* Card 2 — v1.4.0 */}
+            <article className="cl-card cl-card-two">
+              <span className="cl-version cl-version-pink">v1.4.0</span>
+              <h2>Trade Journal Upgrades &amp; Safety Checks</h2>
+              <p>Added &apos;Deleted&apos; status tracking for archived trades so they show up distinctly in your journal with custom badges.</p>
+              <ul className="cl-features">
+                <li><span className="cl-feature-dot cl-pink-dot" />Trade Journey timeline connects deleted events with date, time, and live price upon deletion</li>
+                <li><span className="cl-feature-dot cl-pink-dot" />Strict validation prevents scaling out more shares than currently held in a trade</li>
+                <li><span className="cl-feature-dot cl-pink-dot" />Fixed fractional decimal quantities for non-crypto assets</li>
+              </ul>
+            </article>
+
+            {/* Card 3 — v1.3.0 */}
+            <article className="cl-card cl-card-three">
+              <span className="cl-version cl-version-green">v1.3.0</span>
+              <h2>Smarter AI Assistant</h2>
+              <p>The AI Assistant can now delete trades directly via natural language commands.</p>
+              <ul className="cl-features">
+                <li><span className="cl-feature-dot cl-green-dot" />Refactored AI command router for simpler intent processing and better reliability</li>
+                <li><span className="cl-feature-dot cl-green-dot" />AI no longer hallucinates &apos;Exit Trade&apos; buttons; correctly prompts for missing symbols</li>
+              </ul>
+            </article>
+
+            {/* Card 4 — v1.2.0 */}
+            <article className="cl-card cl-card-four">
+              <span className="cl-version cl-version-blue">v1.2.0</span>
+              <h2>Global Currency &amp; Chart Stability</h2>
+              <p>Fixed currency conversion (USD/INR) across the Calendar, Analytics, Trades, Journal, Dashboard P&amp;L, and Chart formatting.</p>
+              <ul className="cl-features">
+                <li><span className="cl-feature-dot cl-blue-dot" />Fixed edge case where missing price candles affected Y-axis scale and chart rendering</li>
+              </ul>
+            </article>
+
+            {/* Card 5 — v1.1.0 */}
+            <article className="cl-card cl-card-five">
+              <span className="cl-version cl-version-pink">v1.1.0</span>
+              <h2>Trading Engine Foundations</h2>
+              <p>Added initial support for scaling in and out of positions via executions API.</p>
+              <ul className="cl-features">
+                <li><span className="cl-feature-dot cl-pink-dot" />Enhanced accuracy of R-Multiple and P&amp;L calculations on partially closed trades</li>
+              </ul>
+            </article>
+
+            {/* Card 6 — v1.0.0 */}
+            <article className="cl-card cl-card-six">
+              <span className="cl-version cl-version-green">v1.0.0</span>
+              <h2>The Beginning</h2>
+              <p>Initial platform launch! Started building the most advanced AI-powered trading journal.</p>
+            </article>
+
+            {/* Decorative text */}
+            <div className="cl-decorative-text">
+              <span>BUILD</span>
+              <span>CREATE</span>
+              <span>IMPROVE</span>
+              <span>REPEAT</span>
+            </div>
+
+            {/* More to come */}
+            <div className="cl-more">
+              <div className="cl-more-pill">
+                <span /><span /><span />
+              </div>
+              <div className="cl-more-copy">
+                <span className="cl-more-title">More to come</span>
+                <span className="cl-more-description">We&apos;re just getting started.</span>
+              </div>
+            </div>
+
           </div>
-        )}
+        </div>
+
       </div>
-    </div>
+    </>
   );
 }
-
-// Helper: hex → "r, g, b" for use in rgba()
-function hexToRgb(hex: string): string {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result
-    ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}`
-    : "255, 255, 255";
-}
-
