@@ -477,6 +477,7 @@ model PriceHistory {
 model ActiveVisitor {
   id        String   @id @default(cuid())
   sessionId String   @unique
+  userId    String?
   lastSeen  DateTime @default(now())
 
   @@index([lastSeen])

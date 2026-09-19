@@ -2,11 +2,13 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { prisma } from '@repo/database';
 import crypto from 'crypto';
+import { getCurrentUser } from '@/lib/auth';
 
 export async function POST() {
   try {
     const cookieStore = await cookies();
     let sessionId = cookieStore.get('visitor_session_id')?.value;
+    const userId = await getCurrentUser() || null;
 
     if (!sessionId) {
       sessionId = crypto.randomUUID();
@@ -22,8 +24,8 @@ export async function POST() {
     // Upsert the visitor session
     await prisma.activeVisitor.upsert({
       where: { sessionId },
-      update: { lastSeen: new Date() },
-      create: { sessionId, lastSeen: new Date() },
+      update: { lastSeen: new Date(), userId },
+      create: { sessionId, lastSeen: new Date(), userId },
     });
 
     // Cleanup old sessions (older than 10 minutes to keep DB small)

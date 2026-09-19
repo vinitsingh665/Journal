@@ -91,9 +91,15 @@ export default function AdminUsersPage() {
               <td style={{ padding: "16px 24px 16px 0", color: "#a1a1aa", fontSize: 13 }}>{user.email || 'N/A'}</td>
               <td style={{ padding: "16px 24px 16px 0", color: "#a1a1aa", fontSize: 13 }}>{new Date(user.createdAt).toLocaleDateString()}</td>
               <td style={{ padding: "16px 24px 16px 0" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 6, color: "#10b981", fontSize: 12, fontWeight: 500 }}>
-                  <div style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: "#10b981" }}></div> Active
-                </div>
+                {user.isOnline ? (
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, color: "#10b981", fontSize: 12, fontWeight: 500 }}>
+                    <div style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: "#10b981", boxShadow: "0 0 6px #10b981" }}></div> Online
+                  </div>
+                ) : (
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, color: "#71717a", fontSize: 12, fontWeight: 500 }}>
+                    <div style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: "#3f3f46" }}></div> Offline
+                  </div>
+                )}
               </td>
               <td style={{ padding: "16px 24px 16px 0", textAlign: "right" }}>
                 {currentUserRole === 'ADMIN' && user.id !== currentUserId ? (

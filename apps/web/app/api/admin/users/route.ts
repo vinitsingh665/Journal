@@ -30,9 +30,27 @@ export async function GET() {
       }
     });
 
+    const twoMinutesAgo = new Date(Date.now() - 120000);
+    const activeVisitors = await prisma.activeVisitor.findMany({
+      where: {
+        userId: { not: null },
+        lastSeen: { gt: twoMinutesAgo }
+      },
+      select: { userId: true, lastSeen: true }
+    });
+
+    const activeUserMap = new Map();
+    activeVisitors.forEach(av => activeUserMap.set(av.userId, av.lastSeen));
+
+    const usersWithPresence = users.map(user => ({
+      ...user,
+      isOnline: activeUserMap.has(user.id),
+      lastSeen: activeUserMap.get(user.id) || null
+    }));
+
     return NextResponse.json({ 
       success: true, 
-      data: users,
+      data: usersWithPresence,
       currentUserRole: currentUser.role,
       currentUserId: currentUserId
     });
