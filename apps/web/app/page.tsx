@@ -21,7 +21,7 @@ export default async function LandingPage() {
     "operatingSystem": "Web",
     "applicationCategory": "FinanceApplication",
     "description": "A premium data-dense trading journal for Indian equity, crypto, and swing traders. Track R-Multiples, calculate risk, and eliminate emotional trading.",
-    "url": "https://www.traderlabs.in/home",
+    "url": "https://www.traderlabs.in",
     "aggregateRating": {
       "@type": "AggregateRating",
       "ratingValue": "4.9",
