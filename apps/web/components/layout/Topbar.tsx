@@ -10,7 +10,7 @@ import { PetGalleryDialog } from "@/features/companion/petdex/PetGalleryDialog";
 import { useTheme } from "@/components/layout/ThemeProvider";
 import "@/lib/i18n";
 
-export default function Topbar({ userName = "Trader", avatar = null, isGuest = false, userId }: { userName?: string, avatar?: string | null, isGuest?: boolean, userId?: string }) {
+export default function Topbar({ userName = "Trader", avatar = null, isGuest = false, userId, role }: { userName?: string, avatar?: string | null, isGuest?: boolean, userId?: string, role?: string }) {
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const companionKind = useAppStore(s => s.companionKind);
@@ -78,6 +78,13 @@ export default function Topbar({ userName = "Trader", avatar = null, isGuest = f
 
         <SnapshotTool userId={userId} />
         {!isGuest && <AiAssistant />}
+
+        {/* Admin Button */}
+        {(role === "ADMIN" || role === "MEMBER") && (
+          <Link href="/admin" className="btn btn-secondary" style={{ borderRadius: "9999px", paddingLeft: "20px", paddingRight: "20px" }}>
+            Admin
+          </Link>
+        )}
 
         {/* New Trade Button */}
         <Link href="/trades/new" className="btn btn-primary" id="btn-new-trade">

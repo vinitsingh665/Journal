@@ -18,7 +18,7 @@ export default async function DashboardLayout({
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { name: true, settings: true, isGuest: true }
+    select: { name: true, settings: true, isGuest: true, role: true }
   });
   
   const userName = user?.name || "Trader";
@@ -29,7 +29,7 @@ export default async function DashboardLayout({
     <div className="app-layout">
       <Sidebar userName={userName} tradingStyle={tradingStyle} avatar={avatar} />
       <div className="app-main">
-        <Topbar userName={userName} avatar={avatar} isGuest={user?.isGuest} userId={userId} />
+        <Topbar userName={userName} avatar={avatar} isGuest={user?.isGuest} userId={userId} role={user?.role} />
         <main className="app-content">{children}</main>
         <NotesFAB />
       </div>
