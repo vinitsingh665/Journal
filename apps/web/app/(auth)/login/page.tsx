@@ -22,7 +22,7 @@ function GoogleButton({ setError, setLoading }: { setError: (s: string) => void,
         });
         const data = await res.json();
         if (!res.ok) { setError(data.error || "Google authentication failed"); return; }
-        router.push("/");
+        router.push("/dashboard");
         router.refresh();
       } catch { setError("Failed to connect with Google."); }
       finally { setLoading(false); }
@@ -68,7 +68,7 @@ export default function LoginPage() {
       const res = await fetch(endpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
       const data = await res.json();
       if (!res.ok) { setError(data.error || "Something went wrong"); return; }
-      router.push("/");
+      router.push("/dashboard");
       router.refresh();
     } catch { setError("Failed to connect. Please try again."); }
     finally { setLoading(false); }
@@ -81,7 +81,7 @@ export default function LoginPage() {
       const res = await fetch("/api/auth/guest", { method: "POST" });
       const data = await res.json();
       if (!res.ok) { setError(data.error || "Guest login failed"); return; }
-      router.push("/");
+      router.push("/dashboard");
       router.refresh();
     } catch { setError("Failed to connect. Please try again."); }
     finally { setLoading(false); }
