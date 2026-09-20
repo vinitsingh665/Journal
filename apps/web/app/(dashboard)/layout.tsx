@@ -13,7 +13,7 @@ export default async function DashboardLayout({
 }) {
   const userId = await getCurrentUser();
   if (!userId) {
-    redirect("/login");
+    redirect("/home");
   }
 
   const user = await prisma.user.findUnique({

@@ -15,11 +15,11 @@ import PnlDistribution from "@/components/dashboard/PnlDistribution";
 import RecentTrades from "@/components/dashboard/RecentTrades";
 
 import { Suspense } from "react";
-import DashboardLoading from "./loading";
+import DashboardLoading from "../loading";
 
 async function DashboardContent() {
   const userId = await getCurrentUser();
-  if (!userId) redirect("/login");
+  if (!userId) redirect("/");
 
   // Fetch user settings, trades (lightweight), and open positions in parallel
   const [userSettings, trades, openTrades] = await Promise.all([

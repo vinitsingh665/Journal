@@ -25,8 +25,8 @@ export default async function AboutLayout({ children }: { children: React.ReactN
               Back to Settings
             </Link>
           ) : (
-            <Link href="/login" style={{ textDecoration: "none", fontSize: "var(--text-sm)", color: "var(--text-secondary)" }}>
-              Back to Login
+            <Link href="/home" style={{ textDecoration: "none", fontSize: "var(--text-sm)", color: "var(--text-secondary)" }}>
+              Back to Home
             </Link>
           )}
         </div>

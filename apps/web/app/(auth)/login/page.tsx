@@ -4,6 +4,7 @@ import { useState, FormEvent, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
 import Link from "next/link";
+import { useTheme } from "@/components/layout/ThemeProvider";
 import "./login.css";
 
 function GoogleButton({ setError, setLoading }: { setError: (s: string) => void, setLoading: (b: boolean) => void }) {
@@ -50,17 +51,11 @@ export default function LoginPage() {
   const [isSetup, setIsSetup] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("auth-theme") === "dark";
-    }
-    return false;
-  });
+  const { theme, setTheme } = useTheme();
+  const isDark = theme === "dark";
 
   const toggleTheme = () => {
-    const newTheme = !isDark;
-    setIsDark(newTheme);
-    localStorage.setItem("auth-theme", newTheme ? "dark" : "light");
+    setTheme(isDark ? "light" : "dark");
   };
 
   const handleSubmit = async (e: FormEvent) => {

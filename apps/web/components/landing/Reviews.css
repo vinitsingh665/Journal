@@ -1,0 +1,117 @@
+.reviews {
+  padding: var(--space-9) 0;
+  background: var(--color-bg-primary);
+}
+
+.reviews__header {
+  text-align: center;
+  margin-bottom: var(--space-8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.reviews__title {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--color-text-primary);
+  line-height: 1.1;
+}
+
+.reviews__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.review-card {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+  break-inside: avoid;
+  margin-bottom: var(--space-5);
+  transition: border-color var(--transition-normal);
+}
+
+.review-card:hover {
+  border-color: var(--color-border-hover);
+}
+
+.review-card__stars {
+  color: #fbbf24; /* Gold stars */
+  font-size: var(--text-base);
+  margin-bottom: var(--space-4);
+  letter-spacing: 1px;
+}
+
+.review-card__body {
+  padding: var(--space-5) var(--space-4);
+}
+
+.review-card__text {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin-bottom: var(--space-5);
+}
+
+.review-card__author {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.review-card__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--color-bg-tertiary, #2a2a35);
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.review-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.review-card__name {
+  font-size: var(--text-xs);
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.review-card__role {
+  font-size: 10px;
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.reviews__actions {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-6);
+}
+
+@media (max-width: 1024px) {
+  .reviews__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .reviews__grid {
+    grid-template-columns: 1fr;
+  }
+}

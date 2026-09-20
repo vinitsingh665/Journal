@@ -151,7 +151,7 @@ export default function Sidebar({ userName = "Trader", tradingStyle = "Swing Tra
   return (
     <aside className="sidebar" id="sidebar">
       {/* Brand */}
-      <div className="sidebar-brand" style={{ display: 'flex', justifyContent: 'flex-start', padding: '16px 20px', minHeight: '64px', alignItems: 'center', gap: '10px' }}>
+      <Link href="/" className="sidebar-brand" style={{ display: 'flex', justifyContent: 'flex-start', padding: '16px 20px', minHeight: '64px', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
         <Image
           src="/logo2.png"
           alt="TraderLabs"
@@ -164,7 +164,7 @@ export default function Sidebar({ userName = "Trader", tradingStyle = "Swing Tra
           <span className="sidebar-brand-name" style={{ fontSize: '18px', fontWeight: 'bold', color: 'white', letterSpacing: '1px' }}>TraderLabs</span>
           <span className="sidebar-brand-tagline" style={{ fontSize: '10px', color: '#94a3b8', letterSpacing: '0.5px' }}>Plan . Execute . Improve</span>
         </div>
-      </div>
+      </Link>
 
       {/* Navigation */}
       <nav className="sidebar-nav">
