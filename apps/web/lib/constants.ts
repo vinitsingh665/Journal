@@ -45,7 +45,7 @@ export const NAV_ITEMS = [
   {
     section: "Main",
     items: [
-      { name: "Dashboard", href: "/", icon: "dashboard" },
+      { name: "Dashboard", href: "/dashboard", icon: "dashboard" },
       { name: "Trades", href: "/trades", icon: "trades" },
       { name: "Open Positions", href: "/positions", icon: "positions" },
       { name: "Journal", href: "/journal", icon: "journal" },
