@@ -104,15 +104,41 @@ export default function SnapshotTool({ userId }: { userId?: string }) {
       setNotification(action === "tweet" ? "Generating snapshot for tweet..." : "Capturing snapshot...");
       const element = document.querySelector(".app-content") as HTMLElement || document.body;
       
+      // Resolve the actual background color from the live document — CSS vars can't be
+      // reliably read via getPropertyValue from stylesheets in all browsers, but
+      // getComputedStyle on the body always returns a resolved rgb() value.
+      const resolvedBg = window.getComputedStyle(document.body).backgroundColor;
+      // If the body background is transparent (rgba(0,0,0,0)), use a hardcoded dark color
+      const bgColor = (resolvedBg && resolvedBg !== 'rgba(0, 0, 0, 0)' && resolvedBg !== 'transparent')
+        ? resolvedBg
+        : (document.documentElement.getAttribute('data-theme') === 'dark' ? '#09090B' : '#F5F6FA');
+
       const canvas = await html2canvas(element, { 
         useCORS: true, 
         scale: 2,
-        backgroundColor: window.getComputedStyle(document.body).getPropertyValue('--bg-primary') || '#000000',
-        windowWidth: element.scrollWidth,
-        windowHeight: element.scrollHeight,
+        backgroundColor: bgColor,
+        windowWidth: window.innerWidth,
+        windowHeight: window.innerHeight,
         width: element.scrollWidth,
         height: element.scrollHeight,
-        // Scroll the element to top temporarily before capture if needed, though html2canvas usually handles it with the above options
+        onclone: (clonedDocument) => {
+          const currentTheme = document.documentElement.getAttribute('data-theme');
+          // Copy data-theme to the cloned html element
+          if (currentTheme) {
+            clonedDocument.documentElement.setAttribute('data-theme', currentTheme);
+          }
+          // Explicitly set background on body and .app-content in the clone using
+          // the resolved color — this is the only reliable way to prevent white gaps
+          clonedDocument.body.style.backgroundColor = bgColor;
+          const clonedContent = clonedDocument.querySelector('.app-content') as HTMLElement;
+          if (clonedContent) {
+            clonedContent.style.backgroundColor = bgColor;
+          }
+          const clonedMain = clonedDocument.querySelector('.app-main') as HTMLElement;
+          if (clonedMain) {
+            clonedMain.style.backgroundColor = bgColor;
+          }
+        }
       });
       
       if (action === "download") {
@@ -121,6 +147,8 @@ export default function SnapshotTool({ userId }: { userId?: string }) {
         link.href = imgData;
         link.download = `TraderLabs_Snapshot_${new Date().toISOString().split('T')[0]}.png`;
         link.click();
+        setNotification("Snapshot downloaded!");
+        setTimeout(() => setNotification(null), 3000);
       } else if (action === "copy" || action === "tweet") {
         canvas.toBlob(async (blob) => {
           if (blob) {

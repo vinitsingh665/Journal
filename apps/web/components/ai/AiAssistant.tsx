@@ -140,7 +140,25 @@ export default function AiAssistant() {
         setTimeout(async () => {
           try {
             const element = document.querySelector(".app-content") as HTMLElement || document.body;
-            const canvas = await html2canvas(element, { useCORS: true, scale: 2 });
+            const resolvedBg = window.getComputedStyle(document.body).backgroundColor;
+            const bgColor = (resolvedBg && resolvedBg !== 'rgba(0, 0, 0, 0)' && resolvedBg !== 'transparent')
+              ? resolvedBg
+              : (document.documentElement.getAttribute('data-theme') === 'dark' ? '#09090B' : '#F5F6FA');
+
+            const canvas = await html2canvas(element, {
+              useCORS: true,
+              scale: 2,
+              backgroundColor: bgColor,
+              onclone: (clonedDocument) => {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                if (currentTheme) clonedDocument.documentElement.setAttribute('data-theme', currentTheme);
+                clonedDocument.body.style.backgroundColor = bgColor;
+                const clonedContent = clonedDocument.querySelector('.app-content') as HTMLElement;
+                if (clonedContent) clonedContent.style.backgroundColor = bgColor;
+                const clonedMain = clonedDocument.querySelector('.app-main') as HTMLElement;
+                if (clonedMain) clonedMain.style.backgroundColor = bgColor;
+              }
+            });
             const imgData = canvas.toDataURL("image/png");
             
             const link = document.createElement("a");
@@ -162,7 +180,25 @@ export default function AiAssistant() {
         setTimeout(async () => {
           try {
             const element = document.querySelector(".app-content") as HTMLElement || document.body;
-            const canvas = await html2canvas(element, { useCORS: true, scale: 2 });
+            const resolvedBg = window.getComputedStyle(document.body).backgroundColor;
+            const bgColor = (resolvedBg && resolvedBg !== 'rgba(0, 0, 0, 0)' && resolvedBg !== 'transparent')
+              ? resolvedBg
+              : (document.documentElement.getAttribute('data-theme') === 'dark' ? '#09090B' : '#F5F6FA');
+
+            const canvas = await html2canvas(element, {
+              useCORS: true,
+              scale: 2,
+              backgroundColor: bgColor,
+              onclone: (clonedDocument) => {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                if (currentTheme) clonedDocument.documentElement.setAttribute('data-theme', currentTheme);
+                clonedDocument.body.style.backgroundColor = bgColor;
+                const clonedContent = clonedDocument.querySelector('.app-content') as HTMLElement;
+                if (clonedContent) clonedContent.style.backgroundColor = bgColor;
+                const clonedMain = clonedDocument.querySelector('.app-main') as HTMLElement;
+                if (clonedMain) clonedMain.style.backgroundColor = bgColor;
+              }
+            });
             const imgData = canvas.toDataURL("image/png");
             
             const pdf = new jsPDF({
