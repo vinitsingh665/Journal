@@ -165,9 +165,11 @@
 @media (max-width: 900px) {
   .exp__dash-grid {
     grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    align-items: start;
   }
   .exp__panel-log {
-    grid-row: auto;
+    grid-row: span 1;
   }
   .exp__dash-top {
     flex-wrap: wrap;

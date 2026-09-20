@@ -24,6 +24,7 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: var(--space-6);
+  align-items: start;
 }
 
 /* Spec Card */
@@ -107,5 +108,6 @@
 @media (max-width: 900px) {
   .diff__grid {
     grid-template-columns: 1fr;
+    align-items: start;
   }
 }

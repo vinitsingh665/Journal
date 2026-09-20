@@ -12,7 +12,6 @@ export default function Nav({ isLoggedIn }) {
     setTheme(theme === "dark" ? "light" : "dark");
   };
   const [scrolled, setScrolled] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 24);
@@ -27,7 +26,6 @@ export default function Nav({ isLoggedIn }) {
     if (el) {
       el.scrollIntoView({ behavior: 'smooth' });
     }
-    setMenuOpen(false);
   };
 
   const navLinks = [
@@ -75,44 +73,8 @@ export default function Nav({ isLoggedIn }) {
               Start free
             </Link>
           )}
-          <button
-            id="menu-toggle"
-            className="nav__icon-btn nav__menu-btn"
-            onClick={() => setMenuOpen(o => !o)}
-            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-            aria-expanded={menuOpen}
-          >
-            {menuOpen ? <X size={18} /> : <Menu size={18} />}
-          </button>
         </div>
       </div>
-
-      {/* Mobile menu */}
-      {menuOpen && (
-        <div className="nav__mobile" role="dialog" aria-label="Mobile navigation">
-          <nav>
-            {navLinks.map(link => (
-              <a
-                key={link.label}
-                href={link.href}
-                className="nav__mobile-link"
-                onClick={handleSmoothScroll}
-              >
-                {link.label}
-              </a>
-            ))}
-            {isLoggedIn ? (
-              <Link href="/dashboard" className="btn-primary" onClick={() => setMenuOpen(false)}>
-                Dashboard
-              </Link>
-            ) : (
-              <Link href="/login" className="btn-primary" onClick={() => setMenuOpen(false)}>
-                Start free
-              </Link>
-            )}
-          </nav>
-        </div>
-      )}
     </header>
   );
 }

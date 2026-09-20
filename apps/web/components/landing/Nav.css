@@ -135,15 +135,38 @@
 
 /* Responsive */
 @media (max-width: 768px) {
-  .nav__links {
+  .nav__inner {
+    gap: var(--space-3);
+  }
+
+  .nav__logo-text {
     display: none;
+  }
+
+  .nav__links {
+    flex: 1;
+    min-width: 0; /* allows overflow inside flex child */
+    justify-content: flex-start;
+    gap: 16px;
+    overflow-x: auto;
+    white-space: nowrap;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+    padding: 0 4px;
+    mask-image: linear-gradient(to right, black 85%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
+  }
+
+  .nav__links::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav__link {
+    font-size: 13px;
+    white-space: nowrap;
   }
   
   .nav__cta {
     display: none;
-  }
-  
-  .nav__menu-btn {
-    display: flex;
   }
 }

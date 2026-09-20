@@ -248,10 +248,6 @@
     gap: var(--space-8);
   }
 
-  .hero__visual {
-    order: -1;
-  }
-
   .hero__stat-pill:nth-child(3),
   .hero__stat-pill:nth-child(4) {
     display: none;

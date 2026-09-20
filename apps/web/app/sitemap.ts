@@ -1,24 +1,23 @@
 import { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  return [
-    {
-      url: 'https://www.traderlabs.in',
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 1,
-    },
-    {
-      url: 'https://www.traderlabs.in/login',
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: 'https://www.traderlabs.in/signup',
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-  ]
+  const baseUrl = 'https://www.traderlabs.in';
+
+  // Only include public landing pages. Do NOT include /dashboard, /trades, /journal, /admin, etc.
+  const routes = [
+    '',
+    '/login',
+    '/signup',
+    '/about/changelog',
+    '/about/contact',
+    '/about/privacy',
+    '/about/terms',
+  ];
+
+  return routes.map((route) => ({
+    url: `${baseUrl}${route}`,
+    lastModified: new Date(),
+    changeFrequency: route === '' ? 'weekly' : 'monthly',
+    priority: route === '' ? 1 : 0.8,
+  }));
 }

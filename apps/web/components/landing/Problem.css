@@ -32,7 +32,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--space-6);
-  align-items: stretch;
+  align-items: start;
 }
 
 /* Terminal Cards */
@@ -138,5 +138,9 @@
 @media (max-width: 900px) {
   .problem__split {
     grid-template-columns: 1fr;
+    align-items: start;
+  }
+  .problem__terminal-body {
+    flex-grow: 0;
   }
 }
