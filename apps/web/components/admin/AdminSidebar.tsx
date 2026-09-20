@@ -2,11 +2,12 @@
 
 import React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { LayoutDashboard, Users, Mail, ActivitySquare, LogOut, Activity } from "lucide-react";
 
 export function AdminSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
 
   const navItems = [
     { name: "Overview", href: "/admin", icon: LayoutDashboard },
@@ -65,13 +66,15 @@ export function AdminSidebar() {
 
       {/* Bottom */}
       <div>
-        <Link href="/" style={{ 
+        <button onClick={() => router.back()} style={{ 
           display: "flex", alignItems: "center", gap: 12, padding: "10px 12px", 
-          borderRadius: 8, textDecoration: "none", color: "#ef4444", fontWeight: 500
+          borderRadius: 8, textDecoration: "none", color: "#ef4444", fontWeight: 500,
+          background: "transparent", border: "none", cursor: "pointer", width: "100%",
+          fontFamily: "inherit", fontSize: "14px"
         }}>
           <LogOut size={18} />
           Exit Admin
-        </Link>
+        </button>
       </div>
     </aside>
   );
