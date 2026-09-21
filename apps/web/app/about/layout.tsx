@@ -1,6 +1,7 @@
 import { getCurrentUser } from "@/lib/auth";
 import React from "react";
 import Link from "next/link";
+import { AboutHeaderAction } from "./AboutHeaderAction";
 
 export default async function AboutLayout({ children }: { children: React.ReactNode }) {
   const userId = await getCurrentUser();
@@ -20,15 +21,7 @@ export default async function AboutLayout({ children }: { children: React.ReactN
           <Link href="/" style={{ textDecoration: "none", color: "var(--text-primary)", fontWeight: 800, fontSize: "var(--text-lg)" }}>
             TraderLabs
           </Link>
-          {userId ? (
-            <Link href="/settings?tab=About" style={{ textDecoration: "none", fontSize: "var(--text-sm)", color: "var(--text-secondary)" }}>
-              Back to Settings
-            </Link>
-          ) : (
-            <Link href="/home" style={{ textDecoration: "none", fontSize: "var(--text-sm)", color: "var(--text-secondary)" }}>
-              Back to Home
-            </Link>
-          )}
+          <AboutHeaderAction userId={userId} />
         </div>
       </header>
 
