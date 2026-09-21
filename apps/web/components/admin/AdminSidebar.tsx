@@ -66,7 +66,7 @@ export function AdminSidebar() {
 
       {/* Bottom */}
       <div>
-        <button onClick={() => router.back()} style={{ 
+        <button onClick={() => router.push('/dashboard')} style={{ 
           display: "flex", alignItems: "center", gap: 12, padding: "10px 12px", 
           borderRadius: 8, textDecoration: "none", color: "#ef4444", fontWeight: 500,
           background: "transparent", border: "none", cursor: "pointer", width: "100%",
