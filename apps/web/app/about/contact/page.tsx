@@ -2,6 +2,7 @@
 
 import { Mail, MessageCircle, AtSign, BookOpen, CheckCircle2 } from "lucide-react";
 import { useState } from "react";
+import Link from "next/link";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -111,21 +112,28 @@ export default function ContactPage() {
         </div>
 
         {/* Help Center Card */}
-        <div style={{ 
-          background: "var(--bg-secondary)", 
-          border: "1px solid var(--border-secondary)", 
-          borderRadius: "var(--radius-lg)", 
-          padding: "var(--space-5)", 
-          textAlign: "center",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: "var(--space-2)"
-        }}>
-          <BookOpen size={24} className="text-muted" />
-          <div style={{ fontWeight: 600, fontSize: "var(--text-md)" }}>Help Center</div>
-          <div className="text-muted" style={{ fontSize: "var(--text-xs)" }}>Browse FAQs & Guides →</div>
-        </div>
+        <Link href="/about/faq" style={{ textDecoration: "none", color: "inherit", display: "block" }}>
+          <div style={{ 
+            background: "var(--bg-secondary)", 
+            border: "1px solid var(--border-secondary)", 
+            borderRadius: "var(--radius-lg)", 
+            padding: "var(--space-5)", 
+            textAlign: "center",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "var(--space-2)",
+            cursor: "pointer",
+            transition: "all 0.2s"
+          }}
+          onMouseOver={(e) => e.currentTarget.style.borderColor = 'var(--primary)'}
+          onMouseOut={(e) => e.currentTarget.style.borderColor = 'var(--border-secondary)'}
+          >
+            <BookOpen size={24} className="text-muted" />
+            <div style={{ fontWeight: 600, fontSize: "var(--text-md)" }}>Help Center</div>
+            <div className="text-muted" style={{ fontSize: "var(--text-xs)" }}>Browse FAQs & Guides →</div>
+          </div>
+        </Link>
       </div>
 
       {/* Send a Message Form */}
