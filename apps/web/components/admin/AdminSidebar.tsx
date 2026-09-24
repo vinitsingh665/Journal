@@ -23,7 +23,11 @@ export function AdminSidebar() {
       display: "flex", 
       flexDirection: "column", 
       padding: "24px 16px",
-      backgroundColor: "#000"
+      backgroundColor: "#000",
+      height: "100vh",
+      position: "sticky",
+      top: 0,
+      overflowY: "auto"
     }}>
       {/* Brand */}
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 40, paddingLeft: 8 }}>
