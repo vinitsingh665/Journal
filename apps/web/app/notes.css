@@ -2119,11 +2119,9 @@
   background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 50%, rgba(0,0,0,0) 100%);
 }
 
-/* Restrict size of stickers and emojis in sticky notes so they scale with text */
-.nm-sticky-body .ProseMirror img,
-.nm-sticky-note .ProseMirror img,
-.nm-sticky-modal .ProseMirror img,
-.pinned-note-minimized .ProseMirror img {
+/* Restrict size of animated emojis and stickers globally across all note editors */
+.ProseMirror img[src*="fonts.gstatic.com"],
+.ProseMirror img[src*="iconscout.com"] {
   width: 2.5em;
   height: 2.5em;
   display: inline-block;
