@@ -1,4 +1,7 @@
-# 📈 Trading Journal
+<div align="center">
+  <img src="apps/web/public/logo.png" alt="TraderLabs Logo" width="100" />
+  <h1>TraderLabs Journal</h1>
+</div>
 
 **Website:** [traderlabs.in](https://traderlabs.in)
 
