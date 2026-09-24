@@ -9,8 +9,47 @@ import { Placeholder } from "@tiptap/extension-placeholder";
 import { TaskList } from "@tiptap/extension-task-list";
 import { Color } from "@tiptap/extension-color";
 import { TextStyle } from "@tiptap/extension-text-style";
+import Image from "@tiptap/extension-image";
 import { CustomTaskItem } from "../CustomTaskItem";
 import NoteModalBase from "./NoteModalBase";
+
+const ANIMATED_EMOJIS = [
+  "https://fonts.gstatic.com/s/e/notoemoji/latest/1f600/512.gif",
+  "https://fonts.gstatic.com/s/e/notoemoji/latest/1f602/512.gif",
+  "https://fonts.gstatic.com/s/e/notoemoji/latest/1f923/512.gif",
+  "https://fonts.gstatic.com/s/e/notoemoji/latest/1f60d/512.gif",
+  "https://fonts.gstatic.com/s/e/notoemoji/latest/1f929/512.gif",
+  "https://fonts.gstatic.com/s/e/notoemoji/latest/1f618/512.gif",
+  "https://fonts.gstatic.com/s/e/notoemoji/latest/1f914/512.gif",
+  "https://fonts.gstatic.com/s/e/notoemoji/latest/1f60e/512.gif",
+  "https://fonts.gstatic.com/s/e/notoemoji/latest/1f62d/512.gif",
+  "https://fonts.gstatic.com/s/e/notoemoji/latest/1f92f/512.gif",
+  "https://fonts.gstatic.com/s/e/notoemoji/latest/1f389/512.gif",
+  "https://fonts.gstatic.com/s/e/notoemoji/latest/1f525/512.gif",
+  "https://fonts.gstatic.com/s/e/notoemoji/latest/1f680/512.gif",
+  "https://fonts.gstatic.com/s/e/notoemoji/latest/1f4af/512.gif",
+  "https://fonts.gstatic.com/s/e/notoemoji/latest/2728/512.gif",
+  "https://fonts.gstatic.com/s/e/notoemoji/latest/1f440/512.gif",
+];
+
+const TRADING_STICKERS = [
+  "https://cdnl.iconscout.com/lottie/premium/thumb/financial-growth-animation-gif-download-7675609.gif",
+  "https://cdnl.iconscout.com/lottie/premium/thumb/bitcoin-trading-animation-gif-download-7675599.gif",
+  "https://cdnl.iconscout.com/lottie/premium/thumb/bitcoin-analysis-animation-gif-download-7675589.gif",
+  "https://cdnl.iconscout.com/lottie/premium/thumb/attract-money-animation-gif-download-7675594.gif",
+  "https://cdnl.iconscout.com/lottie/premium/thumb/financial-target-animation-gif-download-7675587.gif",
+  "https://cdnl.iconscout.com/lottie/premium/thumb/online-profit-animation-gif-download-7675591.gif",
+  "https://cdnl.iconscout.com/lottie/premium/thumb/money-wallet-animation-gif-download-7675580.gif",
+  "https://cdnl.iconscout.com/lottie/premium/thumb/financial-statistics-animation-gif-download-7675597.gif",
+  "https://cdnl.iconscout.com/lottie/premium/thumb/financial-vision-animation-gif-download-7675586.gif",
+  "https://cdnl.iconscout.com/lottie/premium/thumb/growth-management-animation-gif-download-7675581.gif",
+  "https://cdnl.iconscout.com/lottie/premium/thumb/cloud-money-animation-gif-download-7675585.gif",
+  "https://cdnl.iconscout.com/lottie/premium/thumb/click-buy-animation-gif-download-7675584.gif",
+  "https://cdnl.iconscout.com/lottie/premium/thumb/financial-security-animation-gif-download-7675602.gif",
+  "https://cdnl.iconscout.com/lottie/premium/thumb/investors-animation-gif-download-7675598.gif",
+  "https://cdnl.iconscout.com/lottie/premium/thumb/dollar-bidding-animation-gif-download-7675595.gif",
+  "https://cdnl.iconscout.com/lottie/premium/thumb/card-error-animation-gif-download-7675600.gif"
+];
 
 const STICKY_COLORS = [
   { name: "Yellow", bg: "#fef08a", border: "#fde047" },
@@ -38,6 +77,10 @@ export default function StickyNoteModal({ open, onClose, existingNote }: Props) 
     
   const [colorIdx, setColorIdx] = useState(initialColorIdx >= 0 ? initialColorIdx : 0);
   const [textLength, setTextLength] = useState(0);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showStickerPicker, setShowStickerPicker] = useState(false);
+  const emojiPickerRef = useRef<HTMLDivElement>(null);
+  const stickerPickerRef = useRef<HTMLDivElement>(null);
   
   // Drag state - initialize to 0,0 so it centers properly
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -58,6 +101,12 @@ export default function StickyNoteModal({ open, onClose, existingNote }: Props) 
       TaskList,
       TextStyle,
       Color,
+      Image.configure({
+        inline: true,
+        HTMLAttributes: {
+          style: "width: 24px; height: 24px; vertical-align: middle; display: inline-block; margin: 0 2px;",
+        }
+      }),
       CustomTaskItem.configure({ nested: true }),
       Placeholder.configure({ placeholder: "Write your note here..." }),
     ],
@@ -78,6 +127,27 @@ export default function StickyNoteModal({ open, onClose, existingNote }: Props) 
       setTextLength(editor.getText().length);
     }
   }, [editor, existingNote]);
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent | TouchEvent) => {
+      if (showEmojiPicker && emojiPickerRef.current && !emojiPickerRef.current.contains(e.target as Node)) {
+        setShowEmojiPicker(false);
+      }
+      if (showStickerPicker && stickerPickerRef.current && !stickerPickerRef.current.contains(e.target as Node)) {
+        setShowStickerPicker(false);
+      }
+    };
+    
+    if (showEmojiPicker || showStickerPicker) {
+      document.addEventListener("mousedown", handleClick);
+      document.addEventListener("touchstart", handleClick);
+    }
+    
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+      document.removeEventListener("touchstart", handleClick);
+    };
+  }, [showEmojiPicker, showStickerPicker]);
 
   const handleClose = useCallback(() => {
     if (!existingNote) {
@@ -230,7 +300,7 @@ export default function StickyNoteModal({ open, onClose, existingNote }: Props) 
       className="nm-sticky-modal"
       hideBackdrop={true}
       style={{ 
-        background: color.bg, 
+        backgroundColor: color.bg, 
         borderColor: color.border,
         transform: (position.x !== 0 || position.y !== 0) ? `translate(${position.x}px, ${position.y}px)` : undefined,
         transition: isDragging.current ? "none" : undefined
@@ -340,9 +410,101 @@ export default function StickyNoteModal({ open, onClose, existingNote }: Props) 
 
             <div className="nm-sticky-tool-divider" />
             
-            <button className="nm-sticky-icon-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>
-            <button className="nm-sticky-icon-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></button>
-            <button className="nm-sticky-icon-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></button>
+            <button className="nm-sticky-icon-btn" style={{ opacity: 0.5, cursor: "not-allowed" }} onClick={(e) => e.preventDefault()} title="Add Attachment (Coming Soon)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>
+            
+            <div style={{ position: "relative" }} ref={stickerPickerRef}>
+              <button 
+                className="nm-sticky-icon-btn"
+                onClick={() => {
+                  setShowStickerPicker(!showStickerPicker);
+                  if (!showStickerPicker) setShowEmojiPicker(false);
+                }}
+                title="Add Trading Sticker"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              </button>
+              
+              {showStickerPicker && (
+                <div style={{
+                  position: "absolute",
+                  bottom: "100%",
+                  right: 0,
+                  marginBottom: "8px",
+                  background: isDark ? "#1f2937" : "#ffffff",
+                  border: `1px solid ${color.border}`,
+                  borderRadius: "8px",
+                  padding: "8px",
+                  display: "grid",
+                  gridTemplateColumns: "repeat(4, 1fr)",
+                  gap: "6px",
+                  boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
+                  zIndex: 100,
+                  width: "max-content"
+                }}>
+                  {TRADING_STICKERS.map(url => (
+                    <img 
+                      key={url}
+                      src={url}
+                      alt="sticker"
+                      style={{ width: "36px", height: "36px", cursor: "pointer", borderRadius: "4px" }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)"}
+                      onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+                      onClick={() => {
+                        editor?.chain().focus().setImage({ src: url }).run();
+                        setShowStickerPicker(false);
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+            
+            <div style={{ position: "relative" }} ref={emojiPickerRef}>
+              <button 
+                className="nm-sticky-icon-btn"
+                onClick={() => {
+                  setShowEmojiPicker(!showEmojiPicker);
+                  if (!showEmojiPicker) setShowStickerPicker(false);
+                }}
+                title="Add Emoji"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+              </button>
+              
+              {showEmojiPicker && (
+                <div style={{
+                  position: "absolute",
+                  bottom: "100%",
+                  right: 0,
+                  marginBottom: "8px",
+                  background: isDark ? "#1f2937" : "#ffffff",
+                  border: `1px solid ${color.border}`,
+                  borderRadius: "8px",
+                  padding: "8px",
+                  display: "grid",
+                  gridTemplateColumns: "repeat(4, 1fr)",
+                  gap: "6px",
+                  boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
+                  zIndex: 100,
+                  width: "max-content"
+                }}>
+                  {ANIMATED_EMOJIS.map(url => (
+                    <img 
+                      key={url}
+                      src={url}
+                      alt="emoji"
+                      style={{ width: "28px", height: "28px", cursor: "pointer", borderRadius: "4px" }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)"}
+                      onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+                      onClick={() => {
+                        editor?.chain().focus().setImage({ src: url }).run();
+                        setShowEmojiPicker(false);
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
         

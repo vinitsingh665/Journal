@@ -7,6 +7,7 @@ import { Underline } from "@tiptap/extension-underline";
 import { TaskList } from "@tiptap/extension-task-list";
 import { Color } from "@tiptap/extension-color";
 import { TextStyle } from "@tiptap/extension-text-style";
+import Image from "@tiptap/extension-image";
 import { CustomTaskItem } from "./CustomTaskItem";
 import { useRouter } from "next/navigation";
 import StickyNoteModal from "./modals/StickyNoteModal";
@@ -33,6 +34,7 @@ export default function PinnedStickyNote({ note, onUpdate }: PinnedNoteProps) {
       TaskList,
       TextStyle,
       Color,
+      Image.configure({ inline: true }),
       CustomTaskItem.configure({ nested: true }),
     ],
     content: note.content,
@@ -76,10 +78,13 @@ export default function PinnedStickyNote({ note, onUpdate }: PinnedNoteProps) {
     let y = position.y;
     let changed = false;
 
+    const maxX = document.documentElement.scrollWidth - dotSize;
+    const maxY = document.documentElement.scrollHeight - dotSize;
+
     if (x < 0) { x = 0; changed = true; }
     if (y < 0) { y = 0; changed = true; }
-    if (x > window.innerWidth - dotSize) { x = window.innerWidth - dotSize; changed = true; }
-    if (y > window.innerHeight - dotSize) { y = window.innerHeight - dotSize; changed = true; }
+    if (x > maxX) { x = maxX; changed = true; }
+    if (y > maxY) { y = maxY; changed = true; }
 
     if (changed) {
       setPosition({ x, y });
@@ -93,8 +98,8 @@ export default function PinnedStickyNote({ note, onUpdate }: PinnedNoteProps) {
     if ((e.target as HTMLElement).closest("button, input, label, .nm-custom-checkbox")) return;
 
     isDragging.current = true;
-    dragStart.current = { x: e.clientX - position.x, y: e.clientY - position.y };
-    clickStartPos.current = { x: e.clientX, y: e.clientY };
+    dragStart.current = { x: e.pageX - position.x, y: e.pageY - position.y };
+    clickStartPos.current = { x: e.pageX, y: e.pageY };
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
     e.preventDefault();
     e.stopPropagation();
@@ -103,15 +108,15 @@ export default function PinnedStickyNote({ note, onUpdate }: PinnedNoteProps) {
   const handleResizePointerDown = (e: React.PointerEvent) => {
     e.stopPropagation();
     isResizing.current = true;
-    resizeStart.current = { x: e.clientX, y: e.clientY, w: size.w, h: size.h };
+    resizeStart.current = { x: e.pageX, y: e.pageY, w: size.w, h: size.h };
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
     e.preventDefault();
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
     if (isResizing.current) {
-      let newW = resizeStart.current.w + (e.clientX - resizeStart.current.x);
-      let newH = resizeStart.current.h + (e.clientY - resizeStart.current.y);
+      let newW = resizeStart.current.w + (e.pageX - resizeStart.current.x);
+      let newH = resizeStart.current.h + (e.pageY - resizeStart.current.y);
       if (newW < 32) newW = 32;
       if (newH < 32) newH = 32;
       setSize({ w: newW, h: newH });
@@ -120,14 +125,17 @@ export default function PinnedStickyNote({ note, onUpdate }: PinnedNoteProps) {
 
     if (!isDragging.current) return;
     
-    let newX = e.clientX - dragStart.current.x;
-    let newY = e.clientY - dragStart.current.y;
+    let newX = e.pageX - dragStart.current.x;
+    let newY = e.pageY - dragStart.current.y;
     
-    // Clamp to screen bounds
+    // Clamp to document bounds
+    const maxX = document.documentElement.scrollWidth - size.w;
+    const maxY = document.documentElement.scrollHeight - size.h;
+
     if (newX < 0) newX = 0;
     if (newY < 0) newY = 0;
-    if (newX > window.innerWidth - size.w) newX = window.innerWidth - size.w;
-    if (newY > window.innerHeight - size.h) newY = window.innerHeight - size.h;
+    if (newX > maxX) newX = maxX;
+    if (newY > maxY) newY = maxY;
 
     setPosition({ x: newX, y: newY });
   };
@@ -209,7 +217,7 @@ export default function PinnedStickyNote({ note, onUpdate }: PinnedNoteProps) {
         onDoubleClick={(e) => e.preventDefault()}
         onContextMenu={(e) => e.preventDefault()}
         style={{
-          position: "fixed",
+          position: "absolute",
           left: position.x,
           top: position.y,
           width: size.w,
@@ -218,7 +226,7 @@ export default function PinnedStickyNote({ note, onUpdate }: PinnedNoteProps) {
           background: note.color,
           boxShadow: isExpanded ? "0 8px 24px rgba(0,0,0,0.15)" : "0 4px 12px rgba(0,0,0,0.2)",
           cursor: isExpanded ? "auto" : "grab",
-          zIndex: 9999,
+          zIndex: 80,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -231,8 +239,8 @@ export default function PinnedStickyNote({ note, onUpdate }: PinnedNoteProps) {
         }}
         onClick={(e) => {
           if ((e.target as HTMLElement).closest("button, input, label, .nm-custom-checkbox")) return;
-          const dx = e.clientX - clickStartPos.current.x;
-          const dy = e.clientY - clickStartPos.current.y;
+          const dx = e.pageX - clickStartPos.current.x;
+          const dy = e.pageY - clickStartPos.current.y;
           const distance = Math.sqrt(dx * dx + dy * dy);
           if (distance < 5) {
             setIsEditing(true);

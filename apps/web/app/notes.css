@@ -2118,3 +2118,16 @@
   border-top-left-radius: 40px;
   background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 50%, rgba(0,0,0,0) 100%);
 }
+
+/* Restrict size of stickers and emojis in sticky notes so they scale with text */
+.nm-sticky-body .ProseMirror img,
+.nm-sticky-note .ProseMirror img,
+.nm-sticky-modal .ProseMirror img,
+.pinned-note-minimized .ProseMirror img {
+  width: 2.5em;
+  height: 2.5em;
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 4px;
+  border-radius: 4px;
+}

@@ -8,6 +8,7 @@ import { Color } from "@tiptap/extension-color";
 import { TaskList } from "@tiptap/extension-task-list";
 import { TaskItem } from "@tiptap/extension-task-item";
 import { Placeholder } from "@tiptap/extension-placeholder";
+import Image from "@tiptap/extension-image";
 import { useEffect, useRef, useCallback, useState } from "react";
 import { NAV_ITEMS } from "@/lib/constants";
 
@@ -97,6 +98,7 @@ export default function NoteEditor({
       Color,
       TaskList,
       TaskItem.configure({ nested: true }),
+      Image.configure({ inline: true }),
       Placeholder.configure({ placeholder: "Start writing your note..." }),
     ],
     content: initialContent as any,
