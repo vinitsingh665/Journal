@@ -136,7 +136,7 @@ export default function RecentTrades({ trades, isShared, sharedUserId }: { trade
                       {displayPnlPct.toFixed(2)}%
                     </span>
                   </td>
-                  <td style={{ color: "var(--text-secondary)", fontSize: "var(--text-sm)" }}>
+                  <td style={{ color: "var(--text-secondary)", fontSize: "var(--text-sm)" }} suppressHydrationWarning>
                     {formatDate(trade.entryTime)}
                   </td>
                 </tr>

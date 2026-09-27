@@ -171,7 +171,7 @@ export default function OpenPositions({ positions }: { positions: Position[] }) 
                       {pos.direction}
                     </span>
                   </div>
-                  <div style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)", marginTop: 2 }}>
+                  <div style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)", marginTop: 2 }} suppressHydrationWarning>
                     {pos.quantity} shares · {formatHoldingPeriod(holdingMs)}
                   </div>
                 </div>
