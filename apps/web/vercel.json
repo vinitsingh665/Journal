@@ -7,6 +7,11 @@
     {
       "path": "/api/cron/cleanup-guests",
       "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cron/ping",
+      "schedule": "0 */6 * * *"
     }
   ]
 }
+

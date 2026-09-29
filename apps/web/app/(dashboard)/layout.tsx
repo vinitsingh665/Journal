@@ -16,10 +16,34 @@ export default async function DashboardLayout({
     redirect("/home");
   }
 
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { name: true, settings: true, isGuest: true, role: true }
-  });
+  // Retry once on connection errors (Prisma cold-start / idle connection timeout on serverless)
+  let user = null;
+  try {
+    user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { name: true, settings: true, isGuest: true, role: true }
+    });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    const isConnectionError =
+      msg.includes("connection") ||
+      msg.includes("socket") ||
+      msg.includes("ECONNRESET") ||
+      msg.includes("Can't reach database") ||
+      msg.includes("prepared statement") ||
+      msg.includes("Connection pool");
+
+    if (isConnectionError) {
+      // Wait briefly for the connection pool to recover, then retry once
+      await new Promise((r) => setTimeout(r, 500));
+      user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { name: true, settings: true, isGuest: true, role: true }
+      });
+    } else {
+      throw err;
+    }
+  }
   
   const userName = user?.name || "Trader";
   const tradingStyle = user?.settings?.tradingStyle || "Swing Trader";
