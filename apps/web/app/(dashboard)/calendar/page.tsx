@@ -6,6 +6,8 @@ import CalendarView from "@/components/calendar/CalendarView";
 import { Suspense } from "react";
 import DashboardLoading from "../loading";
 
+export const revalidate = 30;
+
 async function CalendarContent({ searchParams }: { searchParams: { month?: string; year?: string } }) {
   const userId = await getCurrentUser();
   if (!userId) {

@@ -1,18 +1,13 @@
+import { Suspense } from "react";
 import { prisma } from "@repo/database";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import JournalDetail from "@/components/journal/JournalDetail";
+import DashboardLoading from "../../loading";
 
-export default async function JournalDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const userId = await getCurrentUser();
-  if (!userId) redirect("/login");
+export const revalidate = 30;
 
-  const { id } = await params;
-
+async function JournalDetailContent({ id, userId }: { id: string; userId: string }) {
   const trade = await prisma.trade.findFirst({
     where: { id, userId },
     include: {
@@ -42,7 +37,6 @@ export default async function JournalDetailPage({
   const prevId = prevTrade?.id || null;
   const nextId = nextTrade?.id || null;
 
-  // Use DB-stored P&L values (live prices fetched client-side)
   const serialized = {
     id: trade.id,
     symbol: trade.symbol,
@@ -102,4 +96,21 @@ export default async function JournalDetailPage({
   };
 
   return <JournalDetail trade={serialized} />;
+}
+
+export default async function JournalDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const userId = await getCurrentUser();
+  if (!userId) redirect("/login");
+
+  const { id } = await params;
+
+  return (
+    <Suspense fallback={<DashboardLoading />}>
+      <JournalDetailContent id={id} userId={userId} />
+    </Suspense>
+  );
 }

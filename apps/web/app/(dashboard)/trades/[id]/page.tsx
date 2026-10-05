@@ -6,6 +6,8 @@ import TradeDetail from "@/components/trades/TradeDetail";
 import { Suspense } from "react";
 import DashboardLoading from "../../loading";
 
+export const revalidate = 30;
+
 async function TradeContent({ id, userId }: { id: string; userId: string }) {
   const trade = await prisma.trade.findFirst({
     where: { id, userId },

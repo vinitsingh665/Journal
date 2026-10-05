@@ -69,6 +69,12 @@ export async function GET(request: Request) {
         const livePrice = quote.regularMarketPrice;
         const isLong = trade.direction === "LONG";
 
+        // SAFETY: Ignore invalid or zero prices from the API (prevents false SL hits on API glitches)
+        if (!livePrice || livePrice <= 0) {
+          console.warn(`[cron/stop-loss] Skipping ${trade.symbol}: livePrice is ${livePrice}. API may be glitching.`);
+          continue;
+        }
+
         // Check SL / Target hit
         const slHit = trade.stopLoss !== null && (isLong ? livePrice <= trade.stopLoss : livePrice >= trade.stopLoss);
         const targetHit = trade.target !== null && (isLong ? livePrice >= trade.target : livePrice <= trade.target);
