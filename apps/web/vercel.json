@@ -10,7 +10,7 @@
     },
     {
       "path": "/api/cron/ping",
-      "schedule": "*/4 * * * *"
+      "schedule": "0 6 * * *"
     }
   ]
 }
