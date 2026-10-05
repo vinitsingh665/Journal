@@ -100,7 +100,9 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.variable} font-sans`}>
-        <NextTopLoader color="#10b981" showSpinner={false} />
+        <Suspense fallback={null}>
+          <NextTopLoader color="#10b981" showSpinner={false} />
+        </Suspense>
         <ThemeProvider>
           <PresenceTracker />
           <StickyNotesLayer />
