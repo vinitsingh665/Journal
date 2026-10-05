@@ -55,7 +55,9 @@ export default function PositionsClient({ initialPositions, capital = 1000000, i
   useEffect(() => {
     if (initialPositions.length === 0) return;
 
-      const fetchQuotes = async () => {
+    const fetchQuotes = async () => {
+      // Skip fetching when the tab is hidden
+      if (document.visibilityState === "hidden") return;
       try {
         const uniquePositions = Array.from(new Map(initialPositions.map(p => [p.symbol, p])).values());
         const symbolsPayload = uniquePositions.map(p => ({ symbol: p.symbol, exchange: p.exchange }));
@@ -77,14 +79,23 @@ export default function PositionsClient({ initialPositions, capital = 1000000, i
         }
 
         // Ping the background job to auto-close any trades that hit stop loss
-        // This simulates a cron job running while the dashboard is open
         await fetch("/api/cron/stop-loss").catch(() => {});
       } catch { }
     };
 
     fetchQuotes();
     const interval = setInterval(fetchQuotes, 60000);
-    return () => clearInterval(interval);
+
+    // When user returns to the tab, refresh immediately
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") fetchQuotes();
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
   }, [initialPositions]);
 
   useEffect(() => {

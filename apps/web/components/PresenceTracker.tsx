@@ -1,32 +1,55 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 export function PresenceTracker() {
+  // Keep a ref to the interval so we can clear/restart it cleanly
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
   useEffect(() => {
-    // Function to ping the server
     const pingPresence = async () => {
+      // Never ping when the tab is not visible — saves resources and DB connections
+      if (document.visibilityState === "hidden") return;
       try {
-        await fetch('/api/presence', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+        await fetch("/api/presence", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
         });
       } catch (err) {
         console.error("Failed to ping presence", err);
       }
     };
 
-    // Ping immediately on mount
+    const startInterval = () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      intervalRef.current = setInterval(pingPresence, 30 * 1000);
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        // User came back to the tab — ping immediately, then resume polling
+        pingPresence();
+        startInterval();
+      } else {
+        // Tab is hidden — pause the interval to avoid wasted requests
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
+      }
+    };
+
+    // Ping immediately on mount and start the polling interval
     pingPresence();
+    startInterval();
 
-    // Then ping every 30 seconds
-    const interval = setInterval(pingPresence, 30 * 1000);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
-    return () => clearInterval(interval);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
   }, []);
 
-  // This component doesn't render anything visible
   return null;
 }

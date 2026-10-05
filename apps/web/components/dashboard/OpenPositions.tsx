@@ -55,7 +55,9 @@ export default function OpenPositions({ positions }: { positions: Position[] }) 
   useEffect(() => {
     if (positions.length === 0) return;
 
-      const fetchQuotes = async () => {
+    const fetchQuotes = async () => {
+      // Skip fetching when the tab is hidden
+      if (document.visibilityState === "hidden") return;
       setLoading(true);
       try {
         const uniquePositions = Array.from(new Map(positions.map(p => [p.symbol, p])).values());
@@ -85,7 +87,17 @@ export default function OpenPositions({ positions }: { positions: Position[] }) 
 
     fetchQuotes();
     const interval = setInterval(fetchQuotes, 60000);
-    return () => clearInterval(interval);
+
+    // Immediately refresh prices when user comes back to this tab
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") fetchQuotes();
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
   }, [positions]);
 
   // Fetch chart data for each position
