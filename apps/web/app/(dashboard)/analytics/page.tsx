@@ -1,9 +1,11 @@
-import { Suspense } from "react";
+import { Suspense, cache } from "react";
 import DashboardLoading from "../loading";
 import { prisma } from "@repo/database";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import AnalyticsDashboard from "@/components/analytics/AnalyticsDashboard";
+
+export const revalidate = 60;
 
 async function AnalyticsContent() {
   const userId = await getCurrentUser();

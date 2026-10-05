@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import { Suspense, cache } from "react";
 import DashboardLoading from "../loading";
 import { prisma } from "@repo/database";
 import { Prisma } from "@prisma/client";
@@ -7,6 +7,8 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import TradesList from "@/components/trades/TradesList";
 import DhanSyncButton from "@/components/trades/DhanSyncButton";
+
+export const revalidate = 30;
 
 const TRADES_PER_PAGE = 12;
 

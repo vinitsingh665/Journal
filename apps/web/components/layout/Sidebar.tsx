@@ -177,6 +177,7 @@ export default function Sidebar({ userName = "Trader", tradingStyle = "Swing Tra
                 <Link
                   key={item.href}
                   href={item.href}
+                  prefetch={true}
                   className={cn("sidebar-link", isActive && "active")}
                   id={`nav-${item.icon}`}
                 >

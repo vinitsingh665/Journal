@@ -5,6 +5,8 @@ import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import PositionsClient from "@/components/positions/PositionsClient";
 
+export const revalidate = 30;
+
 async function PositionsContent() {
   const userId = await getCurrentUser();
   if (!userId) redirect("/login");

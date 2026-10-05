@@ -198,11 +198,11 @@ model Trade {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  @@index([userId])
+  @@index([userId, isArchived])
+  @@index([userId, isArchived, status])
+  @@index([userId, isArchived, netPnl])
   @@index([symbol])
-  @@index([status])
   @@index([entryTime])
-  @@index([strategy])
 }
 
 // ─── TRADE EVENTS ───────────────────────────────────

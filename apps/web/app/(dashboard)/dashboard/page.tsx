@@ -1,6 +1,9 @@
 import { prisma } from "@repo/database";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { Suspense, cache } from "react";
+import dynamic from "next/dynamic";
+import DashboardLoading from "../loading";
 import {
   calculatePerformanceMetrics,
   calculateEquityCurve,
@@ -10,19 +13,20 @@ import {
 import KpiCards from "@/components/dashboard/KpiCards";
 import OpenPositions from "@/components/dashboard/OpenPositions";
 import PerformanceOverview from "@/components/dashboard/PerformanceOverview";
-import EquityCurve from "@/components/dashboard/EquityCurve";
-import PnlDistribution from "@/components/dashboard/PnlDistribution";
 import RecentTrades from "@/components/dashboard/RecentTrades";
 
-import { Suspense } from "react";
-import DashboardLoading from "../loading";
+const EquityCurve = dynamic(() => import("@/components/dashboard/EquityCurve"), {
+  loading: () => <div className="card card-body" style={{ height: 350, display: "flex", alignItems: "center", justifyContent: "center" }}><span className="text-muted">Loading chart...</span></div>
+});
 
-async function DashboardContent() {
-  const userId = await getCurrentUser();
-  if (!userId) redirect("/");
+const PnlDistribution = dynamic(() => import("@/components/dashboard/PnlDistribution"), {
+  loading: () => <div className="card card-body" style={{ height: 350, display: "flex", alignItems: "center", justifyContent: "center" }}><span className="text-muted">Loading chart...</span></div>
+});
 
-  // Fetch user settings, trades (lightweight), and open positions in parallel
-  const [userSettings, trades, openTrades] = await Promise.all([
+export const revalidate = 30;
+
+const getDashboardData = cache(async (userId: string) => {
+  return Promise.all([
     prisma.userSettings.findUnique({ where: { userId } }),
     prisma.trade.findMany({
       where: { userId, isArchived: false },
@@ -67,6 +71,13 @@ async function DashboardContent() {
       orderBy: { entryTime: "desc" },
     }),
   ]);
+});
+
+async function DashboardContent() {
+  const userId = await getCurrentUser();
+  if (!userId) redirect("/");
+
+  const [userSettings, trades, openTrades] = await getDashboardData(userId);
 
   const totalCapital = userSettings?.defaultCapital || 500000;
 

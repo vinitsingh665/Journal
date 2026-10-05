@@ -3,16 +3,10 @@ import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import TradeDetail from "@/components/trades/TradeDetail";
 
-export default async function TradeDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const userId = await getCurrentUser();
-  if (!userId) redirect("/login");
+import { Suspense } from "react";
+import DashboardLoading from "../loading";
 
-  const { id } = await params;
-
+async function TradeContent({ id, userId }: { id: string; userId: string }) {
   const trade = await prisma.trade.findFirst({
     where: { id, userId },
     include: {
@@ -72,4 +66,21 @@ export default async function TradeDetailPage({
   };
 
   return <TradeDetail trade={serialized} />;
+}
+
+export default async function TradeDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const userId = await getCurrentUser();
+  if (!userId) redirect("/login");
+
+  const { id } = await params;
+
+  return (
+    <Suspense fallback={<DashboardLoading />}>
+      <TradeContent id={id} userId={userId} />
+    </Suspense>
+  );
 }

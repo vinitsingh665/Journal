@@ -2,7 +2,8 @@
 
 import { useState, useCallback, useEffect } from "react";
 import NoteCard from "./NoteCard";
-import NoteEditor from "./NoteEditor";
+import dynamic from "next/dynamic";
+const NoteEditor = dynamic(() => import("./NoteEditor"), { ssr: false });
 
 interface NoteStub {
   id: string;

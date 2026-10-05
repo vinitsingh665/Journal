@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import { Suspense, cache } from "react";
 import DashboardLoading from "../loading";
 import { prisma } from "@repo/database";
 import { Prisma } from "@prisma/client";
@@ -6,6 +6,8 @@ import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import JournalList from "@/components/journal/JournalList";
+
+export const revalidate = 30;
 
 const TRADES_PER_PAGE = 20;
 
