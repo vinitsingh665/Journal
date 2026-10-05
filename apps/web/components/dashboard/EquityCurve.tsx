@@ -87,6 +87,7 @@ export default function EquityCurve({ data }: EquityCurveProps) {
               maxRotation: 0,
             },
             border: { display: false },
+            offset: true,
           },
           y: {
             grid: {

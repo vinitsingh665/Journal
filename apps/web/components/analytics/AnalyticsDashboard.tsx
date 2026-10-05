@@ -620,7 +620,7 @@ export default function AnalyticsDashboard({ initialTrades: rawTrades, sharedUse
       if (Object.keys(dayMap).length > 0) {
         const sortedKeys = Object.keys(dayMap).sort();
         const start = new Date(sortedKeys[0]);
-        const end = new Date(); // today
+        const end = new Date(sortedKeys[sortedKeys.length - 1]); // last date with data
         const cursor = new Date(start);
         
         const hasCrypto = filteredTrades.some(t => t.exchange.toUpperCase() === "CRYPTO");
@@ -954,7 +954,8 @@ export default function AnalyticsDashboard({ initialTrades: rawTrades, sharedUse
                 scales: {
                   x: { 
                     grid: { display: false },
-                    ticks: { font: { size: 10 }, color: "#71717a" }
+                    ticks: { font: { size: 10 }, color: "#71717a" },
+                    offset: true
                   },
                   y: { 
                     position: "right",
