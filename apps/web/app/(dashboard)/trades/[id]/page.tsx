@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import TradeDetail from "@/components/trades/TradeDetail";
 
 import { Suspense } from "react";
-import DashboardLoading from "../loading";
+import DashboardLoading from "../../loading";
 
 async function TradeContent({ id, userId }: { id: string; userId: string }) {
   const trade = await prisma.trade.findFirst({
