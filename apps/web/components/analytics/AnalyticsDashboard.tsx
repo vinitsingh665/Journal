@@ -109,6 +109,7 @@ function PerfChart({
         barPercentage: 0.65,
         categoryPercentage: 0.75,
         minBarLength: 4,
+        maxBarThickness: 40,
       },
     ],
   };
@@ -144,7 +145,7 @@ function PerfChart({
           .perf-scroll::-webkit-scrollbar-thumb { background: rgba(120,120,130,0.4); border-radius: 99px; }
           .perf-scroll::-webkit-scrollbar-thumb:hover { background: rgba(120,120,130,0.7); }
         `}</style>
-        <div style={{ width: `${dailyCanvasWidth}px`, height: `${CHART_HEIGHT}px` }}>
+        <div style={{ width: "100%", minWidth: `${labels.length * 44}px`, height: `${CHART_HEIGHT}px` }}>
           <Bar
             data={chartData}
             options={{
