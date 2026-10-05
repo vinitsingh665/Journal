@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import { PresenceTracker } from "@/components/PresenceTracker";
 import StickyNotesLayer from "@/components/notes/StickyNotesLayer";
+import NextTopLoader from "nextjs-toploader";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: '--font-sans' });
@@ -99,6 +100,7 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.variable} font-sans`}>
+        <NextTopLoader color="#10b981" showSpinner={false} />
         <ThemeProvider>
           <PresenceTracker />
           <StickyNotesLayer />
