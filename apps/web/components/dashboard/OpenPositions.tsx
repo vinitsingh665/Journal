@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { formatINR, formatPercent, formatHoldingPeriod, cn } from "@/lib/utils";
+import { formatINR, formatPercent, formatHoldingPeriod, formatQuantity, cn } from "@/lib/utils";
 import type { StockQuote } from "@/lib/finance";
 import MiniCandleChart from "./MiniCandleChart";
 
@@ -172,7 +172,7 @@ export default function OpenPositions({ positions }: { positions: Position[] }) 
                     </span>
                   </div>
                   <div style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)", marginTop: 2 }} suppressHydrationWarning>
-                    {pos.quantity} shares · {formatHoldingPeriod(holdingMs)}
+                    {formatQuantity(pos.quantity)} shares · {formatHoldingPeriod(holdingMs)}
                   </div>
                 </div>
                 <div style={{ textAlign: "right" }}>

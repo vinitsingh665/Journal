@@ -49,6 +49,8 @@ export function toYahooSymbol(symbol: string, exchange: string = "NSE"): string 
       base = base.replace("USDT", "");
     } else if (base.endsWith("USD")) {
       base = base.replace("USD", "");
+    } else if (base.endsWith("U")) {
+      base = base.replace(/U$/, "");
     }
     return `${base}-USD`;
   }

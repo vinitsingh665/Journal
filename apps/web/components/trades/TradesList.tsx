@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { formatINR, formatDate, formatDateTime, formatHoldingPeriod, cn } from "@/lib/utils";
+import { formatINR, formatDate, formatDateTime, formatHoldingPeriod, formatQuantity, cn } from "@/lib/utils";
 import MiniCandleChart from "@/components/dashboard/MiniCandleChart";
 import AddExecutionModal from "./AddExecutionModal";
 import { useEnrichedPnl } from "@/hooks/useEnrichedPnl";
@@ -611,7 +611,7 @@ export default function TradesList({
                                                 {exec.side}
                                               </span>
                                             </td>
-                                            <td style={{ padding: "5px 8px", textAlign: "right", fontFamily: "var(--font-mono)", fontWeight: 600 }}>{exec.quantity}</td>
+                                            <td style={{ padding: "5px 8px", textAlign: "right", fontFamily: "var(--font-mono)", fontWeight: 600 }}>{formatQuantity(exec.quantity)}</td>
                                             <td style={{ padding: "5px 8px", textAlign: "right", fontFamily: "var(--font-mono)" }}>{formatINR(exec.price)}</td>
                                             <td style={{ padding: "5px 8px", textAlign: "right", fontFamily: "var(--font-mono)", color: "var(--text-secondary)" }}>{formatINR(exec.price * exec.quantity)}</td>
                                             <td style={{ padding: "5px 8px", textAlign: "right", fontFamily: "var(--font-mono)", color: "var(--text-secondary)" }}>{formatINR(runningAvg)}</td>
@@ -774,7 +774,7 @@ export default function TradesList({
                 {[
                   { label: "Entry", value: formatINR(selectedTrade.avgEntryPrice), sub: formatDate(selectedTrade.entryTime) },
                   { label: "Exit", value: selectedTrade.avgExitPrice ? formatINR(selectedTrade.avgExitPrice) : "—", sub: selectedTrade.exitTime ? formatDate(selectedTrade.exitTime) : "" },
-                  { label: selectedTrade.status === "PARTIAL" ? "Open Qty" : "Quantity", value: selectedTrade.status === "PARTIAL" ? `${Math.abs(selectedTrade.totalBuyQty - selectedTrade.totalSellQty)} / ${selectedTrade.direction === "LONG" ? selectedTrade.totalBuyQty : selectedTrade.totalSellQty}` : (selectedTrade.direction === "LONG" ? selectedTrade.totalBuyQty : selectedTrade.totalSellQty).toString() },
+                  { label: selectedTrade.status === "PARTIAL" ? "Open Qty" : "Quantity", value: selectedTrade.status === "PARTIAL" ? `${formatQuantity(Math.abs(selectedTrade.totalBuyQty - selectedTrade.totalSellQty))} / ${formatQuantity(selectedTrade.direction === "LONG" ? selectedTrade.totalBuyQty : selectedTrade.totalSellQty)}` : formatQuantity(selectedTrade.direction === "LONG" ? selectedTrade.totalBuyQty : selectedTrade.totalSellQty) },
                   { label: "Hold Time", value: liveDuration.node },
                   { label: "Stop Loss", value: selectedTrade.stopLoss ? formatINR(selectedTrade.stopLoss) : "—", color: "var(--color-negative)" },
                   { label: "Target", value: selectedTrade.target ? formatINR(selectedTrade.target) : "—", color: "var(--color-positive)" },

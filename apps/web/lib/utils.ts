@@ -47,6 +47,12 @@ export function formatPercent(
   return `${sign}${value.toFixed(2)}%`;
 }
 
+export function formatQuantity(value: number): string {
+  return new Intl.NumberFormat("en-IN", {
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
 // ─── DATE FORMATTING ────────────────────────────────
 
 export function formatDate(date: Date | string): string {

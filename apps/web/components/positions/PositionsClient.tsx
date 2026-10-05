@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { formatINR, formatPercent, formatHoldingPeriod, cn } from "@/lib/utils";
+import { formatINR, formatPercent, formatHoldingPeriod, formatQuantity, cn } from "@/lib/utils";
 import type { StockQuote } from "@/lib/finance";
 import Sparkline from "@/components/charts/Sparkline";
 import { useRouter } from "next/navigation";
@@ -348,7 +348,7 @@ export default function PositionsClient({ initialPositions, capital = 1000000, i
                     </td>
                     <td style={{ padding: "var(--space-3) 0", verticalAlign: "middle" }}>
                       <span className={`badge ${pos.direction === "LONG" ? "badge-long" : "badge-short"}`}>{pos.direction}</span>
-                      <div className="text-muted" style={{ fontSize: "var(--text-xs)", marginTop: 4 }}>{pos.openQty} shares</div>
+                      <div className="text-muted" style={{ fontSize: "var(--text-xs)", marginTop: 4 }}>{formatQuantity(pos.openQty)} shares</div>
                     </td>
                     <td style={{ padding: "var(--space-3) 0", verticalAlign: "middle" }}>
                       <div style={{ fontSize: "var(--text-sm)", fontWeight: 600 }}>{formatINR(pos.avgEntryPrice)}</div>

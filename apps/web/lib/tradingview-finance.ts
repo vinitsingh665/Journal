@@ -145,7 +145,7 @@ export async function fetchMultipleQuotes(
     if (conversionsNeeded.size > 0) {
       // Map stablecoins to USD for forex lookup
       const mapCurrency = (c: string) => 
-        ["USDT", "USDC", "BUSD", "DAI"].includes(c) ? "USD" : c;
+        ["USDT", "USDC", "BUSD", "DAI", "U"].includes(c) ? "USD" : c;
 
       // Fetch exchange rates (e.g., USD -> INR = USDINR)
       const fxSymbols = Array.from(conversionsNeeded).map(c => ({ 

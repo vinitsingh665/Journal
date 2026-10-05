@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { formatINR, formatDate, formatTime, formatHoldingPeriod, cn } from "@/lib/utils";
+import { formatINR, formatDate, formatTime, formatHoldingPeriod, formatQuantity, cn } from "@/lib/utils";
 import { useEnrichedPnl } from "@/hooks/useEnrichedPnl";
 
 interface Execution {
@@ -370,7 +370,7 @@ export default function JournalDetail({ trade, isShared, sharedUserId }: { trade
                               {formatINR(exec.price)}
                             </td>
                             <td style={{ padding: "8px", textAlign: "right", fontFamily: "var(--font-mono)", fontWeight: 600 }}>
-                              {exec.quantity}
+                              {formatQuantity(exec.quantity)}
                             </td>
                             <td style={{ padding: "8px", textAlign: "right", fontFamily: "var(--font-mono)" }}>
                               {formatINR(exec.quantity * exec.price)}
@@ -390,7 +390,7 @@ export default function JournalDetail({ trade, isShared, sharedUserId }: { trade
                       fontSize: "var(--text-sm)",
                     }}>
                       <span>Avg Entry Price: <strong className="text-positive" style={{ fontFamily: "var(--font-mono)" }}>{formatINR(avgEntryCalc)}</strong></span>
-                      <span>Total Qty: <strong style={{ fontFamily: "var(--font-mono)" }}>{totalEntryQty}</strong></span>
+                      <span>Total Qty: <strong style={{ fontFamily: "var(--font-mono)" }}>{formatQuantity(totalEntryQty)}</strong></span>
                       <span>Total Value: <strong className="text-positive" style={{ fontFamily: "var(--font-mono)" }}>{formatINR(totalEntryValue)}</strong></span>
                     </div>
                   </>
@@ -449,7 +449,7 @@ export default function JournalDetail({ trade, isShared, sharedUserId }: { trade
                                 </span>
                               </td>
                               <td style={{ padding: "8px", textAlign: "right", fontFamily: "var(--font-mono)" }}>{formatINR(exec.price)}</td>
-                              <td style={{ padding: "8px", textAlign: "right", fontFamily: "var(--font-mono)", fontWeight: 600 }}>{exec.quantity}</td>
+                              <td style={{ padding: "8px", textAlign: "right", fontFamily: "var(--font-mono)", fontWeight: 600 }}>{formatQuantity(exec.quantity)}</td>
                               <td style={{ padding: "8px", textAlign: "right", fontFamily: "var(--font-mono)" }}>{formatINR(exec.quantity * exec.price)}</td>
                               <td style={{ padding: "8px", textAlign: "right", fontFamily: "var(--font-mono)" }}>
                                 <span className={cn(exitR >= 0 ? "text-positive" : "text-negative")}>
@@ -588,8 +588,8 @@ export default function JournalDetail({ trade, isShared, sharedUserId }: { trade
                   </div>
                   <div style={{ fontWeight: 600, fontFamily: "var(--font-mono)" }}>
                     {trade.status === "PARTIAL" 
-                      ? `${Math.abs(trade.totalBuyQty - trade.totalSellQty)} / ${trade.direction === "LONG" ? trade.totalBuyQty : trade.totalSellQty}` 
-                      : trade.direction === "LONG" ? trade.totalBuyQty : trade.totalSellQty}
+                      ? `${formatQuantity(Math.abs(trade.totalBuyQty - trade.totalSellQty))} / ${formatQuantity(trade.direction === "LONG" ? trade.totalBuyQty : trade.totalSellQty)}` 
+                      : formatQuantity(trade.direction === "LONG" ? trade.totalBuyQty : trade.totalSellQty)}
                   </div>
                 </div>
                 <div style={{ padding: "var(--space-3) var(--space-4)" }}>
