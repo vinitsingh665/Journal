@@ -1,5 +1,7 @@
 "use client";
 
+import { LATEST_VERSION } from "@/app/about/changelog/page";
+
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -1041,7 +1043,7 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
               borderRadius: 8,
               marginBottom: "var(--space-10)"
             }}>
-              <span style={{ color: "var(--accent-primary)", fontWeight: 700, fontFamily: "monospace", fontSize: "14px" }}>v1.5.0</span>
+              <span style={{ color: "var(--accent-primary)", fontWeight: 700, fontFamily: "monospace", fontSize: "14px" }}>{LATEST_VERSION}</span>
             </div>
 
             {/* Action Buttons */}
