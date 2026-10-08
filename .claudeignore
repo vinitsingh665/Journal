@@ -1,0 +1,33 @@
+﻿# Dependencies - never read these
+node_modules/
+.pnpm/
+
+# Build outputs & caches
+.next/
+.turbo/
+dist/
+build/
+out/
+
+# Lock files - too large, not useful for AI
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Large scratch/data files
+diff.txt
+*.pack
+*.node
+*.wasm
+
+# Images
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.ico
+*.webp
+
+# Logs
+*.log
+*.tmp

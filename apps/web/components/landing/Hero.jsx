@@ -164,8 +164,8 @@ export default function Hero({ isLoggedIn }) {
           </div>
 
           <h1 className="hero__headline">
-            Your edge is built in{' '}
-            <em className="hero__headline-em">your journal.</em>
+            The Best Trading Journal for{' '}
+            <em className="hero__headline-em">Indian Traders.</em>
           </h1>
 
           <p className="hero__sub">

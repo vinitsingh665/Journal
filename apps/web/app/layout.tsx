@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Suspense } from "react";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
@@ -43,6 +43,9 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
+  alternates: {
+    canonical: "https://www.traderlabs.in",
+  },
   openGraph: {
     title: "TraderLabs — Your Ultimate Trading Journal",
     description: "Track trades, analyze performance, and improve your edge with our premium trading journal.",
@@ -50,13 +53,13 @@ export const metadata: Metadata = {
     siteName: "TraderLabs",
     images: [
       {
-        url: "/og-image.png", // Will default to nothing if not present, but good practice
+        url: "/brand-logo.png",
         width: 1200,
         height: 630,
-        alt: "TraderLabs Dashboard Preview",
+        alt: "TraderLabs — Premium Trading Journal for Indian Traders",
       },
     ],
-    locale: "en_US",
+    locale: "en_IN",
     type: "website",
   },
   twitter: {
@@ -64,7 +67,7 @@ export const metadata: Metadata = {
     title: "TraderLabs — Your Ultimate Trading Journal",
     description: "Track trades, analyze performance, and improve your edge.",
     creator: "@TraderLabs",
-    images: ["/og-image.png"],
+    images: ["/brand-logo.png"],
   },
   verification: {
     google: "6lVkmBYmvNlsNtkw6uCbljw7ct5Nhs00TUk3xPBrLjk",
@@ -112,3 +115,4 @@ export default function RootLayout({
     </html>
   );
 }
+

@@ -1,3 +1,8 @@
+export const metadata = {
+  title: "Privacy Policy — TraderLabs",
+};
+
+
 export default function PrivacyPage() {
   return (
     <div style={{ animation: "fadeIn 0.3s ease-out" }}>

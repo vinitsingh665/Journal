@@ -22,6 +22,24 @@ export default async function LandingPage() {
     "applicationCategory": "FinanceApplication",
     "description": "A premium data-dense trading journal for Indian equity, crypto, and swing traders. Track R-Multiples, calculate risk, and eliminate emotional trading.",
     "url": "https://www.traderlabs.in",
+    "featureList": [
+      "Trade Journaling",
+      "Risk Calculator",
+      "R-Multiple Tracking",
+      "P&L Calendar",
+      "CSV Import",
+      "Broker Sync",
+      "Trade Analytics",
+      "Mistake Tracking"
+    ],
+    "screenshot": "https://www.traderlabs.in/brand-logo.png",
+    "softwareVersion": "2.0",
+    "releaseNotes": "https://www.traderlabs.in/about/changelog",
+    "inLanguage": "en-IN",
+    "audience": {
+      "@type": "Audience",
+      "audienceType": "Indian Stock Market Traders"
+    },
     "aggregateRating": {
       "@type": "AggregateRating",
       "ratingValue": "4.9",

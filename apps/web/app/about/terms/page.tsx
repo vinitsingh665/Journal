@@ -1,3 +1,8 @@
+export const metadata = {
+  title: "Terms of Service — TraderLabs",
+};
+
+
 export default function TermsPage() {
   return (
     <div style={{ animation: "fadeIn 0.3s ease-out" }}>
