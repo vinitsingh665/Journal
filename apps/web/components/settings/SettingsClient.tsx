@@ -1,6 +1,6 @@
-"use client";
+﻿"use client";
 
-import { LATEST_VERSION } from "@/app/about/changelog/page";
+import { LATEST_VERSION } from "@/app/about/changelog/ChangelogClient";
 
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -90,7 +90,7 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
   const [defaultMarket, setDefaultMarket] = useState("NSE");
   const [dateFormat, setDateFormat] = useState("31 Aug 2026 (DD MMM YYYY)");
   const [timeFormat, setTimeFormat] = useState("12 Hour (01:30 PM)");
-  const [currency, setCurrency] = useState(initialSettings?.currency || "INR (₹)");
+  const [currency, setCurrency] = useState(initialSettings?.currency || "INR (â‚¹)");
   const [showPnlIn, setShowPnlIn] = useState("Currency");
 
   // Quick settings states
@@ -438,10 +438,10 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
                       <div className="settings-row-desc">Choose your preferred currency.</div>
                     </div>
                     <select className="form-select" value={currency} onChange={e => setCurrency(e.target.value)} style={{ width: 220 }} disabled={isGuest}>
-                      <option>INR (₹)</option>
+                      <option>INR (â‚¹)</option>
                       <option>USD ($)</option>
-                      <option>EUR (€)</option>
-                      <option>GBP (£)</option>
+                      <option>EUR (â‚¬)</option>
+                      <option>GBP (Â£)</option>
                     </select>
                   </div>
 
@@ -858,14 +858,14 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
                 <div className="card card-body">
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingBottom: "var(--space-3)", borderBottom: "1px solid var(--border-secondary)", marginBottom: "var(--space-3)" }}>
                     <div>
-                      <div style={{ fontWeight: 600 }}>Windows PC • Chrome</div>
+                      <div style={{ fontWeight: 600 }}>Windows PC â€¢ Chrome</div>
                       <div className="text-muted" style={{ fontSize: "var(--text-xs)" }}>Mumbai, India (Current)</div>
                     </div>
                     <span className="badge badge-open">Active</span>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                     <div>
-                      <div style={{ fontWeight: 600 }}>iPhone 14 • Safari</div>
+                      <div style={{ fontWeight: 600 }}>iPhone 14 â€¢ Safari</div>
                       <div className="text-muted" style={{ fontSize: "var(--text-xs)" }}>Mumbai, India (2 hours ago)</div>
                     </div>
                     <button className="btn btn-secondary btn-sm">Revoke</button>
@@ -886,7 +886,7 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "var(--space-6)" }}>
                     <div>
                       <h3 style={{ fontSize: "var(--text-xl)", fontWeight: 700, margin: "0 0 4px 0", color: "var(--accent-primary)" }}>Pro Plan</h3>
-                      <p className="text-muted" style={{ margin: 0, fontSize: "var(--text-sm)" }}>Billed annually (₹2,999/yr)</p>
+                      <p className="text-muted" style={{ margin: 0, fontSize: "var(--text-sm)" }}>Billed annually (â‚¹2,999/yr)</p>
                     </div>
                     <span className="badge badge-long">Active</span>
                   </div>
@@ -919,7 +919,7 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
                   <div style={{ display: "flex", alignItems: "center", gap: "var(--space-4)", padding: "var(--space-3)", border: "1px solid var(--border-secondary)", borderRadius: "var(--radius-md)", marginBottom: "var(--space-4)" }}>
                     <div style={{ width: 40, height: 28, background: "#1a1f36", borderRadius: 4, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: 10, fontStyle: "italic" }}>VISA</div>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontWeight: 600 }}>•••• •••• •••• 4242</div>
+                      <div style={{ fontWeight: 600 }}>â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢ 4242</div>
                       <div className="text-muted" style={{ fontSize: "var(--text-xs)" }}>Expires 12/28</div>
                     </div>
                     <button className="btn btn-ghost btn-sm">Edit</button>
@@ -1119,3 +1119,4 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
     </div>
   );
 }
+
