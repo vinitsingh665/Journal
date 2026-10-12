@@ -2,7 +2,7 @@
 
 import React from "react";
 
-export const LATEST_VERSION = "v1.6.0";
+export const LATEST_VERSION = "v1.6.1";
 
 export default function ChangelogPage() {
   return (
@@ -586,77 +586,78 @@ export default function ChangelogPage() {
             </div>
 
             {/* Dates */}
-            <span className="cl-date cl-date-one">OCT 07, 2026</span>
-            <span className="cl-date cl-date-two">SEP 16, 2026</span>
-            <span className="cl-date cl-date-three">AUG 30, 2026</span>
-            <span className="cl-date cl-date-four">AUG 28, 2026</span>
-            <span className="cl-date cl-date-five">AUG 26, 2026</span>
-            <span className="cl-date cl-date-six">AUG 24, 2026</span>
+            <span className="cl-date cl-date-one">OCT 12, 2026</span>
+            <span className="cl-date cl-date-two">OCT 07, 2026</span>
+            <span className="cl-date cl-date-three">SEP 16, 2026</span>
+            <span className="cl-date cl-date-four">AUG 30, 2026</span>
+            <span className="cl-date cl-date-five">AUG 28, 2026</span>
+            <span className="cl-date cl-date-six">AUG 26, 2026</span>
 
-            {/* Card 1 — v1.6.0 */}
+            {/* Card 1 — v1.6.1 */}
             <article className="cl-card cl-card-one">
               <span className="cl-version cl-version-blue">{LATEST_VERSION}</span>
+              <h2>Trades Table UI &amp; Experience Polish</h2>
+              <p>Refined the trades interface with modern execution expansion indicators and streamlined actions.</p>
+              <ul className="cl-features">
+                <li><span className="cl-feature-dot cl-blue-dot" />Replaced legacy arrow with a minimal, accessible chevron that rotates 180° when expanded</li>
+                <li><span className="cl-feature-dot cl-blue-dot" />Streamlined Trades header actions by removing redundant Dhan sync trigger</li>
+              </ul>
+            </article>
+
+            {/* Card 2 — v1.6.0 */}
+            <article className="cl-card cl-card-two">
+              <span className="cl-version cl-version-pink">v1.6.0</span>
               <h2>Performance &amp; Stability Upgrades</h2>
               <p>A major focus on app speed, chart reliability, and preventing rogue Stop-Loss triggers.</p>
               <ul className="cl-features">
-                <li><span className="cl-feature-dot cl-blue-dot" />Restructured dashboard with nextjs-toploader and React cache() for instant page navigation</li>
-                <li><span className="cl-feature-dot cl-blue-dot" />Fixed Y-axis overflows and single-dot rendering issues in the Performance charts</li>
-                <li><span className="cl-feature-dot cl-blue-dot" />Added a PresenceTracker to keep the DB awake and prevent false Stop-Loss triggers</li>
+                <li><span className="cl-feature-dot cl-pink-dot" />Restructured dashboard with nextjs-toploader and React cache() for instant page navigation</li>
+                <li><span className="cl-feature-dot cl-pink-dot" />Fixed Y-axis overflows and single-dot rendering issues in the Performance charts</li>
+                <li><span className="cl-feature-dot cl-pink-dot" />Added a PresenceTracker to keep the DB awake and prevent false Stop-Loss triggers</li>
               </ul>
             </article>
 
-            {/* Card 2 — v1.5.0 */}
-            <article className="cl-card cl-card-two">
-              <span className="cl-version cl-version-pink">v1.5.0</span>
+            {/* Card 3 — v1.5.0 */}
+            <article className="cl-card cl-card-three">
+              <span className="cl-version cl-version-green">v1.5.0</span>
               <h2>Introducing Premium Sticky Notes</h2>
               <p>Added a brand new Sticky Notes feature with a premium, draggable interface.</p>
               <ul className="cl-features">
-                <li><span className="cl-feature-dot cl-pink-dot" />Sticky Notes can be dynamically pinned to any specific page across the platform</li>
-                <li><span className="cl-feature-dot cl-pink-dot" />Rich text formatting with custom text colors, background colors, and typography</li>
-                <li><span className="cl-feature-dot cl-pink-dot" />Real-time synchronization ensures pinned notes are instantly updated</li>
+                <li><span className="cl-feature-dot cl-green-dot" />Sticky Notes can be dynamically pinned to any specific page across the platform</li>
+                <li><span className="cl-feature-dot cl-green-dot" />Rich text formatting with custom text colors, background colors, and typography</li>
+                <li><span className="cl-feature-dot cl-green-dot" />Real-time synchronization ensures pinned notes are instantly updated</li>
               </ul>
             </article>
 
-            {/* Card 3 — v1.4.0 */}
-            <article className="cl-card cl-card-three">
-              <span className="cl-version cl-version-green">v1.4.0</span>
+            {/* Card 4 — v1.4.0 */}
+            <article className="cl-card cl-card-four">
+              <span className="cl-version cl-version-blue">v1.4.0</span>
               <h2>Trade Journal Upgrades &amp; Safety Checks</h2>
               <p>Added &apos;Deleted&apos; status tracking for archived trades so they show up distinctly in your journal.</p>
               <ul className="cl-features">
-                <li><span className="cl-feature-dot cl-green-dot" />Trade Journey timeline connects deleted events with date, time, and live price upon deletion</li>
-                <li><span className="cl-feature-dot cl-green-dot" />Strict validation prevents scaling out more shares than currently held in a trade</li>
-                <li><span className="cl-feature-dot cl-green-dot" />Fixed fractional decimal quantities for non-crypto assets</li>
+                <li><span className="cl-feature-dot cl-blue-dot" />Trade Journey timeline connects deleted events with date, time, and live price upon deletion</li>
+                <li><span className="cl-feature-dot cl-blue-dot" />Strict validation prevents scaling out more shares than currently held in a trade</li>
+                <li><span className="cl-feature-dot cl-blue-dot" />Fixed fractional decimal quantities for non-crypto assets</li>
               </ul>
             </article>
 
-            {/* Card 4 — v1.3.0 */}
-            <article className="cl-card cl-card-four">
-              <span className="cl-version cl-version-blue">v1.3.0</span>
+            {/* Card 5 — v1.3.0 */}
+            <article className="cl-card cl-card-five">
+              <span className="cl-version cl-version-pink">v1.3.0</span>
               <h2>Smarter AI Assistant</h2>
               <p>The AI Assistant can now delete trades directly via natural language commands.</p>
               <ul className="cl-features">
-                <li><span className="cl-feature-dot cl-blue-dot" />Refactored AI command router for simpler intent processing and better reliability</li>
-                <li><span className="cl-feature-dot cl-blue-dot" />AI no longer hallucinates &apos;Exit Trade&apos; buttons; correctly prompts for missing symbols</li>
+                <li><span className="cl-feature-dot cl-pink-dot" />Refactored AI command router for simpler intent processing and better reliability</li>
+                <li><span className="cl-feature-dot cl-pink-dot" />AI no longer hallucinates &apos;Exit Trade&apos; buttons; correctly prompts for missing symbols</li>
               </ul>
             </article>
 
-            {/* Card 5 — v1.2.0 */}
-            <article className="cl-card cl-card-five">
-              <span className="cl-version cl-version-pink">v1.2.0</span>
+            {/* Card 6 — v1.2.0 */}
+            <article className="cl-card cl-card-six">
+              <span className="cl-version cl-version-green">v1.2.0</span>
               <h2>Global Currency &amp; Chart Stability</h2>
               <p>Fixed currency conversion (USD/INR) across the Calendar, Analytics, Trades, Journal, Dashboard P&amp;L, and Chart formatting.</p>
               <ul className="cl-features">
-                <li><span className="cl-feature-dot cl-pink-dot" />Fixed edge case where missing price candles affected Y-axis scale and chart rendering</li>
-              </ul>
-            </article>
-
-            {/* Card 6 — v1.1.0 */}
-            <article className="cl-card cl-card-six">
-              <span className="cl-version cl-version-green">v1.1.0</span>
-              <h2>Trading Engine Foundations</h2>
-              <p>Added initial support for scaling in and out of positions via executions API.</p>
-              <ul className="cl-features">
-                <li><span className="cl-feature-dot cl-green-dot" />Enhanced accuracy of R-Multiple and P&amp;L calculations on partially closed trades</li>
+                <li><span className="cl-feature-dot cl-green-dot" />Fixed edge case where missing price candles affected Y-axis scale and chart rendering</li>
               </ul>
             </article>
 

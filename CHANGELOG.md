@@ -2,7 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased] - 2026-10-07
+## [1.6.1] - 2026-10-12
+
+### Changed
+- **Trades Table:** Redesigned the trade row execution history expand/collapse indicator with a minimal, accessible chevron icon (`ChevronDown`) featuring a smooth 180° rotation transition.
+- **Trades Page:** Removed the "Sync Dhan Trades" button from the page header actions to streamline the interface.
+
+## [1.6.0] - 2026-10-07
 
 ### Added
 - **Performance:** Implemented `nextjs-toploader` (wrapped in Suspense) to show a loading bar during client-side navigation.

@@ -1,4 +1,4 @@
-﻿/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    TRADING JOURNAL â€” PREMIUM DESIGN SYSTEM
    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 @import url('https://cdn.jsdelivr.net/gh/JetBrains/JetBrainsMono/css/jetbrains-mono.css');
@@ -2100,6 +2100,46 @@ h4 { font-size: var(--text-lg); }
 
 .trades-row-active td:first-child {
   box-shadow: inset 3px 0 0 var(--accent-primary);
+}
+
+/* Trades Table Expand/Collapse Button */
+.trades-expand-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color var(--transition-fast, 150ms ease), background-color var(--transition-fast, 150ms ease);
+}
+
+.trades-expand-btn:hover {
+  color: var(--accent-primary);
+  background-color: var(--accent-primary-light, rgba(99, 102, 241, 0.12));
+}
+
+.trades-expand-btn:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 1px;
+}
+
+.trades-expand-chevron {
+  width: 14px;
+  height: 14px;
+  display: block;
+  transition: transform 190ms cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+}
+
+.trades-expand-btn[aria-expanded="true"] .trades-expand-chevron,
+.trades-expand-btn-expanded .trades-expand-chevron {
+  transform: rotate(180deg);
 }
 
 /* Pagination */

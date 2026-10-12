@@ -6,7 +6,6 @@ import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import TradesList from "@/components/trades/TradesList";
-import DhanSyncButton from "@/components/trades/DhanSyncButton";
 
 export const revalidate = 30;
 
@@ -181,7 +180,6 @@ export default async function TradesPage({
           </p>
         </div>
         <div className="page-actions" style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-          <DhanSyncButton />
           <Link href="/import" className="btn btn-secondary" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />

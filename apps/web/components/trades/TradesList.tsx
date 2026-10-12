@@ -7,6 +7,7 @@ import { formatINR, formatDate, formatDateTime, formatHoldingPeriod, formatQuant
 import MiniCandleChart from "@/components/dashboard/MiniCandleChart";
 import AddExecutionModal from "./AddExecutionModal";
 import { useEnrichedPnl } from "@/hooks/useEnrichedPnl";
+import { ChevronDown } from "lucide-react";
 
 interface Trade {
   id: string;
@@ -462,6 +463,7 @@ export default function TradesList({
                       const displayR = liveQuote && trade.stopLoss && riskAmount > 0
                         ? (displayPnl / riskAmount)
                         : trade.rMultiple;
+                      const isExpanded = expandedTradeId === trade.id;
                         
                       return (
                         <React.Fragment key={trade.id}>
@@ -488,25 +490,28 @@ export default function TradesList({
                             <div className="flex items-center gap-2">
                               {trade.executions && trade.executions.length > 0 && (
                                 <button
+                                  type="button"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    setExpandedTradeId(expandedTradeId === trade.id ? null : trade.id);
+                                    setExpandedTradeId(isExpanded ? null : trade.id);
                                   }}
-                                  style={{
-                                    background: "none",
-                                    border: "none",
-                                    cursor: "pointer",
-                                    padding: 0,
-                                    color: "var(--text-muted)",
-                                    fontSize: 10,
-                                    transition: "transform 0.2s ease",
-                                    transform: expandedTradeId === trade.id ? "rotate(90deg)" : "rotate(0deg)",
-                                    display: "flex",
-                                    alignItems: "center",
-                                  }}
-                                  title="Show executions"
+                                  className={cn(
+                                    "trades-expand-btn",
+                                    isExpanded && "trades-expand-btn-expanded"
+                                  )}
+                                  aria-expanded={isExpanded}
+                                  aria-label={
+                                    isExpanded
+                                      ? `Collapse execution history for ${trade.symbol}`
+                                      : `Expand execution history for ${trade.symbol}`
+                                  }
+                                  title={
+                                    isExpanded
+                                      ? "Collapse executions"
+                                      : "Expand executions"
+                                  }
                                 >
-                                  ▶
+                                  <ChevronDown size={14} className="trades-expand-chevron" />
                                 </button>
                               )}
                               {trade.symbol}
