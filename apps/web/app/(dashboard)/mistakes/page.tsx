@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { formatINR } from "@/lib/utils";
+import { formatINR, cn } from "@/lib/utils";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -422,25 +422,25 @@ export default function MistakesPage() {
   });
 
   return (
-    <div style={{ maxWidth: 1400, margin: "0 auto", position: "relative" }}>
+    <div className="mistakes-container" style={{ maxWidth: 1400, margin: "0 auto", position: "relative" }}>
       {/* HEADER */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "var(--space-6)" }}>
-        <div>
+      <div className="mistakes-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "var(--space-6)" }}>
+        <div className="mistakes-title-group">
           <h1 style={{ fontSize: 24, fontWeight: 700, margin: 0, marginBottom: 4 }}>Mistakes</h1>
           <p className="text-muted" style={{ margin: 0, fontSize: "var(--text-sm)" }}>Analyze your mistakes to identify patterns and become a better trader.</p>
         </div>
-        <div style={{ display: "flex", gap: 12 }}>
-          <button className="input" style={{ display: "flex", alignItems: "center", gap: 8, background: "var(--bg-secondary)", border: "1px solid var(--border-color)", padding: "8px 12px", height: "auto", borderRadius: "var(--radius-md)", color: "var(--text-primary)" }}>
+        <div className="mistakes-header-actions" style={{ display: "flex", gap: 12 }}>
+          <button className="input mistakes-filter-btn" style={{ display: "flex", alignItems: "center", gap: 8, background: "var(--bg-secondary)", border: "1px solid var(--border-color)", padding: "8px 12px", height: "auto", borderRadius: "var(--radius-md)", color: "var(--text-primary)" }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
             This Month
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
           </button>
-          <button className="input" style={{ display: "flex", alignItems: "center", gap: 8, background: "var(--bg-secondary)", border: "1px solid var(--border-color)", padding: "8px 12px", height: "auto", borderRadius: "var(--radius-md)", color: "var(--text-primary)" }}>
+          <button className="input mistakes-filter-btn" style={{ display: "flex", alignItems: "center", gap: 8, background: "var(--bg-secondary)", border: "1px solid var(--border-color)", padding: "8px 12px", height: "auto", borderRadius: "var(--radius-md)", color: "var(--text-primary)" }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
             All Accounts
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
           </button>
-          <button className="btn btn-primary" onClick={() => setShowModal(true)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px" }}>
+          <button className="btn btn-primary mistakes-add-btn" onClick={() => setShowModal(true)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px" }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
             Add Mistake
           </button>
@@ -448,70 +448,70 @@ export default function MistakesPage() {
       </div>
 
       {/* METRICS ROW */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: "var(--space-6)", marginBottom: "var(--space-6)" }}>
+      <div className="mistakes-kpi-row" style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: "var(--space-6)", marginBottom: "var(--space-6)" }}>
         {/* Total Mistakes */}
-        <div className="card" style={{ padding: "var(--space-5)" }}>
+        <div className="card mistakes-kpi-card mistakes-kpi-total" style={{ padding: "var(--space-5)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
-            <div className="text-muted" style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.05em" }}>TOTAL MISTAKES</div>
+            <div className="text-muted mistakes-kpi-label" style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.05em" }}>TOTAL MISTAKES</div>
             <div style={{ background: "rgba(59, 130, 246, 0.1)", color: "#3b82f6", width: 24, height: 24, borderRadius: 4, display: "flex", alignItems: "center", justifyContent: "center" }}><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></div>
           </div>
-          <div style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>{mistakes.length}</div>
+          <div className="mistakes-kpi-val" style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>{mistakes.length}</div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 12 }}>
             <span className="text-muted">This Period</span>
             {mistakes.length > 0 && <span className="text-negative" style={{ fontWeight: 600 }}>6.2% ↑</span>}
           </div>
-          <div style={{ height: 40, marginTop: 12 }}><Line data={generateSparkline(20, "#ef4444")} options={sparklineOptions} /></div>
+          <div className="mistakes-kpi-sparkline" style={{ height: 40, marginTop: 12 }}><Line data={generateSparkline(20, "#ef4444")} options={sparklineOptions} /></div>
         </div>
 
         {/* Mistakes / Trade */}
-        <div className="card" style={{ padding: "var(--space-5)" }}>
+        <div className="card mistakes-kpi-card mistakes-kpi-pertrade" style={{ padding: "var(--space-5)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
-            <div className="text-muted" style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.05em" }}>MISTAKES / TRADE</div>
+            <div className="text-muted mistakes-kpi-label" style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.05em" }}>MISTAKES / TRADE</div>
             <div style={{ background: "rgba(139, 92, 246, 0.1)", color: "#8b5cf6", width: 24, height: 24, borderRadius: 4, display: "flex", alignItems: "center", justifyContent: "center" }}><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></div>
           </div>
-          <div style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>{mistakesPerTrade}</div>
+          <div className="mistakes-kpi-val" style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>{mistakesPerTrade}</div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 12 }}>
             <span className="text-muted">Avg per trade</span>
             {mistakes.length > 0 && <span className="text-negative" style={{ fontWeight: 600 }}>4.3% ↑</span>}
           </div>
-          <div style={{ height: 40, marginTop: 12 }}><Line data={generateSparkline(20, "#8b5cf6")} options={sparklineOptions} /></div>
+          <div className="mistakes-kpi-sparkline" style={{ height: 40, marginTop: 12 }}><Line data={generateSparkline(20, "#8b5cf6")} options={sparklineOptions} /></div>
         </div>
 
         {/* P&L Impact */}
-        <div className="card" style={{ padding: "var(--space-5)" }}>
+        <div className="card mistakes-kpi-card mistakes-kpi-hero kpi-pnl-loss" style={{ padding: "var(--space-5)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
-            <div className="text-muted" style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.05em" }}>P&L IMPACT</div>
+            <div className="text-muted mistakes-kpi-label" style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.05em" }}>P&L IMPACT</div>
             <div style={{ background: "rgba(239, 68, 68, 0.1)", color: "#ef4444", width: 24, height: 24, borderRadius: 4, display: "flex", alignItems: "center", justifyContent: "center" }}><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg></div>
           </div>
-          <div style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>-₹{Math.abs(totalImpact).toLocaleString()}</div>
+          <div className="mistakes-kpi-val text-negative" style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>-₹{Math.abs(totalImpact).toLocaleString()}</div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 12 }}>
-            <span className="text-muted">Total</span>
+            <span className="text-muted">Total loss from mistakes</span>
           </div>
-          <div style={{ height: 40, marginTop: 12 }}><Line data={generateSparkline(20, "#ef4444")} options={sparklineOptions} /></div>
+          <div className="mistakes-kpi-sparkline" style={{ height: 40, marginTop: 12 }}><Line data={generateSparkline(20, "#ef4444")} options={sparklineOptions} /></div>
         </div>
 
         {/* Recurrence Rate */}
-        <div className="card" style={{ padding: "var(--space-5)" }}>
+        <div className="card mistakes-kpi-card mistakes-kpi-recurrence" style={{ padding: "var(--space-5)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
-            <div className="text-muted" style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.05em" }}>RECURRENCE RATE</div>
+            <div className="text-muted mistakes-kpi-label" style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.05em" }}>RECURRENCE RATE</div>
             <div style={{ background: "rgba(16, 185, 129, 0.1)", color: "#10b981", width: 24, height: 24, borderRadius: 4, display: "flex", alignItems: "center", justifyContent: "center" }}><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
           </div>
-          <div style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>{recurrenceRate}%</div>
+          <div className="mistakes-kpi-val" style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>{recurrenceRate}%</div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 12 }}>
             <span className="text-muted">Mistakes repeated</span>
           </div>
-          <div style={{ height: 40, marginTop: 12 }}><Line data={generateSparkline(20, "#f59e0b")} options={sparklineOptions} /></div>
+          <div className="mistakes-kpi-sparkline" style={{ height: 40, marginTop: 12 }}><Line data={generateSparkline(20, "#f59e0b")} options={sparklineOptions} /></div>
         </div>
       </div>
 
       {/* MAIN GRID */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: "var(--space-6)" }}>
+      <div className="mistakes-main-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: "var(--space-6)" }}>
         
-        {/* LEFT COLUMN: TABLE */}
-        <div className="card" style={{ display: "flex", flexDirection: "column", gridColumn: "span 3" }}>
+        {/* LEFT COLUMN: TABLE & MOBILE CARDS */}
+        <div className="card mistakes-table-panel" style={{ display: "flex", flexDirection: "column", gridColumn: "span 3" }}>
           
           {/* Table Toolbar */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 20px", borderBottom: "1px solid var(--border-color)" }}>
+          <div className="mistakes-toolbar" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 20px", borderBottom: "1px solid var(--border-color)" }}>
             <div style={{ display: "flex", gap: 24 }}>
               {["All Mistakes"].map(tab => (
                 <button
@@ -541,8 +541,62 @@ export default function MistakesPage() {
             </div>
           </div>
 
+          {/* Mobile Native Mistake Cards */}
+          <div className="mistakes-mobile-cards">
+            {sortedMistakes.map((m) => (
+              <div key={m.id} className="card mistake-mobile-card">
+                <div className="mistake-mobile-card-top">
+                  <div className="mistake-mobile-card-badges">
+                    <span 
+                      className="mistake-cat-pill" 
+                      style={{ 
+                        backgroundColor: CATEGORY_STYLES[m.category]?.bg || "rgba(239, 68, 68, 0.1)",
+                        color: CATEGORY_STYLES[m.category]?.color || "#ef4444" 
+                      }}
+                    >
+                      {m.category}
+                    </span>
+                    <span className="mistake-recurred-pill">{m.recurred}x recurred</span>
+                  </div>
+                  <button 
+                    onClick={() => handleDeleteMistake(m.id)} 
+                    className="mistake-delete-btn"
+                    title="Delete Mistake"
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  </button>
+                </div>
+
+                <div className="mistake-mobile-title">{m.title}</div>
+                {m.desc && <div className="mistake-mobile-desc">{m.desc}</div>}
+
+                <div className="mistake-mobile-meta-row">
+                  <div className="mistake-mobile-trade-info">
+                    <span className="mistake-mobile-symbol">{m.symbol}</span>
+                    <span className={cn("mistake-direction-pill", m.direction === 'LONG' ? "pill-long" : "pill-short")}>
+                      {m.direction}
+                    </span>
+                    <span className="mistake-mobile-prices">₹{m.priceIn.toFixed(2)} → ₹{m.priceOut.toFixed(2)}</span>
+                  </div>
+                </div>
+
+                <div className="mistake-mobile-footer">
+                  <span className="mistake-mobile-date">
+                    {new Date(m.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                  </span>
+                  <span className="mistake-mobile-impact">-₹{Math.abs(m.impact).toLocaleString()}</span>
+                </div>
+              </div>
+            ))}
+            {mistakes.length === 0 && (
+              <div style={{ padding: "32px 16px", textAlign: "center", color: "var(--text-muted)", fontSize: 13 }}>
+                No mistakes tracked yet. Click "Add Mistake" to log one.
+              </div>
+            )}
+          </div>
+
           {/* Table Content */}
-          <div style={{ overflowX: "auto" }}>
+          <div className="mistakes-desktop-table" style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", fontSize: "var(--text-sm)", borderCollapse: "collapse" }}>
               <thead>
                 <tr className="text-muted" style={{ borderBottom: "1px solid var(--border-color)", fontSize: 10, letterSpacing: "0.05em", textTransform: "uppercase" }}>
@@ -618,10 +672,10 @@ export default function MistakesPage() {
         </div>
 
         {/* RIGHT COLUMN: INSIGHTS */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-6)", gridColumn: "span 1" }}>
+        <div className="mistakes-sidebar" style={{ display: "flex", flexDirection: "column", gap: "var(--space-6)", gridColumn: "span 1" }}>
           
           {/* MISTAKES BREAKDOWN */}
-          <div className="card" style={{ padding: "var(--space-5)" }}>
+          <div className="card mistakes-sidebar-card" style={{ padding: "var(--space-5)" }}>
             <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.05em", marginBottom: 20 }}>MISTAKES BREAKDOWN</div>
             <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
               <div style={{ width: 100, height: 100, position: "relative" }}>
@@ -650,7 +704,7 @@ export default function MistakesPage() {
           </div>
 
           {/* CATEGORY P&L IMPACT */}
-          <div className="card" style={{ padding: "var(--space-5)" }}>
+          <div className="card mistakes-sidebar-card" style={{ padding: "var(--space-5)" }}>
             <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.05em", marginBottom: 16 }}>CATEGORY P&L IMPACT</div>
             <div style={{ height: 160 }}>
               {mistakes.length > 0 ? (
@@ -662,7 +716,7 @@ export default function MistakesPage() {
           </div>
 
           {/* MOST REPEATED MISTAKES */}
-          <div className="card" style={{ padding: "var(--space-5)" }}>
+          <div className="card mistakes-sidebar-card" style={{ padding: "var(--space-5)" }}>
             <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.05em", marginBottom: 16 }}>MOST REPEATED MISTAKES</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 16 }}>
               {mostRepeated.map(([name, count], i) => (
@@ -680,7 +734,7 @@ export default function MistakesPage() {
           </div>
 
           {/* ACTION PLAN */}
-          <div className="card" style={{ padding: "var(--space-5)" }}>
+          <div className="card mistakes-sidebar-card" style={{ padding: "var(--space-5)" }}>
             <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.05em", marginBottom: 16 }}>ACTION PLAN</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 16 }}>
               {actionPlans.map((item) => (
@@ -722,8 +776,8 @@ export default function MistakesPage() {
 
       {/* ADD MISTAKE MODAL */}
       {showModal && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div className="card" style={{ width: 500, padding: 0, overflow: "hidden", animation: "slideUp 0.2s ease-out" }}>
+        <div className="mistakes-modal-backdrop" style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div className="card mistakes-modal-card" style={{ width: 500, padding: 0, overflow: "hidden", animation: "slideUp 0.2s ease-out" }}>
             <div style={{ padding: "16px 24px", borderBottom: "1px solid var(--border-color)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <h2 style={{ margin: 0, fontSize: 18 }}>Add Mistake</h2>
               <button onClick={() => setShowModal(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)" }}>✕</button>

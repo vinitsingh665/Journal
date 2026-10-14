@@ -812,18 +812,18 @@ export default function AnalyticsDashboard({ initialTrades: rawTrades, sharedUse
   const activeCount = isFiltered ? selectedTradeIds.size : rawTrades.length;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-6)" }}>
+    <div className="analytics-container" style={{ display: "flex", flexDirection: "column", gap: "var(--space-6)" }}>
 
       {/* 0. HEADER & ACTIONS ROW */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "var(--space-4)" }}>
-        <div>
+      <div className="analytics-header-row" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "var(--space-4)" }}>
+        <div className="analytics-title-group">
           <h1 className="page-title" style={{ margin: 0 }}>Analytics</h1>
           <p className="page-description text-muted" style={{ margin: 0, marginTop: "var(--space-1)" }}>Deep dive into your trading performance.</p>
         </div>
-        <div style={{ position: "relative", zIndex: 10 }} ref={dropdownRef}>
+        <div className="analytics-filter-wrap" style={{ position: "relative", zIndex: 10 }} ref={dropdownRef}>
           <button
             onClick={() => setFilterDropdownOpen(o => !o)}
-            className="input"
+            className="input analytics-filter-btn"
             style={{ 
               display: "flex", alignItems: "center", gap: "var(--space-2)", 
               padding: "6px 12px", fontSize: "var(--text-sm)", fontWeight: 600,
@@ -839,7 +839,7 @@ export default function AnalyticsDashboard({ initialTrades: rawTrades, sharedUse
 
           {/* Dropdown Menu */}
           {filterDropdownOpen && (
-            <div className="card" style={{ 
+            <div className="card analytics-filter-dropdown" style={{ 
               position: "absolute", top: "100%", right: 0, marginTop: "var(--space-2)", 
               width: 320, maxHeight: 400, overflowY: "auto", zIndex: 50,
               padding: "var(--space-3)", display: "flex", flexDirection: "column", gap: "var(--space-2)",
@@ -892,7 +892,7 @@ export default function AnalyticsDashboard({ initialTrades: rawTrades, sharedUse
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "var(--space-4)" }}>
+      <div className="analytics-kpi-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "var(--space-4)" }}>
         {[
           { label: "TOTAL P&L", value: formatINR(totalPnl, { showSign: true, compact: true }), color: totalPnl >= 0 ? "var(--color-positive)" : "var(--color-negative)", rawValue: formatINR(totalPnl, { showSign: true }) },
           { label: "WIN RATE", value: `${winRate.toFixed(1)}%`, sub: `${winningCount}W / ${losingCount}L` },
@@ -901,20 +901,32 @@ export default function AnalyticsDashboard({ initialTrades: rawTrades, sharedUse
           { label: "AVG R-MULTIPLE", value: `${avgRMultiple >= 0 ? "+" : ""}${avgRMultiple.toFixed(2)}R`, sub: "Per Trade", color: avgRMultiple >= 0 ? "var(--color-positive)" : "var(--color-negative)" },
           { label: "MAX DRAWDOWN", value: formatINR(-maxDrawdown, { compact: true }), sub: "Peak to Trough", color: "var(--color-negative)", rawValue: formatINR(-maxDrawdown) },
           { label: "AVG HOLDING TIME", value: formatTime(avgHoldingMs), sub: "Per Trade" },
-        ].map((kpi, i) => (
-          <div key={i} className="card" style={{ padding: "var(--space-5)", overflow: "hidden" }} title={kpi.rawValue || kpi.value}>
-            <div className="text-muted" style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.05em", marginBottom: "var(--space-2)", whiteSpace: "nowrap", textOverflow: "ellipsis", overflow: "hidden" }}>{kpi.label}</div>
-            <div style={{ fontSize: "var(--text-2xl)", fontWeight: 700, color: kpi.color || "var(--text-primary)", marginBottom: "var(--space-1)", whiteSpace: "nowrap", textOverflow: "ellipsis", overflow: "hidden" }}>{kpi.value}</div>
-            {kpi.sub && <div className="text-muted" style={{ fontSize: "var(--text-xs)", whiteSpace: "nowrap", textOverflow: "ellipsis", overflow: "hidden" }}>{kpi.sub}</div>}
-          </div>
-        ))}
+        ].map((kpi, i) => {
+          const isHero = i === 0;
+          return (
+            <div 
+              key={i} 
+              className={cn(
+                "card analytics-kpi-card",
+                isHero && "analytics-kpi-hero",
+                isHero && (totalPnl >= 0 ? "kpi-pnl-profit" : "kpi-pnl-loss")
+              )} 
+              style={{ padding: "var(--space-5)", overflow: "hidden" }} 
+              title={kpi.rawValue || kpi.value}
+            >
+              <div className="text-muted analytics-kpi-label" style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.05em", marginBottom: "var(--space-2)", whiteSpace: "nowrap", textOverflow: "ellipsis", overflow: "hidden" }}>{kpi.label}</div>
+              <div className="analytics-kpi-val" style={{ fontSize: "var(--text-2xl)", fontWeight: 700, color: kpi.color || "var(--text-primary)", marginBottom: "var(--space-1)", whiteSpace: "nowrap", textOverflow: "ellipsis", overflow: "hidden" }}>{kpi.value}</div>
+              {kpi.sub && <div className="text-muted analytics-kpi-sub" style={{ fontSize: "var(--text-xs)", whiteSpace: "nowrap", textOverflow: "ellipsis", overflow: "hidden" }}>{kpi.sub}</div>}
+            </div>
+          );
+        })}
       </div>
 
       {/* 2. CHARTS ROW */}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-6)" }}>
-        <div className="card" style={{ flex: "2 1 500px", padding: "var(--space-5)", minWidth: 0 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-4)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "var(--space-4)" }}>
+      <div className="analytics-charts-row" style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-6)" }}>
+        <div className="card analytics-chart-card" style={{ flex: "2 1 500px", padding: "var(--space-5)", minWidth: 0 }}>
+          <div className="analytics-equity-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-4)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "var(--space-4)", flexWrap: "wrap" }}>
               <div style={{ fontSize: "var(--text-sm)", fontWeight: 700 }}>EQUITY CURVE <span className="text-muted">ⓘ</span></div>
               <div style={{ display: "flex", gap: "var(--space-3)", fontSize: "var(--text-xs)" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 4 }}><div style={{ width: 6, height: 6, borderRadius: "50%", background: "#10b981" }}></div> Equity</div>
@@ -979,9 +991,9 @@ export default function AnalyticsDashboard({ initialTrades: rawTrades, sharedUse
           </div>
         </div>
 
-        <div className="card" style={{ flex: "1 1 300px", padding: "var(--space-5)", minWidth: 0, overflow: "hidden" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-4)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "var(--space-4)" }}>
+        <div className="card analytics-chart-card" style={{ flex: "1 1 300px", padding: "var(--space-5)", minWidth: 0, overflow: "hidden" }}>
+          <div className="analytics-perf-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-4)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "var(--space-4)", flexWrap: "wrap" }}>
               <div style={{ fontSize: "var(--text-sm)", fontWeight: 700 }}>PERFORMANCE <span className="text-muted">ⓘ</span></div>
               <select className="input" style={{ padding: "4px 8px", fontSize: "var(--text-xs)", height: "auto", color: "var(--text-primary)", backgroundColor: "var(--bg-primary)" }} value={perfView} onChange={(e) => setPerfView(e.target.value)}>
                 <option>Daily</option>
@@ -1010,8 +1022,8 @@ export default function AnalyticsDashboard({ initialTrades: rawTrades, sharedUse
       </div>
 
       {/* 3. DISTRIBUTION ROW */}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-6)" }}>
-        <div className="card" style={{ flex: "1 1 200px", padding: "var(--space-5)", display: "flex", flexDirection: "column", alignItems: "center", minWidth: 0 }}>
+      <div className="analytics-dist-row" style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-6)" }}>
+        <div className="card analytics-dist-card" style={{ flex: "1 1 200px", padding: "var(--space-5)", display: "flex", flexDirection: "column", alignItems: "center", minWidth: 0 }}>
           <div style={{ fontSize: "var(--text-sm)", fontWeight: 700, width: "100%", marginBottom: "var(--space-4)" }}>TRADES BREAKDOWN</div>
           <div style={{ width: 160, height: 160, position: "relative" }}>
             <Doughnut
@@ -1032,7 +1044,7 @@ export default function AnalyticsDashboard({ initialTrades: rawTrades, sharedUse
           </div>
         </div>
 
-        <div className="card" style={{ flex: "2 1 400px", padding: "var(--space-5)", minWidth: 0 }}>
+        <div className="card analytics-dist-card" style={{ flex: "2 1 400px", padding: "var(--space-5)", minWidth: 0 }}>
           <div style={{ fontSize: "var(--text-sm)", fontWeight: 700, marginBottom: "var(--space-4)" }}>R-MULTIPLE DISTRIBUTION</div>
           <div style={{ height: 160 }}>
             <Bar
@@ -1060,7 +1072,7 @@ export default function AnalyticsDashboard({ initialTrades: rawTrades, sharedUse
           </div>
         </div>
 
-        <div className="card" style={{ flex: "1 1 200px", padding: "var(--space-5)", display: "flex", flexDirection: "column", alignItems: "center", minWidth: 0 }}>
+        <div className="card analytics-dist-card" style={{ flex: "1 1 200px", padding: "var(--space-5)", display: "flex", flexDirection: "column", alignItems: "center", minWidth: 0 }}>
           <div style={{ fontSize: "var(--text-sm)", fontWeight: 700, width: "100%", marginBottom: "var(--space-4)" }}>R-MULTIPLE OVERVIEW</div>
           <div style={{ width: 160, height: 160, position: "relative" }}>
             <Doughnut
@@ -1083,29 +1095,29 @@ export default function AnalyticsDashboard({ initialTrades: rawTrades, sharedUse
       </div>
 
       {/* 4. STREAKS ROW */}
-      <div className="card" style={{ padding: "var(--space-5)" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "var(--space-5)", textAlign: "center" }}>
-          <div>
+      <div className="card analytics-streaks-card" style={{ padding: "var(--space-5)" }}>
+        <div className="analytics-streaks-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "var(--space-5)", textAlign: "center" }}>
+          <div className="analytics-streak-item">
             <div className="text-muted" style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.05em", marginBottom: 8 }}>BEST TRADE</div>
             <div className="text-positive" style={{ fontWeight: 700 }}>{formatINR(bestTrade, { showSign: true, compact: true })}</div>
           </div>
-          <div>
+          <div className="analytics-streak-item">
             <div className="text-muted" style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.05em", marginBottom: 8 }}>WORST TRADE</div>
             <div className="text-negative" style={{ fontWeight: 700 }}>{formatINR(worstTrade, { compact: true })}</div>
           </div>
-          <div>
+          <div className="analytics-streak-item">
             <div className="text-muted" style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.05em", marginBottom: 8 }}>LARGEST WIN STREAK</div>
             <div className="text-positive" style={{ fontWeight: 700 }}>{maxWinStreak} Trades</div>
           </div>
-          <div>
+          <div className="analytics-streak-item">
             <div className="text-muted" style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.05em", marginBottom: 8 }}>LARGEST LOSS STREAK</div>
             <div className="text-negative" style={{ fontWeight: 700 }}>{maxLossStreak} Trades</div>
           </div>
-          <div>
+          <div className="analytics-streak-item">
             <div className="text-muted" style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.05em", marginBottom: 8 }}>AVG WIN</div>
             <div className="text-positive" style={{ fontWeight: 700 }}>{formatINR(avgWin, { showSign: true, compact: true })}</div>
           </div>
-          <div>
+          <div className="analytics-streak-item">
             <div className="text-muted" style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.05em", marginBottom: 8 }}>AVG LOSS</div>
             <div className="text-negative" style={{ fontWeight: 700 }}>{formatINR(avgLoss, { compact: true })}</div>
           </div>
@@ -1113,37 +1125,39 @@ export default function AnalyticsDashboard({ initialTrades: rawTrades, sharedUse
       </div>
 
       {/* 5. TABLES ROW */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "var(--space-6)" }}>
+      <div className="analytics-tables-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "var(--space-6)" }}>
         {[
           { title: "PERFORMANCE BY SETUP", data: bySetup },
           { title: "PERFORMANCE BY SYMBOL", data: bySymbol },
           { title: "PERFORMANCE BY DAY OF WEEK", data: byDayOfWeek },
           { title: "PERFORMANCE BY TIME OF DAY", data: byTimeOfDay },
         ].map((table, i) => (
-          <div key={i} className="card" style={{ padding: "var(--space-5)" }}>
+          <div key={i} className="card analytics-table-card" style={{ padding: "var(--space-5)" }}>
             <div style={{ fontSize: "var(--text-sm)", fontWeight: 700, marginBottom: "var(--space-4)" }}>{table.title}</div>
-            <table style={{ width: "100%", fontSize: "var(--text-xs)" }}>
-              <thead>
-                <tr className="text-muted" style={{ textAlign: "left", borderBottom: "1px solid var(--border-color)" }}>
-                  <th style={{ paddingBottom: 8, fontWeight: 600 }}>Category</th>
-                  <th style={{ paddingBottom: 8, fontWeight: 600, textAlign: "right" }}>Trades</th>
-                  <th style={{ paddingBottom: 8, fontWeight: 600, textAlign: "right" }}>Win %</th>
-                  <th style={{ paddingBottom: 8, fontWeight: 600, textAlign: "right" }}>P&L</th>
-                </tr>
-              </thead>
-              <tbody>
-                {table.data.slice(0, 6).map((row, j) => (
-                  <tr key={j} style={{ borderBottom: "1px solid var(--border-secondary)" }}>
-                    <td style={{ padding: "8px 0", fontWeight: 500 }}>{row.name}</td>
-                    <td style={{ padding: "8px 0", textAlign: "right" }}>{row.trades}</td>
-                    <td style={{ padding: "8px 0", textAlign: "right" }}>{row.winRate.toFixed(1)}%</td>
-                    <td style={{ padding: "8px 0", textAlign: "right", fontWeight: 600 }} className={cn(row.pnl >= 0 ? "text-positive" : "text-negative")}>
-                      {formatINR(row.pnl, { showSign: true, compact: true })}
-                    </td>
+            <div className="analytics-table-scroll" style={{ width: "100%", overflowX: "auto" }}>
+              <table style={{ width: "100%", fontSize: "var(--text-xs)" }}>
+                <thead>
+                  <tr className="text-muted" style={{ textAlign: "left", borderBottom: "1px solid var(--border-color)" }}>
+                    <th style={{ paddingBottom: 8, fontWeight: 600 }}>Category</th>
+                    <th style={{ paddingBottom: 8, fontWeight: 600, textAlign: "right" }}>Trades</th>
+                    <th style={{ paddingBottom: 8, fontWeight: 600, textAlign: "right" }}>Win %</th>
+                    <th style={{ paddingBottom: 8, fontWeight: 600, textAlign: "right" }}>P&L</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {table.data.slice(0, 6).map((row, j) => (
+                    <tr key={j} style={{ borderBottom: "1px solid var(--border-secondary)" }}>
+                      <td style={{ padding: "8px 0", fontWeight: 500 }}>{row.name}</td>
+                      <td style={{ padding: "8px 0", textAlign: "right" }}>{row.trades}</td>
+                      <td style={{ padding: "8px 0", textAlign: "right" }}>{row.winRate.toFixed(1)}%</td>
+                      <td style={{ padding: "8px 0", textAlign: "right", fontWeight: 600 }} className={cn(row.pnl >= 0 ? "text-positive" : "text-negative")}>
+                        {formatINR(row.pnl, { showSign: true, compact: true })}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         ))}
       </div>

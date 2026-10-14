@@ -28,7 +28,7 @@ export function RiskBudgetGuide({ portfolio, state }: RiskBudgetGuideProps) {
   )`;
 
   return (
-    <div className="card card-body flex flex-col h-full border-l border-border-secondary rounded-l-none">
+    <div className="card card-body flex flex-col h-full border-l border-border-secondary rounded-l-none risk-budget-card">
       <div className="flex items-center gap-2 mb-6">
         <h3 className="font-bold text-sm tracking-wide text-secondary flex items-center gap-2">
            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
@@ -36,8 +36,8 @@ export function RiskBudgetGuide({ portfolio, state }: RiskBudgetGuideProps) {
         </h3>
       </div>
 
-      <div className="flex items-center justify-between mb-8">
-        <div className="relative w-28 h-28 flex items-center justify-center shrink-0">
+      <div className="flex items-center justify-between mb-8 risk-budget-chart-row">
+        <div className="relative w-28 h-28 flex items-center justify-center shrink-0 risk-budget-doughnut">
           {/* Doughnut Chart via CSS */}
           <div className="absolute inset-0 rounded-full" style={{ background: conicGradient }}></div>
           <div className="absolute inset-2 rounded-full flex flex-col items-center justify-center" style={{ background: "var(--bg-card)" }}>
@@ -46,7 +46,7 @@ export function RiskBudgetGuide({ portfolio, state }: RiskBudgetGuideProps) {
           </div>
         </div>
         
-        <div className="flex-1 pl-6 space-y-3 text-sm">
+        <div className="flex-1 pl-6 space-y-3 text-sm risk-budget-legend">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-positive"></div>
@@ -92,8 +92,8 @@ export function RiskBudgetGuide({ portfolio, state }: RiskBudgetGuideProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 mb-6 pt-6 border-t border-border-secondary">
-        <div>
+      <div className="grid grid-cols-2 gap-4 mb-6 pt-6 border-t border-border-secondary risk-budget-capacity-grid">
+        <div className="risk-budget-capacity-tile">
           <div className="text-xs text-secondary mb-1">Your Capacity</div>
           <div className="flex items-baseline gap-2">
             <span className="text-3xl font-bold font-mono text-primary">{Math.max(0, Math.floor(fullRiskTradesCapacity))}</span>
@@ -102,7 +102,7 @@ export function RiskBudgetGuide({ portfolio, state }: RiskBudgetGuideProps) {
             </div>
           </div>
         </div>
-        <div>
+        <div className="risk-budget-capacity-tile">
           <div className="text-xs text-secondary mb-1">Remaining Capacity</div>
           <div className={cn("text-xl font-bold font-mono", remainingRiskCapacityAmount < 0 ? "text-negative" : "text-positive")}>
             {(capital > 0 ? (remainingRiskCapacityAmount/capital)*100 : 0).toFixed(2)}%

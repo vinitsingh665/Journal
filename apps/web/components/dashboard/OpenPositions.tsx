@@ -192,8 +192,8 @@ export default function OpenPositions({ positions }: { positions: Position[] }) 
 
               {/* Mini Candlestick Chart */}
               {chartData && chartData.candles.length > 0 ? (
-                <div style={{ margin: "8px -8px 0 -8px" }}>
-                                <MiniCandleChart
+                <div style={{ margin: "8px 0 0 0", width: "100%", overflow: "hidden" }}>
+                  <MiniCandleChart
                     candles={chartData.candles}
                     entryPrice={pos.avgEntryPrice}
                     entryTime={new Date(pos.entryTime).getTime()}

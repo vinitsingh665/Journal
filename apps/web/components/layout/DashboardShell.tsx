@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
+import MobileBottomNav from "@/components/layout/MobileBottomNav";
 import NotesFAB from "@/components/notes/NotesFAB";
 import prisma from "@repo/database";
 
@@ -31,6 +32,7 @@ async function ShellData({ userId, children }: { userId: string, children: React
         <Topbar userName={userName} avatar={avatar} isGuest={user?.isGuest} userId={userId} role={user?.role} />
         <main className="app-content">{children}</main>
         <NotesFAB />
+        <MobileBottomNav />
       </div>
     </>
   );

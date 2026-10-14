@@ -341,7 +341,7 @@ export default function TradesList({
           <span className="trades-kpi-label">WIN RATE</span>
           <span className="trades-kpi-value" style={{ color: kpis.winRate >= 50 ? "var(--color-positive)" : "var(--text-primary)" }}>{kpis.winRate.toFixed(1)}%</span>
         </div>
-        <div className="trades-kpi-card">
+        <div className={cn("trades-kpi-card", kpis.totalPnl >= 0 ? "kpi-pnl-profit" : "kpi-pnl-loss")}>
           <span className="trades-kpi-label">TOTAL P&L</span>
           <span className="trades-kpi-value" style={{ color: kpis.totalPnl >= 0 ? "var(--color-positive)" : "var(--color-negative)" }}>
             {formatINR(kpis.totalPnl, { showSign: true })}
@@ -418,9 +418,9 @@ export default function TradesList({
 
       {/* Master-Detail Layout */}
       <div className="trades-layout">
-        {/* Left: Table */}
+        {/* Left: Table (Desktop) & Cards (Mobile) */}
         <div className="trades-table-panel">
-          <div className="card">
+          <div className="card trades-desktop-view">
             <div className="table-container">
               {paginated.length > 0 ? (
                 <table className="data-table" id="trades-table">
@@ -699,44 +699,280 @@ export default function TradesList({
               </div>
             )}
           </div>
-        </div>
 
-        {/* Right: Detail Panel */}
-        {selectedTrade && (
-          <div className="trade-detail-panel">
-            <div className="card" style={{ position: "sticky", top: 16 }}>
-              {/* Header */}
-              <div style={{ padding: "var(--space-4) var(--space-5)", borderBottom: "1px solid var(--border-secondary)" }}>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span style={{ fontSize: "var(--text-xl)", fontWeight: 700 }}>
-                      {selectedTrade.symbol}
-                    </span>
-                    <span className={`badge ${selectedTrade.direction === "LONG" ? "badge-long" : "badge-short"}`}>
-                      {selectedTrade.direction}
-                    </span>
-                    <span className={cn(
-                      "badge",
-                      (selectedTrade.status === "CLOSED" || selectedTrade.status === "STOP_LOSS_HIT") ? (selectedTrade.status === "STOP_LOSS_HIT" ? "badge-stop-loss-hit" : "badge-closed") : "badge-open"
-                    )}>
-                      {selectedTrade.status === "CLOSED" ? "Closed" : selectedTrade.status === "STOP_LOSS_HIT" ? "SL Hit" : "Open"}
-                    </span>
+          {/* Mobile Card View */}
+          <div className="trades-mobile-view">
+            {paginated.length > 0 ? (
+              <div className="trades-mobile-cards-list">
+                {paginated.map((trade) => {
+                  const liveQuote = livePnl.get(trade.id);
+                  const displayPnl = liveQuote ? (trade.netPnl + liveQuote.netPnl) : trade.netPnl;
+                  const openQty = trade.totalBuyQty - trade.totalSellQty;
+                  const riskPerUnit = trade.stopLoss ? Math.abs(trade.avgEntryPrice - trade.stopLoss) : 0;
+                  const riskAmount = riskPerUnit * (openQty || 1);
+                  const displayR = liveQuote && trade.stopLoss && riskAmount > 0
+                    ? (displayPnl / riskAmount)
+                    : trade.rMultiple;
+                  const displayPct = liveQuote ? liveQuote.pnlPercentage : trade.pnlPercentage;
+                  const isExpanded = expandedTradeId === trade.id;
 
-                  </div>
-                  <button
-                    className="btn btn-ghost btn-icon btn-sm"
-                    onClick={() => setSelectedTradeId(null)}
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <line x1="18" y1="6" x2="6" y2="18" />
-                      <line x1="6" y1="6" x2="18" y2="18" />
-                    </svg>
-                  </button>
-                </div>
-                <div className="text-muted" style={{ fontSize: "var(--text-xs)", marginTop: 4 }}>
-                  {formatDate(selectedTrade.entryTime)}
+                  return (
+                    <div
+                      key={trade.id}
+                      className={cn(
+                        "trade-mobile-card",
+                        selectedTradeId === trade.id && "trade-mobile-card-selected"
+                      )}
+                      onClick={() => setSelectedTradeId(trade.id)}
+                    >
+                      {/* Top Row: Symbol, Badges, Date */}
+                      <div className="trade-mcard-top">
+                        <div className="flex items-center gap-2">
+                          <span className="trade-mcard-symbol">{trade.symbol}</span>
+                          <span className={cn("badge", trade.direction === "LONG" ? "badge-long" : "badge-short")}>
+                            {trade.direction}
+                          </span>
+                          <span className={cn(
+                            "badge",
+                            trade.status === "OPEN" ? "badge-open" :
+                            trade.status === "CLOSED" ? "badge-closed" : 
+                            trade.status === "STOP_LOSS_HIT" ? "badge-stop-loss-hit" : "badge-partial"
+                          )}>
+                            {trade.status === "CLOSED" ? "Closed" : 
+                             trade.status === "STOP_LOSS_HIT" ? "SL Hit" :
+                             trade.status === "OPEN" ? "Open" : "Partial"}
+                          </span>
+                        </div>
+                        <span className="trade-mcard-date text-muted">{formatDate(trade.entryTime)}</span>
+                      </div>
+
+                      {/* Optional Strategy / Setup tags */}
+                      {(trade.strategy || trade.setup) && (
+                        <div className="trade-mcard-tags">
+                          {trade.strategy && <span className="trade-mcard-tag">{trade.strategy}</span>}
+                          {trade.setup && <span className="trade-mcard-tag">{trade.setup}</span>}
+                        </div>
+                      )}
+
+                      {/* Main Metrics: Entry, Exit, Qty, P&L */}
+                      <div className="trade-mcard-stats">
+                        <div className="trade-mcard-price-grid">
+                          <div className="trade-mcard-col">
+                            <span className="trade-mcard-col-label">Entry</span>
+                            <span className="trade-mcard-col-val">{formatINR(trade.avgEntryPrice)}</span>
+                          </div>
+                          <div className="trade-mcard-col">
+                            <span className="trade-mcard-col-label">{trade.status === "OPEN" ? "CMP / Exit" : "Exit"}</span>
+                            <span className="trade-mcard-col-val">
+                              {trade.avgExitPrice ? formatINR(trade.avgExitPrice) : (liveQuote?.currentPrice ? formatINR(liveQuote.currentPrice) : "—")}
+                            </span>
+                          </div>
+                          <div className="trade-mcard-col">
+                            <span className="trade-mcard-col-label">Qty</span>
+                            <span className="trade-mcard-col-val">{formatQuantity(trade.direction === "LONG" ? trade.totalBuyQty : trade.totalSellQty)}</span>
+                          </div>
+                        </div>
+
+                        <div className="trade-mcard-pnl-section">
+                          <div className={cn("trade-mcard-pnl-val", displayPnl >= 0 ? "text-positive" : "text-negative")}>
+                            {formatINR(displayPnl, { showSign: true, compact: true })}
+                          </div>
+                          <div className="trade-mcard-pnl-sub">
+                            <span className={cn("trade-mcard-pct", (displayPct ?? 0) >= 0 ? "text-positive" : "text-negative")}>
+                              {(displayPct ?? 0) >= 0 ? "+" : ""}{(displayPct ?? 0).toFixed(2)}%
+                            </span>
+                            {displayR !== null && (
+                              <span className={cn("trade-mcard-r-badge", displayR >= 0 ? "r-pos" : "r-neg")}>
+                                {displayR >= 0 ? "+" : ""}{displayR.toFixed(2)}R
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Card Footer: Expand/Collapse Executions Button */}
+                      <div className="trade-mcard-footer">
+                        {trade.executions && trade.executions.length > 0 ? (
+                          <button
+                            type="button"
+                            className={cn("trade-mcard-expand-btn", isExpanded && "expanded")}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setExpandedTradeId(isExpanded ? null : trade.id);
+                            }}
+                            aria-expanded={isExpanded}
+                          >
+                            <span className="trade-mcard-expand-label">
+                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="8" y1="6" x2="21" y2="6"></line>
+                                <line x1="8" y1="12" x2="21" y2="12"></line>
+                                <line x1="8" y1="18" x2="21" y2="18"></line>
+                                <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                                <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                                <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                              </svg>
+                              <span>{trade.executions.length} {trade.executions.length === 1 ? "Execution" : "Executions"}</span>
+                            </span>
+                            <ChevronDown size={14} className={cn("trade-mcard-chevron", isExpanded && "rotated")} />
+                          </button>
+                        ) : (
+                          <span className="trade-mcard-single-tag text-muted">Single Fill</span>
+                        )}
+
+                        <div className="trade-mcard-view-hint">
+                          <span>View Details</span>
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                          </svg>
+                        </div>
+                      </div>
+
+                      {/* Expanded Executions on Mobile */}
+                      {isExpanded && trade.executions && trade.executions.length > 0 && (
+                        <div
+                          className="trade-mcard-exec-drawer"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <div className="trade-mcard-exec-drawer-header">
+                            <span>Execution Orders ({trade.executions.length})</span>
+                          </div>
+                          <div className="trade-mcard-exec-drawer-items">
+                            {(() => {
+                              let runningBuyQty = 0;
+                              let runningBuyValue = 0;
+                              let runningSellQty = 0;
+                              let runningSellValue = 0;
+
+                              return trade.executions.map((exec) => {
+                                let runningAvg = 0;
+                                if (exec.side === "BUY") {
+                                  runningBuyQty += exec.quantity;
+                                  runningBuyValue += exec.quantity * exec.price;
+                                  runningAvg = runningBuyValue / runningBuyQty;
+                                } else {
+                                  runningSellQty += exec.quantity;
+                                  runningSellValue += exec.quantity * exec.price;
+                                  runningAvg = runningSellValue / runningSellQty;
+                                }
+
+                                return (
+                                  <div key={exec.id} className="trade-mcard-exec-row">
+                                    <div className="flex items-center justify-between">
+                                      <div className="flex items-center gap-2">
+                                        <span className={cn("trade-exec-badge", exec.side === "BUY" ? "buy" : "sell")}>
+                                          {exec.side}
+                                        </span>
+                                        <span className="trade-exec-qty">
+                                          {formatQuantity(exec.quantity)} shares @ {formatINR(exec.price)}
+                                        </span>
+                                      </div>
+                                      <span className="trade-exec-val">{formatINR(exec.price * exec.quantity)}</span>
+                                    </div>
+                                    <div className="trade-mcard-exec-subrow text-muted">
+                                      <span>Avg: {formatINR(runningAvg)}</span>
+                                      <span>{formatDate(exec.executionTime)}</span>
+                                    </div>
+                                  </div>
+                                );
+                              });
+                            })()}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="card">
+                <div className="empty-state">
+                  <svg className="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+                    <polyline points="16 7 22 7 22 13" />
+                  </svg>
+                  <h3 className="empty-state-title">No trades found</h3>
+                  <p className="empty-state-description">
+                    {trades.length === 0
+                      ? "Start by importing your trades or adding them manually."
+                      : "No trades match your current filters."}
+                  </p>
                 </div>
               </div>
+            )}
+
+            {/* Mobile Pagination */}
+            {totalPages > 1 && (
+              <div className="trades-mobile-pagination">
+                <button
+                  className="btn btn-secondary btn-sm"
+                  disabled={page <= 1}
+                  onClick={() => handlePageChange(page - 1)}
+                >
+                  ‹ Prev
+                </button>
+                <span className="text-muted text-xs font-semibold">
+                  {page} / {totalPages}
+                </span>
+                <button
+                  className="btn btn-secondary btn-sm"
+                  disabled={page >= totalPages}
+                  onClick={() => handlePageChange(page + 1)}
+                >
+                  Next ›
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right: Detail Panel (Desktop side panel / Mobile bottom sheet) */}
+        {selectedTrade && (
+          <>
+            <div
+              className="trade-detail-backdrop"
+              onClick={() => setSelectedTradeId(null)}
+              aria-hidden="true"
+            />
+            <div className="trade-detail-panel">
+              <div className="card trade-detail-card" style={{ position: "sticky", top: 16 }}>
+                {/* Mobile Handle Bar */}
+                <div className="trade-detail-handle-bar">
+                  <div className="trade-detail-handle" />
+                </div>
+
+                {/* Header */}
+                <div style={{ padding: "var(--space-4) var(--space-5)", borderBottom: "1px solid var(--border-secondary)" }}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span style={{ fontSize: "var(--text-xl)", fontWeight: 700 }}>
+                        {selectedTrade.symbol}
+                      </span>
+                      <span className={`badge ${selectedTrade.direction === "LONG" ? "badge-long" : "badge-short"}`}>
+                        {selectedTrade.direction}
+                      </span>
+                      <span className={cn(
+                        "badge",
+                        (selectedTrade.status === "CLOSED" || selectedTrade.status === "STOP_LOSS_HIT") ? (selectedTrade.status === "STOP_LOSS_HIT" ? "badge-stop-loss-hit" : "badge-closed") : "badge-open"
+                      )}>
+                        {selectedTrade.status === "CLOSED" ? "Closed" : selectedTrade.status === "STOP_LOSS_HIT" ? "SL Hit" : "Open"}
+                      </span>
+
+                    </div>
+                    <button
+                      className="btn btn-ghost btn-icon btn-sm trade-detail-close-btn"
+                      onClick={() => setSelectedTradeId(null)}
+                      aria-label="Close trade details"
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                      </svg>
+                    </button>
+                  </div>
+                  <div className="text-muted" style={{ fontSize: "var(--text-xs)", marginTop: 4 }}>
+                    {formatDate(selectedTrade.entryTime)}
+                  </div>
+                </div>
 
               {/* Key Metrics */}
               {(() => {
@@ -751,7 +987,7 @@ export default function TradesList({
                   : selectedTrade.rMultiple;
                   
                 return (
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1.7fr 1fr", gap: "var(--space-3)", padding: "var(--space-4) var(--space-5)", borderBottom: "1px solid var(--border-secondary)" }}>
+                  <div className="trade-detail-metrics-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1.7fr 1fr", gap: "var(--space-3)", padding: "var(--space-4) var(--space-5)", borderBottom: "1px solid var(--border-secondary)" }}>
                     <div>
                       <div className="text-muted" style={{ fontSize: "var(--text-xs)", marginBottom: 2 }}>R-Multiple</div>
                       <div className={cn("text-positive", (displayR ?? 0) < 0 && "text-negative")} style={{ fontSize: "var(--text-lg)", fontWeight: 700, fontFamily: "var(--font-mono)" }}>
@@ -775,7 +1011,7 @@ export default function TradesList({
               })()}
 
               {/* Trade Info Grid */}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "var(--space-3)", padding: "var(--space-4) var(--space-5)", borderBottom: "1px solid var(--border-secondary)" }}>
+              <div className="trade-detail-info-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "var(--space-3)", padding: "var(--space-4) var(--space-5)", borderBottom: "1px solid var(--border-secondary)" }}>
                 {[
                   { label: "Entry", value: formatINR(selectedTrade.avgEntryPrice), sub: formatDate(selectedTrade.entryTime) },
                   { label: "Exit", value: selectedTrade.avgExitPrice ? formatINR(selectedTrade.avgExitPrice) : "—", sub: selectedTrade.exitTime ? formatDate(selectedTrade.exitTime) : "" },
@@ -862,7 +1098,7 @@ export default function TradesList({
 
               {/* Action Links */}
               {!isShared && (
-                <div style={{ padding: "var(--space-3) var(--space-5)", borderTop: "1px solid var(--border-secondary)", display: "flex", gap: "var(--space-2)" }}>
+                <div className="trade-detail-actions" style={{ padding: "var(--space-3) var(--space-5)", borderTop: "1px solid var(--border-secondary)", display: "flex", gap: "var(--space-2)" }}>
                   {(selectedTrade.status === "OPEN" || selectedTrade.status === "PARTIAL") && (
                     <button
                       className="btn btn-primary btn-sm"
@@ -883,7 +1119,8 @@ export default function TradesList({
               )}
             </div>
           </div>
-        )}
+        </>
+      )}
       </div>
 
       {/* Bulk Delete Confirmation Modal */}

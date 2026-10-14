@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { NAV_ITEMS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+import { useAppStore } from "@/stores/app-store";
 
 const ICONS: Record<string, React.ReactNode> = {
   dashboard: (
@@ -115,6 +116,25 @@ const ICONS: Record<string, React.ReactNode> = {
 export default function Sidebar({ userName = "Trader", tradingStyle = "Swing Trader", avatar = null }: { userName?: string, tradingStyle?: string, avatar?: string | null }) {
   const pathname = usePathname();
   const router = useRouter();
+  const mobileSidebarOpen = useAppStore((s) => s.mobileSidebarOpen);
+  const setMobileSidebarOpen = useAppStore((s) => s.setMobileSidebarOpen);
+
+  // Close mobile sidebar on route change
+  useEffect(() => {
+    setMobileSidebarOpen(false);
+  }, [pathname, setMobileSidebarOpen]);
+
+  // Lock body scroll on mobile when sidebar drawer is open
+  useEffect(() => {
+    if (mobileSidebarOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileSidebarOpen]);
 
   // Auto-sync stop losses
   useEffect(() => {
@@ -141,6 +161,7 @@ export default function Sidebar({ userName = "Trader", tradingStyle = "Swing Tra
   const handleLogout = async () => {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
+      setMobileSidebarOpen(false);
       router.push("/login");
       router.refresh(); // Force a full refresh to clear server components cache
     } catch (error) {
@@ -149,81 +170,112 @@ export default function Sidebar({ userName = "Trader", tradingStyle = "Swing Tra
   };
 
   return (
-    <aside className="sidebar" id="sidebar">
-      {/* Brand */}
-      <Link href="/" className="sidebar-brand" style={{ display: 'flex', justifyContent: 'flex-start', padding: '16px 20px', minHeight: '64px', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
-        <Image
-          src="/logo2.png"
-          alt="TraderLabs"
-          width={60}
-          height={60}
-          style={{ objectFit: 'contain' }}
-          priority
+    <>
+      {/* Mobile Drawer Backdrop Overlay */}
+      {mobileSidebarOpen && (
+        <div
+          className="sidebar-backdrop"
+          onClick={() => setMobileSidebarOpen(false)}
+          aria-label="Close navigation"
         />
-        <div className="sidebar-brand-text" style={{ display: 'flex', flexDirection: 'column' }}>
-          <span className="sidebar-brand-name" style={{ fontSize: '18px', fontWeight: 'bold', color: 'white', letterSpacing: '1px' }}>TraderLabs</span>
-          <span className="sidebar-brand-tagline" style={{ fontSize: '10px', color: '#94a3b8', letterSpacing: '0.5px' }}>Plan . Execute . Improve</span>
-        </div>
-      </Link>
+      )}
 
-      {/* Navigation */}
-      <nav className="sidebar-nav">
-        {NAV_ITEMS.map((section) => (
-          <div key={section.section} className="sidebar-section">
-            <div className="sidebar-section-label">{section.section}</div>
-            {section.items.map((item) => {
-              const isActive = pathname.startsWith(item.href);
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  prefetch={true}
-                  className={cn("sidebar-link", isActive && "active")}
-                  id={`nav-${item.icon}`}
+      <aside className={cn("sidebar", mobileSidebarOpen && "open")} id="sidebar">
+        {/* Brand Header */}
+        <div className="sidebar-brand-wrapper" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>
+          <Link
+            href="/"
+            onClick={() => setMobileSidebarOpen(false)}
+            className="sidebar-brand"
+            style={{ display: 'flex', justifyContent: 'flex-start', padding: '16px 20px', minHeight: '64px', alignItems: 'center', gap: '10px', textDecoration: 'none', flex: 1 }}
+          >
+            <Image
+              src="/logo2.png"
+              alt="TraderLabs"
+              width={60}
+              height={60}
+              style={{ objectFit: 'contain' }}
+              priority
+            />
+            <div className="sidebar-brand-text" style={{ display: 'flex', flexDirection: 'column' }}>
+              <span className="sidebar-brand-name" style={{ fontSize: '18px', fontWeight: 'bold', color: 'white', letterSpacing: '1px' }}>TraderLabs</span>
+              <span className="sidebar-brand-tagline" style={{ fontSize: '10px', color: '#94a3b8', letterSpacing: '0.5px' }}>Plan . Execute . Improve</span>
+            </div>
+          </Link>
+
+          {/* Close button on mobile */}
+          <button
+            className="sidebar-mobile-close"
+            onClick={() => setMobileSidebarOpen(false)}
+            aria-label="Close menu"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        {/* Navigation */}
+        <nav className="sidebar-nav">
+          {NAV_ITEMS.map((section) => (
+            <div key={section.section} className="sidebar-section">
+              <div className="sidebar-section-label">{section.section}</div>
+              {section.items.map((item) => {
+                const isActive = pathname.startsWith(item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    prefetch={true}
+                    onClick={() => setMobileSidebarOpen(false)}
+                    className={cn("sidebar-link", isActive && "active")}
+                    id={`nav-${item.icon}`}
+                  >
+                    {ICONS[item.icon]}
+                    <span>{item.name}</span>
+                  </Link>
+                );
+              })}
+              
+              {/* Inject Logout button in the System section */}
+              {section.section === "System" && (
+                <a
+                  role="button"
+                  tabIndex={0}
+                  onClick={handleLogout}
+                  className="sidebar-link logout-link"
+                  style={{ marginTop: '4px', cursor: 'pointer' }}
                 >
-                  {ICONS[item.icon]}
-                  <span>{item.name}</span>
-                </Link>
-              );
-            })}
-            
-            {/* Inject Logout button in the System section */}
-            {section.section === "System" && (
-              <a
-                role="button"
-                tabIndex={0}
-                onClick={handleLogout}
-                className="sidebar-link logout-link"
-                style={{ marginTop: '4px', cursor: 'pointer' }}
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                  <polyline points="16 17 21 12 16 7"></polyline>
-                  <line x1="21" y1="12" x2="9" y2="12"></line>
-                </svg>
-                <span>Logout</span>
-              </a>
-            )}
-          </div>
-        ))}
-      </nav>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                  </svg>
+                  <span>Logout</span>
+                </a>
+              )}
+            </div>
+          ))}
+        </nav>
 
-      {/* Footer */}
-      <div className="sidebar-footer">
-        <div className="sidebar-user">
-          <div className="sidebar-avatar" style={{ overflow: "hidden", border: avatar ? "1px solid var(--border-secondary)" : "none" }}>
-            {avatar ? (
-              <img src={avatar} alt="Profile Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-            ) : (
-              userName.charAt(0).toUpperCase()
-            )}
-          </div>
-          <div className="sidebar-user-info">
-            <span className="sidebar-user-name">{userName}</span>
-            <span className="sidebar-user-role">{tradingStyle}</span>
+        {/* Footer */}
+        <div className="sidebar-footer">
+          <div className="sidebar-user">
+            <div className="sidebar-avatar" style={{ overflow: "hidden", border: avatar ? "1px solid var(--border-secondary)" : "none" }}>
+              {avatar ? (
+                <img src={avatar} alt="Profile Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              ) : (
+                userName.charAt(0).toUpperCase()
+              )}
+            </div>
+            <div className="sidebar-user-info">
+              <span className="sidebar-user-name">{userName}</span>
+              <span className="sidebar-user-role">{tradingStyle}</span>
+            </div>
           </div>
         </div>
-      </div>
-    </aside>
+      </aside>
+    </>
   );
 }

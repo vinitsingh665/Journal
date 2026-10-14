@@ -186,10 +186,10 @@ export default function JournalList({
 
       {/* Journal Entries */}
       {Object.keys(grouped).length > 0 ? (
-        <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-6)" }}>
+        <div className="journal-groups-list" style={{ display: "flex", flexDirection: "column", gap: "var(--space-6)" }}>
           {Object.entries(grouped).map(([dateKey, dateTrades]) => (
-            <div key={dateKey}>
-              <div style={{
+            <div key={dateKey} className="journal-date-group">
+              <div className="journal-date-header" style={{
                 fontSize: "var(--text-xs)",
                 fontWeight: 600,
                 color: "var(--text-muted)",
@@ -200,14 +200,14 @@ export default function JournalList({
               }}>
                 {dateKey}
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-3)" }}>
+              <div className="journal-cards-list" style={{ display: "flex", flexDirection: "column", gap: "var(--space-3)" }}>
                 {dateTrades.map((trade) => (
                   <Link
                     key={trade.id}
                     href={isShared ? `/shared/${sharedUserId}/journal/${trade.id}` : `/journal/${trade.id}`}
                     style={{ textDecoration: "none", color: "inherit" }}
                   >
-                    <div className="card" style={{
+                    <div className="card journal-card" style={{
                       padding: "var(--space-4) var(--space-5)",
                       cursor: "pointer",
                       transition: "all 0.2s ease",
@@ -222,12 +222,12 @@ export default function JournalList({
                       (e.currentTarget as HTMLDivElement).style.boxShadow = "";
                     }}
                     >
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <div className="journal-card-main" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         {/* Left: Symbol + Direction + Meta */}
-                        <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)" }}>
+                        <div className="journal-card-left" style={{ display: "flex", alignItems: "center", gap: "var(--space-3)" }}>
                           <div>
-                            <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)" }}>
-                              <span style={{ fontSize: "var(--text-lg)", fontWeight: 700 }}>{trade.symbol}</span>
+                            <div className="journal-card-symbol-row" style={{ display: "flex", alignItems: "center", gap: "var(--space-2)" }}>
+                              <span className="journal-card-symbol" style={{ fontSize: "var(--text-lg)", fontWeight: 700 }}>{trade.symbol}</span>
                               <span className={`badge ${trade.direction === "LONG" ? "badge-long" : "badge-short"}`}>
                                 {trade.direction}
                               </span>
@@ -246,7 +246,7 @@ export default function JournalList({
                                 <span className="tag" style={{ fontSize: 10 }}>{trade.setup}</span>
                               )}
                             </div>
-                            <div className="text-muted" style={{ fontSize: "var(--text-xs)", marginTop: 2 }}>
+                            <div className="journal-card-meta text-muted" style={{ fontSize: "var(--text-xs)", marginTop: 2 }}>
                               {trade.exchange} · {trade.totalBuyQty} qty · {formatHoldingPeriod(trade.holdingPeriodMs)} hold
                               {trade.executionCount > 0 && ` · ${trade.executionCount} executions`}
                             </div>
@@ -266,31 +266,31 @@ export default function JournalList({
                             : trade.rMultiple;
 
                           return (
-                            <div style={{ display: "flex", alignItems: "center", gap: "var(--space-6)", textAlign: "right" }}>
+                            <div className="journal-card-right" style={{ display: "flex", alignItems: "center", gap: "var(--space-6)", textAlign: "right" }}>
                               {displayR !== null && (
-                                <div>
-                                  <div className="text-muted" style={{ fontSize: 10 }}>R-Multiple</div>
-                                  <div className={cn(displayR >= 0 ? "text-positive" : "text-negative")}
+                                <div className="journal-card-stat">
+                                  <div className="journal-card-stat-label text-muted" style={{ fontSize: 10 }}>R-Multiple</div>
+                                  <div className={cn("journal-card-stat-val", displayR >= 0 ? "text-positive" : "text-negative")}
                                     style={{ fontWeight: 700, fontFamily: "var(--font-mono)", fontSize: "var(--text-sm)" }}>
                                     {displayR >= 0 ? "+" : ""}{displayR.toFixed(2)}R
                                   </div>
                                 </div>
                               )}
-                              <div>
-                                <div className="text-muted" style={{ fontSize: 10 }}>P&L</div>
-                                <div className={cn(displayPnl >= 0 ? "text-positive" : "text-negative")}
+                              <div className="journal-card-stat">
+                                <div className="journal-card-stat-label text-muted" style={{ fontSize: 10 }}>P&L</div>
+                                <div className={cn("journal-card-stat-val", displayPnl >= 0 ? "text-positive" : "text-negative")}
                                   style={{ fontWeight: 700, fontFamily: "var(--font-mono)", fontSize: "var(--text-sm)" }}>
                                   {formatINR(displayPnl, { showSign: true })}
                                 </div>
                               </div>
-                              <div>
-                                <div className="text-muted" style={{ fontSize: 10 }}>Return</div>
-                                <div className={cn(displayPct >= 0 ? "text-positive" : "text-negative")}
+                              <div className="journal-card-stat">
+                                <div className="journal-card-stat-label text-muted" style={{ fontSize: 10 }}>Return</div>
+                                <div className={cn("journal-card-stat-val", displayPct >= 0 ? "text-positive" : "text-negative")}
                                   style={{ fontWeight: 700, fontFamily: "var(--font-mono)", fontSize: "var(--text-sm)" }}>
                                   {displayPct >= 0 ? "+" : ""}{displayPct.toFixed(2)}%
                                 </div>
                               </div>
-                              <div style={{ color: "var(--text-muted)", fontSize: 18 }}>›</div>
+                              <div className="journal-card-chevron" style={{ color: "var(--text-muted)", fontSize: 18 }}>›</div>
                             </div>
                           );
                         })()}
@@ -298,7 +298,7 @@ export default function JournalList({
 
                       {/* Thesis preview */}
                       {trade.thesis && (
-                        <div className="text-muted" style={{
+                        <div className="journal-card-thesis text-muted" style={{
                           fontSize: "var(--text-xs)",
                           marginTop: "var(--space-2)",
                           overflow: "hidden",

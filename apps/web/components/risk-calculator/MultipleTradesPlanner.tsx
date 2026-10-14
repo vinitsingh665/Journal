@@ -39,32 +39,32 @@ export function MultipleTradesPlanner({ portfolio, state, actions }: MultipleTra
   const hasSectorWarning = topSectorPct > 35; // warning if > 35% in one sector
 
   return (
-    <div className="card card-body mt-6 overflow-hidden">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-4">
-          <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-xs font-bold text-inverse">4</div>
-          <h3 className="font-bold text-sm tracking-wide">MULTIPLE TRADES PLANNER</h3>
+    <div className="card card-body mt-6 overflow-hidden risk-planner-card">
+      <div className="flex items-center justify-between mb-6 risk-planner-header">
+        <div className="flex items-center gap-4 risk-planner-title-group">
+          <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-xs font-bold text-inverse shrink-0">4</div>
+          <h3 className="font-bold text-sm tracking-wide shrink-0">MULTIPLE TRADES PLANNER</h3>
           
-          <div className="flex gap-3 ml-6 pl-6 border-l border-border-secondary">
-            <div className="px-3 py-1.5 rounded-md bg-positive/10">
+          <div className="flex gap-3 ml-6 pl-6 border-l border-border-secondary risk-planner-badges-row">
+            <div className="px-3 py-1.5 rounded-md bg-positive/10 shrink-0">
                <div className="text-[10px] text-secondary font-semibold uppercase">Open Risk ({openCount})</div>
                <div className="text-sm font-bold font-mono text-positive">{formatINR(openRiskAmount, { compact: true })} ({(capital > 0 ? (openRiskAmount/capital)*100 : 0).toFixed(2)}%)</div>
             </div>
-            <div className="px-3 py-1.5 rounded-md bg-warning/10">
+            <div className="px-3 py-1.5 rounded-md bg-warning/10 shrink-0">
                <div className="text-[10px] text-secondary font-semibold uppercase">Planned Risk ({plannedCount})</div>
                <div className="text-sm font-bold font-mono text-warning">{formatINR(plannedRiskAmount, { compact: true })} ({(capital > 0 ? (plannedRiskAmount/capital)*100 : 0).toFixed(2)}%)</div>
             </div>
-            <div className="px-3 py-1.5 rounded-md bg-sidebar-active/30">
+            <div className="px-3 py-1.5 rounded-md bg-sidebar-active/30 shrink-0">
                <div className="text-[10px] text-secondary font-semibold uppercase">Total Risk</div>
                <div className="text-sm font-bold font-mono text-primary">{formatINR(totalPortfolioRiskAmount, { compact: true })} ({(capital > 0 ? (totalPortfolioRiskAmount/capital)*100 : 0).toFixed(2)}%)</div>
             </div>
-            <div className={cn("px-3 py-1.5 rounded-md", remainingRiskCapacityAmount < 0 ? "bg-negative/10" : "bg-positive/10")}>
+            <div className={cn("px-3 py-1.5 rounded-md shrink-0", remainingRiskCapacityAmount < 0 ? "bg-negative/10" : "bg-positive/10")}>
                <div className="text-[10px] text-secondary font-semibold uppercase">Available Risk</div>
                <div className={cn("text-sm font-bold font-mono", remainingRiskCapacityAmount < 0 ? "text-negative" : "text-positive")}>
                  {formatINR(remainingRiskCapacityAmount, { compact: true })} ({(capital > 0 ? (remainingRiskCapacityAmount/capital)*100 : 0).toFixed(2)}%)
                </div>
             </div>
-            <div className="px-3 py-1.5 rounded-md bg-sidebar-active/30">
+            <div className="px-3 py-1.5 rounded-md bg-sidebar-active/30 shrink-0">
                <div className="text-[10px] text-secondary font-semibold uppercase">Capital Deployed</div>
                <div className="text-sm font-bold font-mono text-primary">
                  {formatINR(totalCapitalDeployed, { compact: true })} ({(capital > 0 ? (totalCapitalDeployed/capital)*100 : 0).toFixed(1)}%)
@@ -73,7 +73,7 @@ export function MultipleTradesPlanner({ portfolio, state, actions }: MultipleTra
           </div>
         </div>
         
-        <div className="flex gap-3">
+        <div className="flex gap-3 risk-planner-actions">
           <button className="btn btn-primary btn-sm border-primary" onClick={actions.addTradeToPlanner}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
             Add Trade
@@ -85,7 +85,7 @@ export function MultipleTradesPlanner({ portfolio, state, actions }: MultipleTra
         </div>
       </div>
 
-      <div className="overflow-x-auto -mx-6">
+      <div className="overflow-x-auto -mx-6 risk-planner-table-container">
         <table className="w-full text-sm">
           <thead>
             <tr className="text-secondary text-[10px] uppercase border-y border-border-secondary/50 bg-sidebar-active/30">

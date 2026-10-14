@@ -10,10 +10,13 @@ type AppState = {
   companionXPercent: number | null;
   companionYPercent: number | null;
   companionHidden: boolean;
+  mobileSidebarOpen: boolean;
 
   setCompanionPosition: (xPercent: number, yPercent: number) => void;
   setCompanionHidden: (hidden: boolean) => void;
   setCompanionConfig: (kind: string, pet: PetdexCatalogEntry | null, accessory: PikoAccessoryDisplayId) => void;
+  setMobileSidebarOpen: (open: boolean) => void;
+  toggleMobileSidebar: () => void;
 };
 
 export const useAppStore = create<AppState>((set) => ({
@@ -23,8 +26,11 @@ export const useAppStore = create<AppState>((set) => ({
   companionXPercent: null,
   companionYPercent: null,
   companionHidden: false,
+  mobileSidebarOpen: false,
 
   setCompanionPosition: (xPercent, yPercent) => set({ companionXPercent: xPercent, companionYPercent: yPercent }),
   setCompanionHidden: (hidden) => set({ companionHidden: hidden }),
   setCompanionConfig: (kind, pet, accessory) => set({ companionKind: kind, companionPet: pet, pikoAccessory: accessory }),
+  setMobileSidebarOpen: (open) => set({ mobileSidebarOpen: open }),
+  toggleMobileSidebar: () => set((s) => ({ mobileSidebarOpen: !s.mobileSidebarOpen })),
 }));

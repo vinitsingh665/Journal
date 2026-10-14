@@ -30,14 +30,14 @@ export function ScenarioComparison({ state, current }: ScenarioComparisonProps) 
   scenarios.push({ label: "Extended (5R)", r: 5, pnl: positionSize * (5 * rValue), color: "text-positive", dot: "bg-positive" });
 
   return (
-    <div className="card card-body flex flex-col h-full relative">
+    <div className="card card-body flex flex-col h-full relative risk-scenario-card">
       <div className="flex items-center gap-2 mb-6">
         <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-xs font-bold text-inverse">3</div>
         <h3 className="font-bold text-sm tracking-wide">SCENARIO COMPARISON</h3>
       </div>
 
-      <div className="flex-1">
-        <table className="w-full text-sm">
+      <div className="flex-1 overflow-x-auto risk-scenario-table-container">
+        <table className="w-full text-sm risk-scenario-table">
           <thead>
             <tr className="text-secondary text-xs border-b border-border-secondary">
               <th className="font-semibold pb-3 text-left">Scenario</th>
@@ -53,15 +53,15 @@ export function ScenarioComparison({ state, current }: ScenarioComparisonProps) 
                 <tr key={i} className="border-b border-border-secondary/50 hover:bg-sidebar-hover transition-colors">
                   <td className="py-3 flex items-center gap-2">
                     <div className={cn("w-2 h-2 rounded-full", s.dot)}></div>
-                    <span className="font-medium text-text-primary">{s.label}</span>
+                    <span className="font-medium text-text-primary whitespace-nowrap">{s.label}</span>
                   </td>
-                  <td className="py-3 text-center font-mono text-muted">
+                  <td className="py-3 text-center font-mono text-muted whitespace-nowrap">
                     {s.r > 0 ? "+" : ""}{Number(s.r.toFixed(2))}R
                   </td>
-                  <td className={cn("py-3 text-right font-mono", s.color)}>
+                  <td className={cn("py-3 text-right font-mono whitespace-nowrap", s.color)}>
                     {s.pnl > 0 ? "+" : ""}{formatINR(s.pnl)}
                   </td>
-                  <td className={cn("py-3 text-right font-mono", s.color)}>
+                  <td className={cn("py-3 text-right font-mono whitespace-nowrap", s.color)}>
                     {pnlPct > 0 ? "+" : ""}{pnlPct.toFixed(2)}%
                   </td>
                 </tr>
@@ -71,7 +71,7 @@ export function ScenarioComparison({ state, current }: ScenarioComparisonProps) 
         </table>
       </div>
 
-      <div className="mt-6 p-4 rounded-md bg-sidebar-active border border-border-secondary">
+      <div className="mt-6 p-4 rounded-md bg-sidebar-active border border-border-secondary risk-scenario-expectancy-box">
         <div className="flex items-start gap-3">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2" className="mt-0.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
           <div className="text-sm text-secondary">

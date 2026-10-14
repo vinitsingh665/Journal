@@ -47,6 +47,7 @@ export default function NotesClient({
 }) {
   const [notes, setNotes] = useState<NoteStub[]>(initialNotes);
   const [selectedId, setSelectedId] = useState<string | null>(initialNotes.length > 0 ? initialNotes[0]?.id : null);
+  const [mobileView, setMobileView] = useState<"list" | "editor">("list");
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "pinned" | "tags">("all");
   const [creating, setCreating] = useState(false);
@@ -89,6 +90,7 @@ export default function NotesClient({
         const note = await res.json();
         setNotes((prev) => [{ ...note, trade: null }, ...prev]);
         setSelectedId(note.id);
+        setMobileView("editor");
         window.dispatchEvent(new Event("notesUpdated"));
       }
     } finally {
@@ -100,7 +102,11 @@ export default function NotesClient({
     await fetch(`/api/notes/${id}`, { method: "DELETE" });
     setNotes((prev) => prev.filter((n) => n.id !== id));
     if (selectedId === id) {
-      setSelectedId(notes.find((n) => n.id !== id)?.id ?? null);
+      const nextNote = notes.find((n) => n.id !== id);
+      setSelectedId(nextNote?.id ?? null);
+      if (!nextNote) {
+        setMobileView("list");
+      }
     }
     window.dispatchEvent(new Event("notesUpdated"));
   };
@@ -125,7 +131,7 @@ export default function NotesClient({
   );
 
   return (
-    <div className="notes-page-root">
+    <div className={`notes-page-root ${mobileView === "editor" ? "is-mobile-editor-open" : "is-mobile-list-open"}`}>
       {/* Global Page Header */}
       <div className="notes-page-header">
         <div className="notes-header-left">
@@ -143,6 +149,12 @@ export default function NotesClient({
             <p>Capture ideas, insights, and lessons on your trading journey.</p>
           </div>
         </div>
+        
+        {/* Mobile Title View */}
+        <div className="notes-mobile-header-bar">
+          <span className="notes-mobile-header-title">My Notes ({notes.length})</span>
+        </div>
+
         <div className="notes-header-right">
           <div className="notes-header-quote">
             "A disciplined mind writes things down."
@@ -160,17 +172,33 @@ export default function NotesClient({
         </div>
       </div>
 
-      <div className="notes-layout">
+      <div className={`notes-layout ${mobileView === "editor" ? "mobile-show-editor" : "mobile-show-list"}`}>
         {/* Sidebar */}
         <div className="notes-sidebar">
+          {/* Mobile Quick KPI Stats */}
+          <div className="notes-mobile-stats-row">
+            <div className="notes-mobile-stat-card">
+              <span className="notes-stat-val">{notes.length}</span>
+              <span className="notes-stat-lbl">Total Notes</span>
+            </div>
+            <div className="notes-mobile-stat-card">
+              <span className="notes-stat-val">{notes.filter((n) => n.isPinned).length}</span>
+              <span className="notes-stat-lbl">Pinned</span>
+            </div>
+            <div className="notes-mobile-stat-card">
+              <span className="notes-stat-val">{notes.filter((n) => !!n.tradeId).length}</span>
+              <span className="notes-stat-lbl">With Trades</span>
+            </div>
+          </div>
+
           <div className="notes-sidebar-filters">
             <button className={`notes-filter-tab ${filter === "all" ? "active" : ""}`} onClick={() => setFilter("all")}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-              All
+              All ({notes.length})
             </button>
             <button className={`notes-filter-tab ${filter === "pinned" ? "active" : ""}`} onClick={() => setFilter("pinned")}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="2" y1="2" x2="22" y2="22"/><path d="M15.5 3H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2V8.5L15.5 3z"/></svg>
-              Pinned
+              Pinned ({notes.filter((n) => n.isPinned).length})
             </button>
             <button className={`notes-filter-tab ${filter === "tags" ? "active" : ""}`} onClick={() => setFilter("tags")}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
@@ -227,7 +255,10 @@ export default function NotesClient({
                   contentPreview={extractPreview(note.content)}
                   tradeSymbol={note.trade?.symbol ?? null}
                   isSelected={selectedId === note.id}
-                  onClick={() => setSelectedId(note.id)}
+                  onClick={() => {
+                    setSelectedId(note.id);
+                    setMobileView("editor");
+                  }}
                   onDelete={() => deleteNote(note.id)}
                 />
               ))}
@@ -254,10 +285,14 @@ export default function NotesClient({
               tradeId={selectedNote.tradeId}
               trades={trades}
               onUpdate={(patch) => handleUpdate(selectedNote.id, patch as any)}
-              onClose={() => setSelectedId(null)}
+              onClose={() => {
+                setSelectedId(null);
+                setMobileView("list");
+              }}
               onDelete={() => {
                 deleteNote(selectedNote.id);
                 setSelectedId(null);
+                setMobileView("list");
               }}
             />
           ) : (

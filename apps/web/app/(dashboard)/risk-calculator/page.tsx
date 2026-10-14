@@ -29,9 +29,9 @@ export default function RiskCalculatorPage() {
   const isCalculatorOpen = engine.state.isCalculatorOpen;
 
   return (
-    <div className="max-w-[1600px] mx-auto pb-12">
-      <div className="flex items-center justify-between mb-8">
-        <div>
+    <div className="max-w-[1600px] mx-auto pb-12 risk-page-container">
+      <div className="flex items-center justify-between mb-8 risk-header">
+        <div className="risk-title-group">
           <h1 className="page-title">Risk Calculator</h1>
           <p className="text-secondary mt-1 text-sm">
             Size positions, manage portfolio risk, plan trades with confidence.
@@ -39,7 +39,7 @@ export default function RiskCalculatorPage() {
         </div>
         
         {!isCalculatorOpen ? (
-          <div className="flex gap-3">
+          <div className="flex gap-3 risk-header-actions">
             <button 
               onClick={engine.actions.openCalculator}
               className="btn btn-primary"
@@ -49,7 +49,7 @@ export default function RiskCalculatorPage() {
             </button>
           </div>
         ) : (
-          <div className="flex gap-3">
+          <div className="flex gap-3 risk-header-actions">
             <button 
               onClick={engine.actions.closeCalculator}
               className="btn btn-secondary bg-transparent border-border-secondary text-secondary mr-2"
@@ -114,7 +114,7 @@ export default function RiskCalculatorPage() {
             <div className="flex flex-col gap-6">
               <PortfolioOverview state={engine.state} portfolio={engine.portfolio} setters={engine.setters} />
 
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 risk-cards-grid">
                 <TradeInputsForm state={engine.state} setters={engine.setters} current={engine.current} />
                 <PositionSizeCard current={engine.current} actions={engine.actions} />
                 <ScenarioComparison state={engine.state} current={engine.current} />

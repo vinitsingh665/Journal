@@ -183,7 +183,7 @@ export default function PositionsClient({ initialPositions, capital = 1000000, i
 
   return (
     <>
-      <div className="page-header" style={{ marginBottom: "var(--space-6)" }}>
+      <div className="page-header positions-page-header" style={{ marginBottom: "var(--space-6)" }}>
         <div className="flex items-center justify-between w-full">
           <div>
             <h1 className="page-title">Open Positions</h1>
@@ -205,85 +205,85 @@ export default function PositionsClient({ initialPositions, capital = 1000000, i
       </div>
 
       {/* KPI Cards */}
-      <div className="grid-4 mb-6" style={{ gridTemplateColumns: "1fr 1fr 1fr 1.5fr" }}>
-        <div className="card card-body" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+      <div className="positions-kpi-row grid-4 mb-6" style={{ gridTemplateColumns: "1fr 1fr 1fr 1.5fr" }}>
+        <div className="card card-body positions-kpi-card positions-kpi-card-count" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
           <div className="flex justify-between items-start">
-            <div className="text-secondary" style={{ fontSize: "var(--text-xs)", fontWeight: 600, letterSpacing: "0.05em" }}>OPEN POSITIONS</div>
-            <div style={{ padding: 4, background: "rgba(37, 99, 235, 0.1)", borderRadius: 6, color: "var(--accent-primary)" }}>
+            <div className="text-secondary positions-kpi-label" style={{ fontSize: "var(--text-xs)", fontWeight: 600, letterSpacing: "0.05em" }}>OPEN POSITIONS</div>
+            <div className="positions-kpi-icon-wrap" style={{ padding: 4, background: "rgba(37, 99, 235, 0.1)", borderRadius: 6, color: "var(--accent-primary)" }}>
                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
             </div>
           </div>
           <div>
-            <div style={{ fontSize: "1.75rem", fontWeight: 800, fontFamily: "var(--font-mono)" }}>{openPositionsCount}</div>
-            <div className="text-muted" style={{ fontSize: "var(--text-xs)" }}>Total active trades</div>
+            <div className="positions-kpi-val" style={{ fontSize: "1.75rem", fontWeight: 800, fontFamily: "var(--font-mono)" }}>{openPositionsCount}</div>
+            <div className="text-muted positions-kpi-sub" style={{ fontSize: "var(--text-xs)" }}>Total active trades</div>
           </div>
         </div>
 
-        <div className="card card-body" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+        <div className={cn("card card-body positions-kpi-card positions-kpi-card-hero", totalLivePnl >= 0 ? "kpi-pnl-profit" : "kpi-pnl-loss")} style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
           <div className="flex justify-between items-start">
-            <div className="text-secondary" style={{ fontSize: "var(--text-xs)", fontWeight: 600, letterSpacing: "0.05em" }}>TOTAL UNREALIZED P&L</div>
-            <div style={{ padding: 4, background: "rgba(16, 185, 129, 0.1)", borderRadius: 6, color: "var(--color-positive)" }}>
+            <div className="text-secondary positions-kpi-label" style={{ fontSize: "var(--text-xs)", fontWeight: 600, letterSpacing: "0.05em" }}>TOTAL UNREALIZED P&L</div>
+            <div className="positions-kpi-icon-wrap" style={{ padding: 4, background: totalLivePnl >= 0 ? "rgba(16, 185, 129, 0.1)" : "rgba(239, 68, 68, 0.1)", borderRadius: 6, color: totalLivePnl >= 0 ? "var(--color-positive)" : "var(--color-negative)" }}>
                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
             </div>
           </div>
           <div>
-            <div className={cn(totalLivePnl >= 0 ? "text-positive" : "text-negative")} style={{ fontSize: "1.5rem", fontWeight: 800, fontFamily: "var(--font-mono)" }}>
+            <div className={cn("positions-kpi-val", totalLivePnl >= 0 ? "text-positive" : "text-negative")} style={{ fontSize: "1.5rem", fontWeight: 800, fontFamily: "var(--font-mono)" }}>
               {formatINR(totalLivePnl, { showSign: true })}
             </div>
-            <div className={cn(totalLivePnl >= 0 ? "text-positive" : "text-negative")} style={{ fontSize: "var(--text-xs)", fontWeight: 600 }}>
+            <div className={cn("positions-kpi-sub", totalLivePnl >= 0 ? "text-positive" : "text-negative")} style={{ fontSize: "var(--text-xs)", fontWeight: 600 }}>
               {formatPercent(totalInvestment > 0 ? (totalLivePnl / totalInvestment) * 100 : 0)} <span className="text-muted font-normal">of capital</span>
             </div>
           </div>
         </div>
 
-        <div className="card card-body" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+        <div className="card card-body positions-kpi-card positions-kpi-card-avg" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
           <div className="flex justify-between items-start">
-            <div className="text-secondary" style={{ fontSize: "var(--text-xs)", fontWeight: 600, letterSpacing: "0.05em" }}>AVG UNREALIZED P&L</div>
-            <div style={{ padding: 4, background: "rgba(16, 185, 129, 0.1)", borderRadius: 6, color: "var(--color-positive)" }}>
+            <div className="text-secondary positions-kpi-label" style={{ fontSize: "var(--text-xs)", fontWeight: 600, letterSpacing: "0.05em" }}>AVG UNREALIZED P&L</div>
+            <div className="positions-kpi-icon-wrap" style={{ padding: 4, background: "rgba(16, 185, 129, 0.1)", borderRadius: 6, color: "var(--color-positive)" }}>
                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg>
             </div>
           </div>
           <div>
-            <div className={cn(avgUnrealizedPnl >= 0 ? "text-positive" : "text-negative")} style={{ fontSize: "1.5rem", fontWeight: 800, fontFamily: "var(--font-mono)" }}>
+            <div className={cn("positions-kpi-val", avgUnrealizedPnl >= 0 ? "text-positive" : "text-negative")} style={{ fontSize: "1.5rem", fontWeight: 800, fontFamily: "var(--font-mono)" }}>
               {formatINR(avgUnrealizedPnl, { showSign: true })}
             </div>
-            <div className="text-muted" style={{ fontSize: "var(--text-xs)" }}>Per position</div>
+            <div className="text-muted positions-kpi-sub" style={{ fontSize: "var(--text-xs)" }}>Per position</div>
           </div>
         </div>
 
-        <div className="card card-body" style={{ display: "flex", gap: "var(--space-4)" }}>
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between", borderRight: "1px solid var(--border-secondary)", paddingRight: "var(--space-4)" }}>
+        <div className="card card-body positions-kpi-card positions-kpi-card-performers" style={{ display: "flex", gap: "var(--space-4)" }}>
+          <div className="positions-performer-col best" style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between", borderRight: "1px solid var(--border-secondary)", paddingRight: "var(--space-4)" }}>
             <div className="flex justify-between items-start">
-              <div className="text-secondary" style={{ fontSize: "var(--text-xs)", fontWeight: 600, letterSpacing: "0.05em" }}>BEST PERFORMER</div>
-              <div style={{ padding: 4, background: "rgba(37, 99, 235, 0.1)", borderRadius: 6, color: "var(--accent-primary)" }}>
+              <div className="text-secondary positions-kpi-label" style={{ fontSize: "var(--text-xs)", fontWeight: 600, letterSpacing: "0.05em" }}>BEST PERFORMER</div>
+              <div className="positions-kpi-icon-wrap" style={{ padding: 4, background: "rgba(37, 99, 235, 0.1)", borderRadius: 6, color: "var(--accent-primary)" }}>
                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
               </div>
             </div>
             <div>
-              <div className="text-positive" style={{ fontSize: "1.25rem", fontWeight: 800, fontFamily: "var(--font-mono)" }}>
+              <div className="text-positive positions-kpi-val" style={{ fontSize: "1.25rem", fontWeight: 800, fontFamily: "var(--font-mono)" }}>
                 {bestPerformer.symbol !== "-" ? formatINR(bestPerformer.pnl, { showSign: true }) : "—"}
               </div>
-              <div className="text-muted" style={{ fontSize: "var(--text-xs)", fontWeight: 600 }}>{bestPerformer.symbol}</div>
+              <div className="text-muted positions-kpi-sub" style={{ fontSize: "var(--text-xs)", fontWeight: 600 }}>{bestPerformer.symbol}</div>
             </div>
           </div>
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+          <div className="positions-performer-col worst" style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
             <div className="flex justify-between items-start">
-              <div className="text-secondary" style={{ fontSize: "var(--text-xs)", fontWeight: 600, letterSpacing: "0.05em" }}>WORST PERFORMER</div>
-              <div style={{ padding: 4, background: "rgba(239, 68, 68, 0.1)", borderRadius: 6, color: "var(--color-negative)" }}>
+              <div className="text-secondary positions-kpi-label" style={{ fontSize: "var(--text-xs)", fontWeight: 600, letterSpacing: "0.05em" }}>WORST PERFORMER</div>
+              <div className="positions-kpi-icon-wrap" style={{ padding: 4, background: "rgba(239, 68, 68, 0.1)", borderRadius: 6, color: "var(--color-negative)" }}>
                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
               </div>
             </div>
             <div>
-              <div className="text-negative" style={{ fontSize: "1.25rem", fontWeight: 800, fontFamily: "var(--font-mono)" }}>
+              <div className="text-negative positions-kpi-val" style={{ fontSize: "1.25rem", fontWeight: 800, fontFamily: "var(--font-mono)" }}>
                 {worstPerformer.symbol !== "-" ? formatINR(worstPerformer.pnl, { showSign: true }) : "—"}
               </div>
-              <div className="text-muted" style={{ fontSize: "var(--text-xs)", fontWeight: 600 }}>{worstPerformer.symbol}</div>
+              <div className="text-muted positions-kpi-sub" style={{ fontSize: "var(--text-xs)", fontWeight: 600 }}>{worstPerformer.symbol}</div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="card">
+      <div className="card positions-desktop-view">
         {/* Tabs & Filters Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--border-secondary)", padding: "0 var(--space-4)" }}>
           <div style={{ display: "flex" }}>
@@ -459,6 +459,157 @@ export default function PositionsClient({ initialPositions, capital = 1000000, i
           </div>
         </div>
 
+      </div>
+
+      {/* Mobile Positions View */}
+      <div className="positions-mobile-view">
+        {/* Mobile Tabs */}
+        <div className="positions-mobile-tabs">
+          {["All", "Long", "Short"].map(tab => (
+            <button 
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={cn("positions-mobile-tab", activeTab === tab && "active")}
+            >
+              {tab === "All" ? `All (${enrichedPositions.length})` : `${tab} (${tab === "Long" ? numLongs : numShorts})`}
+            </button>
+          ))}
+        </div>
+
+        {/* Position Cards */}
+        <div className="positions-mobile-cards-list">
+          {filteredPositions.map(pos => {
+            const holdingMs = new Date().getTime() - new Date(pos.entryTime).getTime();
+            const sparkData = chartDataMap.get(pos.symbol);
+            const isPositive = pos.pnlPct >= 0;
+            const cmpColor = pos.currentPrice ? (pos.currentPrice >= pos.avgEntryPrice ? "var(--color-positive)" : "var(--color-negative)") : "inherit";
+
+            return (
+              <div key={pos.id} className="position-mobile-card">
+                {/* Header Row: Symbol, Exchange, Direction, Sparkline */}
+                <div className="pos-mcard-top">
+                  <div className="pos-mcard-title-group">
+                    <div className="pos-mcard-symbol-row">
+                      <span className="pos-mcard-symbol">{pos.symbol}</span>
+                      <span className="pos-mcard-exchange">{pos.exchange}</span>
+                      <span className={cn("badge", pos.direction === "LONG" ? "badge-long" : "badge-short")}>
+                        {pos.direction}
+                      </span>
+                    </div>
+                    <div className="pos-mcard-qty">{formatQuantity(pos.openQty)} shares</div>
+                  </div>
+
+                  <div className="pos-mcard-sparkline">
+                    {sparkData ? (
+                      <Sparkline data={sparkData} color={isPositive ? "var(--color-positive)" : "var(--color-negative)"} width={82} height={28} />
+                    ) : (
+                      <span className="text-muted" style={{ fontSize: "11px" }}>—</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Body Row: Prices & P&L */}
+                <div className="pos-mcard-body">
+                  <div className="pos-mcard-prices">
+                    <div className="pos-mcard-stat">
+                      <span className="pos-mcard-label">ENTRY</span>
+                      <span className="pos-mcard-val">{formatINR(pos.avgEntryPrice)}</span>
+                    </div>
+                    <div className="pos-mcard-stat">
+                      <span className="pos-mcard-label">CMP</span>
+                      <span className="pos-mcard-val" style={{ color: cmpColor }}>
+                        {pos.currentPrice ? formatINR(pos.currentPrice) : "—"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="pos-mcard-pnl">
+                    <div className={cn("pos-mcard-pnl-val", isPositive ? "text-positive" : "text-negative")}>
+                      {formatINR(pos.pnl, { showSign: true })}
+                    </div>
+                    <div className={cn("pos-mcard-pnl-pct", isPositive ? "text-positive" : "text-negative")}>
+                      {formatPercent(pos.pnlPct)}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Target & Stop Loss mini bar */}
+                {(pos.target != null || pos.stopLoss != null) && (
+                  <div className="pos-mcard-target-row">
+                    <div className="pos-mcard-target-col">
+                      <span className="pos-mcard-sublabel">STOP LOSS</span>
+                      <span className="pos-mcard-subval text-negative">{pos.stopLoss ? formatINR(pos.stopLoss) : "—"}</span>
+                    </div>
+                    <div className="pos-mcard-target-col" style={{ textAlign: "right" }}>
+                      <span className="pos-mcard-sublabel">TARGET</span>
+                      <span className="pos-mcard-subval text-positive">{pos.target ? formatINR(pos.target) : "—"}</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Footer: Holding Time & Setup */}
+                <div className="pos-mcard-footer">
+                  <div className="pos-mcard-time">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    <span>{formatHoldingPeriod(holdingMs)}</span>
+                    <span className="pos-mcard-date-hint">({new Date(pos.entryTime).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })})</span>
+                  </div>
+                  {pos.setup && (
+                    <span className="pos-mcard-setup-badge">{pos.setup}</span>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+
+          {filteredPositions.length === 0 && (
+            <div className="card card-body text-center" style={{ padding: "36px 16px", color: "var(--text-muted)" }}>
+              No positions match the selected filter.
+            </div>
+          )}
+        </div>
+
+        {/* Mobile Portfolio Summary Card */}
+        <div className="positions-mobile-summary-card">
+          <div className="pos-msummary-header">PORTFOLIO SUMMARY</div>
+
+          <div className="pos-msummary-grid">
+            <div className="pos-msummary-item">
+              <span className="pos-msummary-sublabel">TOTAL UNREALIZED</span>
+              <span className={cn("pos-msummary-val", totalLivePnl >= 0 ? "text-positive" : "text-negative")}>
+                {formatINR(totalLivePnl, { showSign: true })}
+              </span>
+            </div>
+            <div className="pos-msummary-item" style={{ alignItems: "flex-end" }}>
+              <span className="pos-msummary-sublabel">INVESTED CAPITAL</span>
+              <span className="pos-msummary-val" style={{ color: "var(--text-primary)" }}>
+                {formatINR(totalInvestment)}
+              </span>
+            </div>
+          </div>
+
+          <div className="pos-msummary-progress-wrap">
+            <div className="pos-msummary-progress-labels">
+              <span>CAPITAL UTILIZATION</span>
+              <span>{capitalUtilizedPct.toFixed(1)}%</span>
+            </div>
+            <div className="settings-progress-bar-bg" style={{ height: 6, borderRadius: 3, overflow: "hidden" }}>
+              <div className="settings-progress-bar-fill" style={{ width: `${Math.min(capitalUtilizedPct, 100)}%`, background: "var(--accent-primary)", height: "100%" }}></div>
+            </div>
+            <div className="pos-msummary-progress-sub">
+              {formatINR(totalInvestment, { compact: true })} utilized of {formatINR(capital, { compact: true })}
+            </div>
+          </div>
+
+          {totalRisk > 0 && (
+            <div className="pos-msummary-risk-row">
+              <span className="pos-msummary-sublabel">TOTAL RISK</span>
+              <span className="text-negative font-mono" style={{ fontWeight: 700, fontSize: "13px" }}>
+                {formatINR(totalRisk, { compact: true })} ({riskRMultiple.toFixed(2)}R)
+              </span>
+            </div>
+          )}
+        </div>
       </div>
     </>
   );

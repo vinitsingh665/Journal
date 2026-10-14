@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { LATEST_VERSION } from "@/app/about/changelog/ChangelogClient";
 
@@ -6,7 +6,32 @@ import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTheme } from "@/components/layout/ThemeProvider";
-import { Activity } from "lucide-react";
+import {
+  Activity,
+  User,
+  TrendingUp,
+  Zap,
+  Palette,
+  Info,
+  Check,
+  Moon,
+  Sun,
+  Monitor,
+  AlertTriangle,
+  Trash2,
+  RefreshCw,
+  Eye,
+  EyeOff,
+  Save,
+  Camera,
+  ChevronRight,
+  Shield,
+  Sliders,
+  DollarSign,
+  Percent,
+  Lock,
+  Sparkles
+} from "lucide-react";
 
 interface SettingsClientProps {
   user: { name?: string | null; email?: string | null; isGuest?: boolean };
@@ -18,10 +43,13 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
   const { theme, setTheme, accent, setAccent } = useTheme();
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState(searchParams?.get("tab") || "General");
+  const [mobileTab, setMobileTab] = useState<"Profile" | "Trading" | "Broker API" | "Appearance" | "About">("Profile");
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showDhanToken, setShowDhanToken] = useState(false);
+  const [mobileAvatarPicker, setMobileAvatarPicker] = useState(false);
 
   const handleDeleteAccount = async () => {
     setIsDeleting(true);
@@ -185,8 +213,10 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
         </div>
       )}
 
-      {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-6)" }}>
+      {/* Desktop View */}
+      <div className="settings-desktop-view">
+        {/* Header */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-6)" }}>
         <div>
           <h1 style={{ fontSize: "var(--text-3xl)", fontWeight: 700, margin: 0 }}>Settings {isGuest && <span style={{ fontSize: "0.8rem", background: "var(--color-primary)", color: "white", padding: "2px 8px", borderRadius: "10px", marginLeft: "8px" }}>Guest Mode</span>}</h1>
           <p className="text-muted" style={{ marginTop: 4 }}>Manage your account, preferences and application settings.</p>
@@ -1064,6 +1094,820 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
             </div>
           </div>
         ) : null}
+      </div>
+    </div>
+
+      {/* Mobile View */}
+      <div className="settings-mobile-view">
+        {/* Mobile Header Bar */}
+        <div className="settings-mobile-header">
+          <div className="settings-mobile-header-text">
+            <h2 className="settings-mobile-header-title">
+              {mobileTab === "Profile" && "Profile & Account"}
+              {mobileTab === "Trading" && "Trading & Risk"}
+              {mobileTab === "Broker API" && "Broker Integration"}
+              {mobileTab === "Appearance" && "App Appearance"}
+              {mobileTab === "About" && "About TraderLabs"}
+            </h2>
+            <span className="settings-mobile-header-desc">
+              {mobileTab === "Profile" && "Personal info, preferences & defaults"}
+              {mobileTab === "Trading" && "Capital sizing, risk rules & broker fees"}
+              {mobileTab === "Broker API" && "Sync orders with DhanHQ real-time API"}
+              {mobileTab === "Appearance" && "Dark/Light themes & accent color palette"}
+              {mobileTab === "About" && `TraderLabs ${LATEST_VERSION} • Support & info`}
+            </span>
+          </div>
+
+          <button
+            className="btn"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "7px 15px",
+              borderRadius: "var(--radius-full)",
+              fontSize: "13px",
+              fontWeight: 700,
+              backgroundColor: saveSuccess ? "#10B981" : "var(--accent-primary)",
+              color: "#ffffff",
+              border: "none",
+              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.2)",
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+              flexShrink: 0
+            }}
+            onClick={handleSave}
+            disabled={saving || isGuest}
+          >
+            {saving ? (
+              <>
+                <RefreshCw size={14} className="animate-spin" />
+                <span>Saving...</span>
+              </>
+            ) : saveSuccess ? (
+              <>
+                <Check size={14} />
+                <span>Saved!</span>
+              </>
+            ) : (
+              <>
+                <Save size={14} />
+                <span>Save</span>
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* Mobile Tabs Pill Bar */}
+        <div className="settings-mobile-tabs">
+          {[
+            { id: "Profile", label: "Profile", icon: User },
+            { id: "Trading", label: "Trading", icon: TrendingUp },
+            { id: "Broker API", label: "Broker API", icon: Zap },
+            { id: "Appearance", label: "Appearance", icon: Palette },
+            { id: "About", label: "About", icon: Info },
+          ].map((t) => {
+            const Icon = t.icon;
+            const isActive = mobileTab === t.id;
+            return (
+              <button
+                key={t.id}
+                className={cn("settings-mobile-tab-btn", isActive && "active")}
+                onClick={() => setMobileTab(t.id as any)}
+              >
+                <Icon size={14} />
+                <span>{t.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Guest Warning on Mobile */}
+        {isGuest && (
+          <div style={{
+            marginBottom: "14px",
+            padding: "10px 14px",
+            background: "rgba(245, 158, 11, 0.1)",
+            border: "1px solid rgba(245, 158, 11, 0.3)",
+            borderRadius: "var(--radius-md)",
+            color: "#b45309",
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            fontSize: "12px",
+            fontWeight: 500
+          }}>
+            <AlertTriangle size={18} style={{ flexShrink: 0 }} />
+            <span>Guest Mode: profile modifications cannot be saved.</span>
+          </div>
+        )}
+
+        {/* TAB 1: PROFILE */}
+        {mobileTab === "Profile" && (
+          <div>
+            {/* Profile Info Card */}
+            <div className="settings-mobile-card">
+              <div className="settings-mobile-card-header">
+                <div className="settings-mobile-card-icon">
+                  <User size={16} />
+                </div>
+                <div>
+                  <h3 className="settings-mobile-card-title">TRADER PROFILE</h3>
+                  <p className="settings-mobile-card-desc">Your public name, avatar and trading persona.</p>
+                </div>
+              </div>
+
+              {/* Avatar Selector */}
+              <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "16px" }}>
+                <div style={{
+                  width: 72,
+                  height: 72,
+                  borderRadius: "50%",
+                  background: "var(--bg-secondary)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  overflow: "hidden",
+                  border: "2px solid var(--border-secondary)",
+                  boxShadow: "var(--shadow-sm)",
+                  flexShrink: 0
+                }}>
+                  {avatar ? (
+                    <img src={avatar} alt="Profile Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  ) : (
+                    <User size={36} className="text-muted" />
+                  )}
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: "6px", flex: 1 }}>
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 6,
+                      fontSize: "12px",
+                      fontWeight: 600,
+                      padding: "6px 12px",
+                      borderRadius: "var(--radius-full)"
+                    }}
+                    onClick={() => !isGuest && setMobileAvatarPicker(!mobileAvatarPicker)}
+                    disabled={isGuest}
+                  >
+                    <Camera size={14} />
+                    {mobileAvatarPicker ? "Close Avatars" : "Choose Avatar"}
+                  </button>
+
+                  {avatar && (
+                    <button
+                      className="btn btn-ghost btn-sm"
+                      style={{
+                        color: "var(--color-negative)",
+                        fontSize: "11px",
+                        padding: "2px 6px",
+                        alignSelf: "flex-start"
+                      }}
+                      onClick={() => !isGuest && setAvatar("")}
+                      disabled={isGuest}
+                    >
+                      Remove Avatar
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Avatar Picker Drawer */}
+              {mobileAvatarPicker && (
+                <div style={{
+                  marginBottom: "16px",
+                  padding: "12px",
+                  background: "var(--bg-secondary)",
+                  borderRadius: "var(--radius-md)",
+                  border: "1px solid var(--border-secondary)"
+                }}>
+                  <div style={{ fontSize: "11px", fontWeight: 600, color: "var(--text-secondary)", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                    Select an Avatar
+                  </div>
+                  <div className="settings-avatar-grid">
+                    {PREDEFINED_AVATARS.map((url, i) => (
+                      <button
+                        key={i}
+                        onClick={() => { setAvatar(url); setMobileAvatarPicker(false); }}
+                        className={cn("settings-avatar-option", avatar === url && "active")}
+                      >
+                        <img src={url} alt={`Avatar option ${i + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Name & Email */}
+              <div className="settings-mobile-field">
+                <label className="settings-mobile-label">Full Name</label>
+                <input
+                  className="form-input"
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                  disabled={isGuest}
+                  placeholder="Your Name"
+                />
+              </div>
+
+              <div className="settings-mobile-field">
+                <label className="settings-mobile-label" style={{ display: "flex", justifyContent: "space-between" }}>
+                  <span>Email</span>
+                  <span style={{ fontSize: "10px", color: "var(--text-muted)", textTransform: "none", fontWeight: 500 }}>Read-only</span>
+                </label>
+                <input
+                  className="form-input"
+                  value={email}
+                  readOnly
+                  style={{
+                    backgroundColor: "var(--bg-secondary)",
+                    color: "var(--text-muted)",
+                    cursor: "not-allowed",
+                    opacity: 0.8
+                  }}
+                />
+              </div>
+
+              {/* Trading Style & Experience */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "14px" }}>
+                <div className="settings-mobile-field" style={{ marginBottom: 0 }}>
+                  <label className="settings-mobile-label">Trading Style</label>
+                  <select className="form-select" value={tradingStyle} onChange={e => setTradingStyle(e.target.value)} disabled={isGuest}>
+                    <option>Swing Trading</option>
+                    <option>Day Trading</option>
+                    <option>Position Trading</option>
+                    <option>Scalping</option>
+                  </select>
+                </div>
+
+                <div className="settings-mobile-field" style={{ marginBottom: 0 }}>
+                  <label className="settings-mobile-label">Experience</label>
+                  <select className="form-select" value={experience} onChange={e => setExperience(e.target.value)} disabled={isGuest}>
+                    <option>Beginner</option>
+                    <option>Intermediate</option>
+                    <option>Advanced</option>
+                    <option>Professional</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Bio / About */}
+              <div className="settings-mobile-field" style={{ marginBottom: 0 }}>
+                <label className="settings-mobile-label">About / Bio</label>
+                <textarea
+                  className="form-input form-textarea"
+                  rows={3}
+                  value={about}
+                  onChange={e => setAbout(e.target.value)}
+                  disabled={isGuest}
+                  placeholder="Focus on price action, VCP setups and volume analysis."
+                />
+              </div>
+            </div>
+
+            {/* Display & Market Defaults Card */}
+            <div className="settings-mobile-card">
+              <div className="settings-mobile-card-header">
+                <div className="settings-mobile-card-icon">
+                  <Sliders size={16} />
+                </div>
+                <div>
+                  <h3 className="settings-mobile-card-title">MARKET DEFAULTS</h3>
+                  <p className="settings-mobile-card-desc">Preferred market, timeframe and currency display.</p>
+                </div>
+              </div>
+
+              <div className="settings-mobile-row">
+                <div className="settings-mobile-row-info">
+                  <div className="settings-mobile-row-title">Primary Market</div>
+                  <div className="settings-mobile-row-desc">Default exchange for new trades</div>
+                </div>
+                <select className="form-select" style={{ width: 130 }} value={defaultMarket} onChange={e => setDefaultMarket(e.target.value)} disabled={isGuest}>
+                  <option>NSE</option>
+                  <option>BSE</option>
+                  <option>NASDAQ</option>
+                  <option>NYSE</option>
+                  <option>CRYPTO</option>
+                </select>
+              </div>
+
+              <div className="settings-mobile-row">
+                <div className="settings-mobile-row-info">
+                  <div className="settings-mobile-row-title">Chart Timeframe</div>
+                  <div className="settings-mobile-row-desc">Default period for setups</div>
+                </div>
+                <select className="form-select" style={{ width: 130 }} value={defaultTimeframe} onChange={e => setDefaultTimeframe(e.target.value)} disabled={isGuest}>
+                  <option>1 Day</option>
+                  <option>1 Week</option>
+                  <option>1 Month</option>
+                  <option>15 Min</option>
+                </select>
+              </div>
+
+              <div className="settings-mobile-row">
+                <div className="settings-mobile-row-info">
+                  <div className="settings-mobile-row-title">Base Currency</div>
+                  <div className="settings-mobile-row-desc">Currency used in metrics</div>
+                </div>
+                <select className="form-select" style={{ width: 130 }} value={currency} onChange={e => setCurrency(e.target.value)} disabled={isGuest}>
+                  <option>INR (₹)</option>
+                  <option>USD ($)</option>
+                  <option>EUR (€)</option>
+                  <option>GBP (£)</option>
+                </select>
+              </div>
+
+              <div className="settings-mobile-row">
+                <div className="settings-mobile-row-info">
+                  <div className="settings-mobile-row-title">Show P&L in</div>
+                  <div className="settings-mobile-row-desc">Display metric on trades</div>
+                </div>
+                <div className="segmented-control" style={{ width: 150 }}>
+                  <button
+                    className={cn("segmented-btn", showPnlIn === "Currency" && "active")}
+                    onClick={() => !isGuest && setShowPnlIn("Currency")}
+                    style={{ flex: 1, padding: "5px 8px", fontSize: "12px" }}
+                    disabled={isGuest}
+                  >
+                    Currency
+                  </button>
+                  <button
+                    className={cn("segmented-btn", showPnlIn === "R Multiple" && "active")}
+                    onClick={() => !isGuest && setShowPnlIn("R Multiple")}
+                    style={{ flex: 1, padding: "5px 8px", fontSize: "12px" }}
+                    disabled={isGuest}
+                  >
+                    R-Multiple
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Danger Zone Card */}
+            <div className="settings-mobile-card" style={{ borderColor: "rgba(239, 68, 68, 0.3)", background: "rgba(239, 68, 68, 0.02)" }}>
+              <div className="settings-mobile-card-header">
+                <div className="settings-mobile-card-icon" style={{ background: "rgba(239, 68, 68, 0.1)", color: "#ef4444" }}>
+                  <AlertTriangle size={16} />
+                </div>
+                <div>
+                  <h3 className="settings-mobile-card-title" style={{ color: "#ef4444" }}>DANGER ZONE</h3>
+                  <p className="settings-mobile-card-desc">Irreversible account actions.</p>
+                </div>
+              </div>
+
+              <div className="settings-mobile-row">
+                <div className="settings-mobile-row-info">
+                  <div className="settings-mobile-row-title">Clear Local Cache</div>
+                  <div className="settings-mobile-row-desc">Remove stored offline temporary data</div>
+                </div>
+                <button
+                  className="btn btn-secondary btn-sm"
+                  style={{ fontSize: "12px", fontWeight: 600 }}
+                  onClick={() => {
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    alert("Local cache cleared successfully.");
+                  }}
+                >
+                  Clear Cache
+                </button>
+              </div>
+
+              <div className="settings-mobile-row">
+                <div className="settings-mobile-row-info">
+                  <div className="settings-mobile-row-title" style={{ color: "#ef4444" }}>Delete Account</div>
+                  <div className="settings-mobile-row-desc">Permanently erase your account and all data</div>
+                </div>
+                <button
+                  className="btn btn-sm"
+                  style={{
+                    backgroundColor: "rgba(239, 68, 68, 0.1)",
+                    color: "#ef4444",
+                    border: "1px solid rgba(239, 68, 68, 0.3)",
+                    fontWeight: 700,
+                    fontSize: "12px"
+                  }}
+                  onClick={() => !isGuest && setShowDeleteConfirm(true)}
+                  disabled={isGuest}
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 2: TRADING */}
+        {mobileTab === "Trading" && (
+          <div>
+            {/* Capital & Risk Parameters */}
+            <div className="settings-mobile-card">
+              <div className="settings-mobile-card-header">
+                <div className="settings-mobile-card-icon">
+                  <TrendingUp size={16} />
+                </div>
+                <div>
+                  <h3 className="settings-mobile-card-title">CAPITAL & RISK PARAMETERS</h3>
+                  <p className="settings-mobile-card-desc">Core sizing and limits used in calculations and alerts.</p>
+                </div>
+              </div>
+
+              <div className="settings-mobile-field">
+                <label className="settings-mobile-label">Default Trading Capital (₹)</label>
+                <input
+                  type="number"
+                  className="form-input"
+                  value={defaultCapital}
+                  onChange={e => setDefaultCapital(e.target.value)}
+                  disabled={isGuest}
+                  placeholder="500000"
+                />
+                <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>Total capital available for sizing (saves to your account).</span>
+              </div>
+
+              <div className="settings-mobile-field">
+                <label className="settings-mobile-label">Default Risk Per Trade (%)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  className="form-input"
+                  value={defaultRisk}
+                  onChange={e => setDefaultRisk(e.target.value)}
+                  disabled={isGuest}
+                  placeholder="1.0"
+                />
+                <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>Standard risk percentage per setup (e.g. 1.0%).</span>
+              </div>
+
+              <div className="settings-mobile-field">
+                <label className="settings-mobile-label">Target Reward-to-Risk (R:R)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  className="form-input"
+                  value={defaultRR}
+                  onChange={e => setDefaultRR(e.target.value)}
+                  disabled={isGuest}
+                  placeholder="2.0"
+                />
+                <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>Your minimum target reward multiplier (e.g. 2.0).</span>
+              </div>
+
+              <div className="settings-mobile-field" style={{ marginBottom: 0 }}>
+                <label className="settings-mobile-label">Max Daily Loss Limit (₹)</label>
+                <input
+                  type="number"
+                  className="form-input"
+                  value={maxDailyLoss}
+                  onChange={e => setMaxDailyLoss(e.target.value)}
+                  disabled={isGuest}
+                  placeholder="5000"
+                />
+                <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>Discipline threshold to prevent catastrophic loss days.</span>
+              </div>
+            </div>
+
+            {/* Brokerage & Fees */}
+            <div className="settings-mobile-card">
+              <div className="settings-mobile-card-header">
+                <div className="settings-mobile-card-icon">
+                  <DollarSign size={16} />
+                </div>
+                <div>
+                  <h3 className="settings-mobile-card-title">FEES & EXECUTION</h3>
+                  <p className="settings-mobile-card-desc">Deduct brokerage fees for true Net P&L calculations.</p>
+                </div>
+              </div>
+
+              <div className="settings-mobile-row">
+                <div className="settings-mobile-row-info">
+                  <div className="settings-mobile-row-title">Default Broker Fee</div>
+                  <div className="settings-mobile-row-desc">Flat brokerage applied per order side (₹)</div>
+                </div>
+                <input
+                  type="number"
+                  className="form-input"
+                  style={{ width: 90, textAlign: "right" }}
+                  value={defaultBrokerFee}
+                  onChange={e => setDefaultBrokerFee(e.target.value)}
+                  disabled={isGuest}
+                />
+              </div>
+
+              <div className="settings-mobile-row">
+                <div className="settings-mobile-row-info">
+                  <div className="settings-mobile-row-title">Auto-deduct Fees</div>
+                  <div className="settings-mobile-row-desc">Subtract estimated charges from Net P&L</div>
+                </div>
+                <Toggle active={deductFees} onChange={setDeductFees} />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 3: BROKER API */}
+        {mobileTab === "Broker API" && (
+          <div>
+            <div className="settings-mobile-card">
+              <div className="settings-mobile-card-header">
+                <div style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: "50%",
+                  background: "#10b981",
+                  color: "#ffffff",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontWeight: 800,
+                  fontSize: "16px",
+                  flexShrink: 0
+                }}>
+                  D
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <h3 className="settings-mobile-card-title">DHANHQ REAL-TIME API</h3>
+                    {dhanClientId && dhanAccessToken ? (
+                      <span style={{ fontSize: "10px", fontWeight: 700, background: "#10B981", color: "#ffffff", padding: "2px 8px", borderRadius: "10px" }}>Configured</span>
+                    ) : (
+                      <span style={{ fontSize: "10px", fontWeight: 700, background: "#EF4444", color: "#ffffff", padding: "2px 8px", borderRadius: "10px" }}>Not Configured</span>
+                    )}
+                  </div>
+                  <p className="settings-mobile-card-desc">Automatic live trade sync via Dhan's free trading API.</p>
+                </div>
+              </div>
+
+              <div className="settings-mobile-field">
+                <label className="settings-mobile-label">Dhan Client ID</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="e.g. 1100XXXXXX"
+                  value={dhanClientId}
+                  onChange={e => setDhanClientId(e.target.value)}
+                  disabled={isGuest}
+                />
+              </div>
+
+              <div className="settings-mobile-field">
+                <label className="settings-mobile-label">Access Token (JWT)</label>
+                <div style={{ position: "relative" }}>
+                  <input
+                    type={showDhanToken ? "text" : "password"}
+                    className="form-input"
+                    style={{ paddingRight: "40px" }}
+                    placeholder="Paste your 30-day Dhan token"
+                    value={dhanAccessToken}
+                    onChange={e => setDhanAccessToken(e.target.value)}
+                    disabled={isGuest}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowDhanToken(!showDhanToken)}
+                    style={{
+                      position: "absolute",
+                      right: "10px",
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      background: "none",
+                      border: "none",
+                      color: "var(--text-muted)",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      padding: 4
+                    }}
+                  >
+                    {showDhanToken ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Instructions Callout */}
+              <div style={{
+                marginTop: "14px",
+                padding: "12px",
+                background: "rgba(var(--accent-primary-rgb), 0.06)",
+                border: "1px solid rgba(var(--accent-primary-rgb), 0.15)",
+                borderRadius: "var(--radius-md)",
+                display: "flex",
+                gap: "10px",
+                alignItems: "flex-start"
+              }}>
+                <Info size={16} style={{ color: "var(--accent-primary)", flexShrink: 0, marginTop: 2 }} />
+                <div style={{ fontSize: "12px", color: "var(--text-secondary)", lineHeight: 1.45 }}>
+                  <strong>How to generate keys:</strong> Log into <em>web.dhan.co</em> → Profile → DhanHQ APIs → Generate Access Token. Paste both Client ID & Token here and tap <strong>Save</strong> above.
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 4: APPEARANCE */}
+        {mobileTab === "Appearance" && (
+          <div>
+            {/* Theme Card */}
+            <div className="settings-mobile-card">
+              <div className="settings-mobile-card-header">
+                <div className="settings-mobile-card-icon">
+                  <Moon size={16} />
+                </div>
+                <div>
+                  <h3 className="settings-mobile-card-title">THEME MODE</h3>
+                  <p className="settings-mobile-card-desc">Choose between dark, light or auto system preference.</p>
+                </div>
+              </div>
+
+              <div className="settings-theme-selector">
+                {[
+                  { id: "system", label: "System", icon: Monitor },
+                  { id: "dark", label: "Dark", icon: Moon },
+                  { id: "light", label: "Light", icon: Sun },
+                ].map(t => {
+                  const Icon = t.icon;
+                  const isSelected = theme === t.id;
+                  return (
+                    <div
+                      key={t.id}
+                      className={cn("settings-theme-card", isSelected && "active")}
+                      onClick={() => setTheme(t.id as any)}
+                    >
+                      <Icon size={20} />
+                      <span>{t.label}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Accent Palette Card */}
+            <div className="settings-mobile-card">
+              <div className="settings-mobile-card-header">
+                <div className="settings-mobile-card-icon">
+                  <Palette size={16} />
+                </div>
+                <div>
+                  <h3 className="settings-mobile-card-title">ACCENT PALETTE</h3>
+                  <p className="settings-mobile-card-desc">Brand highlight color for buttons, badges and focus rings.</p>
+                </div>
+              </div>
+
+              <div className="settings-accent-selector">
+                {[
+                  { id: "blue", label: "Blue", color: "#3B82F6" },
+                  { id: "indigo", label: "Indigo", color: "#6366F1" },
+                  { id: "emerald", label: "Emerald", color: "#10B981" },
+                  { id: "violet", label: "Violet", color: "#8B5CF6" },
+                ].map(acc => {
+                  const isSelected = accent === acc.id;
+                  return (
+                    <div
+                      key={acc.id}
+                      className={cn("settings-accent-card", isSelected && "active")}
+                      onClick={() => setAccent(acc.id as any)}
+                    >
+                      <div style={{
+                        width: 26,
+                        height: 26,
+                        borderRadius: "50%",
+                        backgroundColor: acc.color,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "#ffffff",
+                        boxShadow: isSelected ? "0 0 0 2px var(--bg-card), 0 0 0 4px " + acc.color : "none"
+                      }}>
+                        {isSelected && <Check size={14} strokeWidth={3} />}
+                      </div>
+                      <span style={{ marginTop: 4 }}>{acc.label}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Compact Mode */}
+            <div className="settings-mobile-card">
+              <div className="settings-mobile-row">
+                <div className="settings-mobile-row-info">
+                  <div className="settings-mobile-row-title">Compact Density</div>
+                  <div className="settings-mobile-row-desc">Tighter spacing to display more trades on screen</div>
+                </div>
+                <Toggle active={compactMode} onChange={setCompactMode} />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 5: ABOUT */}
+        {mobileTab === "About" && (
+          <div>
+            {/* Brand Card */}
+            <div className="settings-mobile-card" style={{ textAlign: "center", padding: "24px 16px" }}>
+              <div style={{
+                width: 72,
+                height: 72,
+                borderRadius: 18,
+                margin: "0 auto 12px auto",
+                overflow: "hidden",
+                boxShadow: "var(--shadow-md)"
+              }}>
+                <img src="/about-logo.png" alt="TraderLabs" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              </div>
+
+              <h3 style={{ fontSize: "20px", fontWeight: 800, margin: "0 0 6px 0" }}>TraderLabs</h3>
+              <div style={{
+                display: "inline-block",
+                border: "1px solid var(--border-secondary)",
+                background: "var(--bg-secondary)",
+                padding: "3px 12px",
+                borderRadius: 20,
+                fontSize: "12px",
+                fontWeight: 700,
+                fontFamily: "var(--font-mono)",
+                color: "var(--accent-primary)",
+                marginBottom: "10px"
+              }}>
+                {LATEST_VERSION}
+              </div>
+              <p style={{ fontSize: "12px", color: "var(--text-secondary)", margin: 0 }}>
+                Next-generation trading journal for data-driven, disciplined market execution.
+              </p>
+            </div>
+
+            {/* Quick Links Card */}
+            <div className="settings-mobile-card" style={{ padding: 0, overflow: "hidden" }}>
+              <a
+                href="/about/contact"
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "14px 16px",
+                  borderBottom: "1px solid var(--border-secondary)",
+                  color: "var(--text-primary)",
+                  textDecoration: "none"
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: "13px", fontWeight: 600 }}>
+                  <User size={16} className="text-muted" />
+                  <span>Contact Support</span>
+                </div>
+                <ChevronRight size={16} className="text-muted" />
+              </a>
+
+              <a
+                href="/about/bug-report"
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "14px 16px",
+                  borderBottom: "1px solid var(--border-secondary)",
+                  color: "var(--text-primary)",
+                  textDecoration: "none"
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: "13px", fontWeight: 600 }}>
+                  <AlertTriangle size={16} className="text-muted" />
+                  <span>Report a Bug</span>
+                </div>
+                <ChevronRight size={16} className="text-muted" />
+              </a>
+
+              <a
+                href="/about/changelog"
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "14px 16px",
+                  color: "var(--text-primary)",
+                  textDecoration: "none"
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: "13px", fontWeight: 600 }}>
+                  <Sparkles size={16} className="text-muted" />
+                  <span>Release Notes & Changelog</span>
+                </div>
+                <ChevronRight size={16} className="text-muted" />
+              </a>
+            </div>
+
+            {/* Legal Footer */}
+            <div style={{ display: "flex", justifyContent: "center", gap: "16px", padding: "12px 0 24px 0" }}>
+              <a href="/about/terms" className="text-muted" style={{ textDecoration: "none", fontSize: "12px" }}>Terms of Service</a>
+              <span className="text-muted" style={{ fontSize: "12px" }}>•</span>
+              <a href="/about/privacy" className="text-muted" style={{ textDecoration: "none", fontSize: "12px" }}>Privacy Policy</a>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Delete Confirmation Modal */}

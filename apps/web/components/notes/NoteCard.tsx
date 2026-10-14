@@ -66,7 +66,12 @@ export default function NoteCard({
       {contentPreview && (
         <p className="note-card-preview">{contentPreview}</p>
       )}
-      <div className="note-card-date">{formatDate(updatedAt)}</div>
+      <div className="note-card-footer">
+        <span className="note-card-date">{formatDate(updatedAt)}</span>
+        <span className="note-card-arrow" aria-hidden="true">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </span>
+      </div>
     </div>
   );
 }

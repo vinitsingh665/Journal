@@ -272,7 +272,7 @@ async function DashboardContent() {
 export default function DashboardPage() {
   return (
     <>
-      <div className="page-header" style={{ marginBottom: "var(--space-6)", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+      <div className="page-header dashboard-page-header" style={{ marginBottom: "var(--space-6)", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
         <div>
           <h1 className="page-title">Dashboard</h1>
           <p className="page-description text-muted">Welcome back. Here's your performance overview.</p>

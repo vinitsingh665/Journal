@@ -195,17 +195,17 @@ export default function JournalDetail({ trade, isShared, sharedUserId }: { trade
         <div className="col-span-8 space-y-6">
 
           {/* Header */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)" }}>
-              <h1 style={{ fontSize: "var(--text-2xl)", fontWeight: 700, margin: 0 }}>{trade.symbol}</h1>
+          <div className="journal-detail-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div className="journal-detail-title-group" style={{ display: "flex", alignItems: "center", gap: "var(--space-3)" }}>
+              <h1 className="journal-detail-title" style={{ fontSize: "var(--text-2xl)", fontWeight: 700, margin: 0 }}>{trade.symbol}</h1>
               <span className={`badge ${trade.direction === "LONG" ? "badge-long" : "badge-short"}`}>
                 ● {trade.direction}
               </span>
-              <span className="text-muted" style={{ fontSize: "var(--text-sm)" }}>
+              <span className="text-muted journal-detail-meta" style={{ fontSize: "var(--text-sm)" }}>
                 {trade.exchange} · {formatDate(trade.entryTime)}
               </span>
               {trade.setup && (
-                <span className="tag" style={{
+                <span className="tag journal-detail-setup-tag" style={{
                   background: "rgba(99, 102, 241, 0.15)",
                   color: "var(--accent-primary)",
                   border: "1px solid rgba(99, 102, 241, 0.3)",
@@ -214,7 +214,7 @@ export default function JournalDetail({ trade, isShared, sharedUserId }: { trade
                 </span>
               )}
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)" }}>
+            <div className="journal-detail-actions-group" style={{ display: "flex", alignItems: "center", gap: "var(--space-2)" }}>
               {!isShared && (
                 <>
                   <Link href={`/trades/${trade.id}/edit`} className="btn btn-secondary btn-sm">
@@ -254,35 +254,36 @@ export default function JournalDetail({ trade, isShared, sharedUserId }: { trade
           </div>
 
           {/* KPI Row */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "var(--space-4)" }}>
-            <div className="card" style={{ padding: "var(--space-3) var(--space-4)", textAlign: "center", overflow: "hidden" }} title={displayR !== null ? `${displayR >= 0 ? "+" : ""}${displayR.toFixed(2)}R` : "—"}>
-              <div className="text-muted" style={{ fontSize: "var(--text-xs)", marginBottom: 4 }}>R-MULTIPLE</div>
+          <div className="journal-detail-kpi-row" style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "var(--space-4)" }}>
+            <div className="card journal-detail-kpi-card journal-detail-kpi-r" style={{ padding: "var(--space-3) var(--space-4)", textAlign: "center", overflow: "hidden" }} title={displayR !== null ? `${displayR >= 0 ? "+" : ""}${displayR.toFixed(2)}R` : "—"}>
+              <div className="text-muted journal-kpi-label" style={{ fontSize: "var(--text-xs)", marginBottom: 4 }}>R-MULTIPLE</div>
               <div className={cn(
+                "journal-kpi-val",
                 (displayR ?? 0) >= 0 ? "text-positive" : "text-negative"
               )} style={{ fontSize: "var(--text-xl)", fontWeight: 700, fontFamily: "var(--font-mono)", whiteSpace: "nowrap", textOverflow: "ellipsis", overflow: "hidden" }}>
                 {displayR !== null ? `${displayR >= 0 ? "+" : ""}${displayR.toFixed(2)}R` : "—"}
               </div>
             </div>
-            <div className="card" style={{ padding: "var(--space-3) var(--space-4)", textAlign: "center", overflow: "hidden" }} title={formatINR(displayPnl, { showSign: true })}>
-              <div className="text-muted" style={{ fontSize: "var(--text-xs)", marginBottom: 4 }}>P&L</div>
-              <div className={cn(displayPnl >= 0 ? "text-positive" : "text-negative")} style={{ fontSize: "var(--text-xl)", fontWeight: 700, fontFamily: "var(--font-mono)", whiteSpace: "nowrap", textOverflow: "ellipsis", overflow: "hidden" }}>
+            <div className={cn("card journal-detail-kpi-card journal-detail-kpi-hero", displayPnl >= 0 ? "kpi-pnl-profit" : "kpi-pnl-loss")} style={{ padding: "var(--space-3) var(--space-4)", textAlign: "center", overflow: "hidden" }} title={formatINR(displayPnl, { showSign: true })}>
+              <div className="text-muted journal-kpi-label" style={{ fontSize: "var(--text-xs)", marginBottom: 4 }}>NET P&L</div>
+              <div className={cn("journal-kpi-val", displayPnl >= 0 ? "text-positive" : "text-negative")} style={{ fontSize: "var(--text-xl)", fontWeight: 700, fontFamily: "var(--font-mono)", whiteSpace: "nowrap", textOverflow: "ellipsis", overflow: "hidden" }}>
                 {formatINR(displayPnl, { showSign: true, compact: true })}
               </div>
             </div>
-            <div className="card" style={{ padding: "var(--space-3) var(--space-4)", textAlign: "center", overflow: "hidden" }} title={`${displayPct >= 0 ? "+" : ""}${displayPct.toFixed(2)}%`}>
-              <div className="text-muted" style={{ fontSize: "var(--text-xs)", marginBottom: 4 }}>RETURN</div>
-              <div className={cn(displayPct >= 0 ? "text-positive" : "text-negative")} style={{ fontSize: "var(--text-xl)", fontWeight: 700, fontFamily: "var(--font-mono)", whiteSpace: "nowrap", textOverflow: "ellipsis", overflow: "hidden" }}>
+            <div className="card journal-detail-kpi-card journal-detail-kpi-return" style={{ padding: "var(--space-3) var(--space-4)", textAlign: "center", overflow: "hidden" }} title={`${displayPct >= 0 ? "+" : ""}${displayPct.toFixed(2)}%`}>
+              <div className="text-muted journal-kpi-label" style={{ fontSize: "var(--text-xs)", marginBottom: 4 }}>RETURN</div>
+              <div className={cn("journal-kpi-val", displayPct >= 0 ? "text-positive" : "text-negative")} style={{ fontSize: "var(--text-xl)", fontWeight: 700, fontFamily: "var(--font-mono)", whiteSpace: "nowrap", textOverflow: "ellipsis", overflow: "hidden" }}>
                 {displayPct >= 0 ? "+" : ""}{displayPct.toFixed(2)}%
               </div>
             </div>
-            <div className="card" style={{ padding: "var(--space-3) var(--space-4)", textAlign: "center", overflow: "hidden" }} title={liveDuration.text}>
-              <div className="text-muted" style={{ fontSize: "var(--text-xs)", marginBottom: 4 }}>DURATION</div>
-              <div style={{ fontSize: "var(--text-xl)", fontWeight: 700, fontFamily: "var(--font-mono)", whiteSpace: "nowrap", textOverflow: "ellipsis", overflow: "hidden" }}>
+            <div className="card journal-detail-kpi-card journal-detail-kpi-duration" style={{ padding: "var(--space-3) var(--space-4)", textAlign: "center", overflow: "hidden" }} title={liveDuration.text}>
+              <div className="text-muted journal-kpi-label" style={{ fontSize: "var(--text-xs)", marginBottom: 4 }}>DURATION</div>
+              <div className="journal-kpi-val" style={{ fontSize: "var(--text-xl)", fontWeight: 700, fontFamily: "var(--font-mono)", whiteSpace: "nowrap", textOverflow: "ellipsis", overflow: "hidden" }}>
                 {liveDuration.node}
               </div>
             </div>
-            <div className="card" style={{ padding: "var(--space-3) var(--space-4)", textAlign: "center" }}>
-              <div className="text-muted" style={{ fontSize: "var(--text-xs)", marginBottom: 4 }}>CONFIDENCE</div>
+            <div className="card journal-detail-kpi-card journal-detail-kpi-confidence" style={{ padding: "var(--space-3) var(--space-4)", textAlign: "center" }}>
+              <div className="text-muted journal-kpi-label" style={{ fontSize: "var(--text-xs)", marginBottom: 4 }}>CONFIDENCE</div>
               <div style={{ display: "flex", justifyContent: "center" }}>
                 {renderConfidenceEmoji(trade.confidence)}
               </div>
@@ -290,7 +291,7 @@ export default function JournalDetail({ trade, isShared, sharedUserId }: { trade
           </div>
 
           {/* Trade Setup + Thesis */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-4)" }}>
+          <div className="journal-detail-setup-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-4)" }}>
             <div className="card">
               <div className="card-header"><span className="card-title">Trade Setup</span></div>
               <div className="card-body">
@@ -338,49 +339,51 @@ export default function JournalDetail({ trade, isShared, sharedUserId }: { trade
                 </div>
                 {entryExecutions.length > 0 ? (
                   <>
-                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "var(--text-sm)" }}>
-                      <thead>
-                        <tr style={{ borderBottom: "1px solid var(--border-secondary)" }}>
-                          <th style={{ padding: "8px", textAlign: "left", color: "var(--text-muted)", fontWeight: 600, fontSize: "var(--text-xs)" }}>#</th>
-                          <th style={{ padding: "8px", textAlign: "left", color: "var(--text-muted)", fontWeight: 600, fontSize: "var(--text-xs)" }}>Time</th>
-                          <th style={{ padding: "8px", textAlign: "left", color: "var(--text-muted)", fontWeight: 600, fontSize: "var(--text-xs)" }}>Type</th>
-                          <th style={{ padding: "8px", textAlign: "right", color: "var(--text-muted)", fontWeight: 600, fontSize: "var(--text-xs)" }}>Price (₹)</th>
-                          <th style={{ padding: "8px", textAlign: "right", color: "var(--text-muted)", fontWeight: 600, fontSize: "var(--text-xs)" }}>Qty</th>
-                          <th style={{ padding: "8px", textAlign: "right", color: "var(--text-muted)", fontWeight: 600, fontSize: "var(--text-xs)" }}>Value (₹)</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {entryExecutions.map((exec, i) => (
-                          <tr key={exec.id} style={{ borderBottom: "1px solid var(--border-secondary)" }}>
-                            <td style={{ padding: "8px", color: "var(--text-muted)" }}>{i + 1}</td>
-                            <td style={{ padding: "8px" }}>{formatDate(exec.executionTime)}, {formatTime(exec.executionTime)}</td>
-                            <td style={{ padding: "8px" }}>
-                              <span style={{
-                                padding: "2px 8px",
-                                borderRadius: "var(--radius-sm)",
-                                fontSize: 11,
-                                fontWeight: 600,
-                                background: i === 0 ? "rgba(99, 102, 241, 0.15)" : "rgba(16, 185, 129, 0.1)",
-                                color: i === 0 ? "var(--accent-primary)" : "var(--color-positive)",
-                              }}>
-                                {i === 0 ? "Initial Entry" : "Add on"}
-                              </span>
-                            </td>
-                            <td style={{ padding: "8px", textAlign: "right", fontFamily: "var(--font-mono)" }}>
-                              {formatINR(exec.price)}
-                            </td>
-                            <td style={{ padding: "8px", textAlign: "right", fontFamily: "var(--font-mono)", fontWeight: 600 }}>
-                              {formatQuantity(exec.quantity)}
-                            </td>
-                            <td style={{ padding: "8px", textAlign: "right", fontFamily: "var(--font-mono)" }}>
-                              {formatINR(exec.quantity * exec.price)}
-                            </td>
+                    <div className="table-container">
+                      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "var(--text-sm)", minWidth: 480 }}>
+                        <thead>
+                          <tr style={{ borderBottom: "1px solid var(--border-secondary)" }}>
+                            <th style={{ padding: "8px", textAlign: "left", color: "var(--text-muted)", fontWeight: 600, fontSize: "var(--text-xs)" }}>#</th>
+                            <th style={{ padding: "8px", textAlign: "left", color: "var(--text-muted)", fontWeight: 600, fontSize: "var(--text-xs)" }}>Time</th>
+                            <th style={{ padding: "8px", textAlign: "left", color: "var(--text-muted)", fontWeight: 600, fontSize: "var(--text-xs)" }}>Type</th>
+                            <th style={{ padding: "8px", textAlign: "right", color: "var(--text-muted)", fontWeight: 600, fontSize: "var(--text-xs)" }}>Price (₹)</th>
+                            <th style={{ padding: "8px", textAlign: "right", color: "var(--text-muted)", fontWeight: 600, fontSize: "var(--text-xs)" }}>Qty</th>
+                            <th style={{ padding: "8px", textAlign: "right", color: "var(--text-muted)", fontWeight: 600, fontSize: "var(--text-xs)" }}>Value (₹)</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody>
+                          {entryExecutions.map((exec, i) => (
+                            <tr key={exec.id} style={{ borderBottom: "1px solid var(--border-secondary)" }}>
+                              <td style={{ padding: "8px", color: "var(--text-muted)" }}>{i + 1}</td>
+                              <td style={{ padding: "8px" }}>{formatDate(exec.executionTime)}, {formatTime(exec.executionTime)}</td>
+                              <td style={{ padding: "8px" }}>
+                                <span style={{
+                                  padding: "2px 8px",
+                                  borderRadius: "var(--radius-sm)",
+                                  fontSize: 11,
+                                  fontWeight: 600,
+                                  background: i === 0 ? "rgba(99, 102, 241, 0.15)" : "rgba(16, 185, 129, 0.1)",
+                                  color: i === 0 ? "var(--accent-primary)" : "var(--color-positive)",
+                                }}>
+                                  {i === 0 ? "Initial Entry" : "Add on"}
+                                </span>
+                              </td>
+                              <td style={{ padding: "8px", textAlign: "right", fontFamily: "var(--font-mono)" }}>
+                                {formatINR(exec.price)}
+                              </td>
+                              <td style={{ padding: "8px", textAlign: "right", fontFamily: "var(--font-mono)", fontWeight: 600 }}>
+                                {formatQuantity(exec.quantity)}
+                              </td>
+                              <td style={{ padding: "8px", textAlign: "right", fontFamily: "var(--font-mono)" }}>
+                                {formatINR(exec.quantity * exec.price)}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                     {/* Entry Summary */}
-                    <div style={{
+                    <div className="journal-exec-summary" style={{
                       display: "flex",
                       justifyContent: "space-between",
                       padding: "10px 8px",
@@ -411,63 +414,65 @@ export default function JournalDetail({ trade, isShared, sharedUserId }: { trade
                 </div>
                 {exitExecutions.length > 0 ? (
                   <>
-                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "var(--text-sm)" }}>
-                      <thead>
-                        <tr style={{ borderBottom: "1px solid var(--border-secondary)" }}>
-                          <th style={{ padding: "8px", textAlign: "left", color: "var(--text-muted)", fontWeight: 600, fontSize: "var(--text-xs)" }}>#</th>
-                          <th style={{ padding: "8px", textAlign: "left", color: "var(--text-muted)", fontWeight: 600, fontSize: "var(--text-xs)" }}>Time</th>
-                          <th style={{ padding: "8px", textAlign: "left", color: "var(--text-muted)", fontWeight: 600, fontSize: "var(--text-xs)" }}>Type</th>
-                          <th style={{ padding: "8px", textAlign: "right", color: "var(--text-muted)", fontWeight: 600, fontSize: "var(--text-xs)" }}>Price (₹)</th>
-                          <th style={{ padding: "8px", textAlign: "right", color: "var(--text-muted)", fontWeight: 600, fontSize: "var(--text-xs)" }}>Qty</th>
-                          <th style={{ padding: "8px", textAlign: "right", color: "var(--text-muted)", fontWeight: 600, fontSize: "var(--text-xs)" }}>Value (₹)</th>
-                          <th style={{ padding: "8px", textAlign: "right", color: "var(--text-muted)", fontWeight: 600, fontSize: "var(--text-xs)" }}>R Multiple</th>
-                          <th style={{ padding: "8px", textAlign: "right", color: "var(--text-muted)", fontWeight: 600, fontSize: "var(--text-xs)" }}>P&L (₹)</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {exitExecutions.map((exec, i) => {
-                          const exitPnl = trade.direction === "LONG"
-                            ? (exec.price - avgEntryCalc) * exec.quantity
-                            : (avgEntryCalc - exec.price) * exec.quantity;
-                          const exitR = riskPerShare > 0
-                            ? (trade.direction === "LONG" ? exec.price - avgEntryCalc : avgEntryCalc - exec.price) / riskPerShare
-                            : 0;
-                          return (
-                            <tr key={exec.id} style={{ borderBottom: "1px solid var(--border-secondary)" }}>
-                              <td style={{ padding: "8px", color: "var(--text-muted)" }}>{i + 1}</td>
-                              <td style={{ padding: "8px" }}>{formatDate(exec.executionTime)}, {formatTime(exec.executionTime)}</td>
-                              <td style={{ padding: "8px" }}>
-                                <span style={{
-                                  padding: "2px 8px",
-                                  borderRadius: "var(--radius-sm)",
-                                  fontSize: 11,
-                                  fontWeight: 600,
-                                  background: i === exitExecutions.length - 1 ? "rgba(239, 68, 68, 0.1)" : "rgba(251, 191, 36, 0.1)",
-                                  color: i === exitExecutions.length - 1 ? "var(--color-negative)" : "#f59e0b",
-                                }}>
-                                  {i === exitExecutions.length - 1 && (trade.status === "CLOSED" || trade.status === "STOP_LOSS_HIT") ? "Final Exit" : "Partial Exit"}
-                                </span>
-                              </td>
-                              <td style={{ padding: "8px", textAlign: "right", fontFamily: "var(--font-mono)" }}>{formatINR(exec.price)}</td>
-                              <td style={{ padding: "8px", textAlign: "right", fontFamily: "var(--font-mono)", fontWeight: 600 }}>{formatQuantity(exec.quantity)}</td>
-                              <td style={{ padding: "8px", textAlign: "right", fontFamily: "var(--font-mono)" }}>{formatINR(exec.quantity * exec.price)}</td>
-                              <td style={{ padding: "8px", textAlign: "right", fontFamily: "var(--font-mono)" }}>
-                                <span className={cn(exitR >= 0 ? "text-positive" : "text-negative")}>
-                                  {exitR >= 0 ? "+" : ""}{exitR.toFixed(2)}R
-                                </span>
-                              </td>
-                              <td style={{ padding: "8px", textAlign: "right", fontFamily: "var(--font-mono)" }}>
-                                <span className={cn(exitPnl >= 0 ? "text-positive" : "text-negative")}>
-                                  {formatINR(exitPnl, { showSign: true })}
-                                </span>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
+                    <div className="table-container">
+                      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "var(--text-sm)", minWidth: 620 }}>
+                        <thead>
+                          <tr style={{ borderBottom: "1px solid var(--border-secondary)" }}>
+                            <th style={{ padding: "8px", textAlign: "left", color: "var(--text-muted)", fontWeight: 600, fontSize: "var(--text-xs)" }}>#</th>
+                            <th style={{ padding: "8px", textAlign: "left", color: "var(--text-muted)", fontWeight: 600, fontSize: "var(--text-xs)" }}>Time</th>
+                            <th style={{ padding: "8px", textAlign: "left", color: "var(--text-muted)", fontWeight: 600, fontSize: "var(--text-xs)" }}>Type</th>
+                            <th style={{ padding: "8px", textAlign: "right", color: "var(--text-muted)", fontWeight: 600, fontSize: "var(--text-xs)" }}>Price (₹)</th>
+                            <th style={{ padding: "8px", textAlign: "right", color: "var(--text-muted)", fontWeight: 600, fontSize: "var(--text-xs)" }}>Qty</th>
+                            <th style={{ padding: "8px", textAlign: "right", color: "var(--text-muted)", fontWeight: 600, fontSize: "var(--text-xs)" }}>Value (₹)</th>
+                            <th style={{ padding: "8px", textAlign: "right", color: "var(--text-muted)", fontWeight: 600, fontSize: "var(--text-xs)" }}>R Multiple</th>
+                            <th style={{ padding: "8px", textAlign: "right", color: "var(--text-muted)", fontWeight: 600, fontSize: "var(--text-xs)" }}>P&L (₹)</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {exitExecutions.map((exec, i) => {
+                            const exitPnl = trade.direction === "LONG"
+                              ? (exec.price - avgEntryCalc) * exec.quantity
+                              : (avgEntryCalc - exec.price) * exec.quantity;
+                            const exitR = riskPerShare > 0
+                              ? (trade.direction === "LONG" ? exec.price - avgEntryCalc : avgEntryCalc - exec.price) / riskPerShare
+                              : 0;
+                            return (
+                              <tr key={exec.id} style={{ borderBottom: "1px solid var(--border-secondary)" }}>
+                                <td style={{ padding: "8px", color: "var(--text-muted)" }}>{i + 1}</td>
+                                <td style={{ padding: "8px" }}>{formatDate(exec.executionTime)}, {formatTime(exec.executionTime)}</td>
+                                <td style={{ padding: "8px" }}>
+                                  <span style={{
+                                    padding: "2px 8px",
+                                    borderRadius: "var(--radius-sm)",
+                                    fontSize: 11,
+                                    fontWeight: 600,
+                                    background: i === exitExecutions.length - 1 ? "rgba(239, 68, 68, 0.1)" : "rgba(251, 191, 36, 0.1)",
+                                    color: i === exitExecutions.length - 1 ? "var(--color-negative)" : "#f59e0b",
+                                  }}>
+                                    {i === exitExecutions.length - 1 && (trade.status === "CLOSED" || trade.status === "STOP_LOSS_HIT") ? "Final Exit" : "Partial Exit"}
+                                  </span>
+                                </td>
+                                <td style={{ padding: "8px", textAlign: "right", fontFamily: "var(--font-mono)" }}>{formatINR(exec.price)}</td>
+                                <td style={{ padding: "8px", textAlign: "right", fontFamily: "var(--font-mono)", fontWeight: 600 }}>{formatQuantity(exec.quantity)}</td>
+                                <td style={{ padding: "8px", textAlign: "right", fontFamily: "var(--font-mono)" }}>{formatINR(exec.quantity * exec.price)}</td>
+                                <td style={{ padding: "8px", textAlign: "right", fontFamily: "var(--font-mono)" }}>
+                                  <span className={cn(exitR >= 0 ? "text-positive" : "text-negative")}>
+                                    {exitR >= 0 ? "+" : ""}{exitR.toFixed(2)}R
+                                  </span>
+                                </td>
+                                <td style={{ padding: "8px", textAlign: "right", fontFamily: "var(--font-mono)" }}>
+                                  <span className={cn(exitPnl >= 0 ? "text-positive" : "text-negative")}>
+                                    {formatINR(exitPnl, { showSign: true })}
+                                  </span>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
                     {/* Exit Summary */}
-                    <div style={{
+                    <div className="journal-exec-summary" style={{
                       display: "flex",
                       justifyContent: "space-between",
                       padding: "10px 8px",
@@ -489,7 +494,7 @@ export default function JournalDetail({ trade, isShared, sharedUserId }: { trade
               </div>
 
               {/* Fees & Net P&L */}
-              <div style={{
+              <div className="journal-fees-bar" style={{
                 padding: "var(--space-3) var(--space-5)",
                 borderTop: "1px solid var(--border-secondary)",
                 display: "flex",

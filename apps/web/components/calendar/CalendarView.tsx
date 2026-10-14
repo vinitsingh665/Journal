@@ -180,80 +180,86 @@ export default function CalendarView({
   return (
     <>
       {/* ─── HEADER ─── */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "var(--space-6)" }}>
-        <div>
+      <div className="calendar-view-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "var(--space-6)" }}>
+        <div className="calendar-view-title-group">
           <h1 style={{ fontSize: "var(--text-3xl)", fontWeight: 700, margin: "0 0 4px 0", color: "var(--text-primary)" }}>Calendar</h1>
           <p style={{ margin: 0, color: "var(--text-secondary)", fontSize: "var(--text-sm)" }}>View your daily trading performance at a glance.</p>
         </div>
         
-        <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)" }}>
-          <div style={{ display: "flex", alignItems: "center", background: "var(--bg-primary)", borderRadius: "var(--radius-md)", border: "1px solid var(--border-color)", overflow: "hidden" }}>
+        <div className="calendar-view-controls" style={{ display: "flex", alignItems: "center", gap: "var(--space-3)" }}>
+          <div className="calendar-month-picker" style={{ display: "flex", alignItems: "center", background: "var(--bg-primary)", borderRadius: "var(--radius-md)", border: "1px solid var(--border-color)", overflow: "hidden" }}>
             <button onClick={handlePrevMonth} className="btn btn-ghost" style={{ padding: "8px 12px", borderRight: "1px solid var(--border-color)", borderRadius: 0 }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6" /></svg>
             </button>
-            <div style={{ padding: "0 16px", fontWeight: 600, fontSize: "var(--text-sm)", width: 140, textAlign: "center" }}>
+            <div className="calendar-month-label" style={{ padding: "0 16px", fontWeight: 600, fontSize: "var(--text-sm)", width: 140, textAlign: "center" }}>
               {currentDate.toLocaleString('default', { month: 'long' })} {year}
             </div>
             <button onClick={handleNextMonth} className="btn btn-ghost" style={{ padding: "8px 12px", borderLeft: "1px solid var(--border-color)", borderRadius: 0 }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6" /></svg>
             </button>
           </div>
-          <button onClick={handleToday} className="btn btn-secondary" style={{ padding: "8px 16px" }}>Today</button>
+          <button onClick={handleToday} className="btn btn-secondary calendar-today-btn" style={{ padding: "8px 16px" }}>Today</button>
         </div>
       </div>
 
       {/* ─── KPI CARDS ─── */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "var(--space-4)", marginBottom: "var(--space-6)" }}>
-        <div className="card" style={{ padding: "var(--space-4)" }}>
-          <div className="text-muted" style={{ fontSize: "var(--text-xs)", textTransform: "uppercase", fontWeight: 600, marginBottom: 8 }}>Total P&L</div>
-          <div className={cn(totalPnl >= 0 ? "text-positive" : "text-negative")} style={{ fontSize: "var(--text-2xl)", fontWeight: 700, fontFamily: "var(--font-mono)" }}>
+      <div className="calendar-kpi-row" style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "var(--space-4)", marginBottom: "var(--space-6)" }}>
+        <div className={cn("card calendar-kpi-card calendar-kpi-hero", totalPnl >= 0 ? "kpi-pnl-profit" : "kpi-pnl-loss")} style={{ padding: "var(--space-4)" }}>
+          <div className="text-muted calendar-kpi-label" style={{ fontSize: "var(--text-xs)", textTransform: "uppercase", fontWeight: 600, marginBottom: 8 }}>Total P&L</div>
+          <div className={cn("calendar-kpi-val", totalPnl >= 0 ? "text-positive" : "text-negative")} style={{ fontSize: "var(--text-2xl)", fontWeight: 700, fontFamily: "var(--font-mono)" }}>
             {formatINR(totalPnl, { showSign: true })}
+          </div>
+          <div className="calendar-kpi-sub" style={{ fontSize: "var(--text-xs)", marginTop: 4, opacity: 0.85 }}>
+            {totalTrades} trades · {winRate.toFixed(1)}% win rate
           </div>
         </div>
         
-        <div className="card" style={{ padding: "var(--space-4)" }}>
-          <div className="text-muted" style={{ fontSize: "var(--text-xs)", textTransform: "uppercase", fontWeight: 600, marginBottom: 8 }}>Win Rate</div>
-          <div style={{ fontSize: "var(--text-2xl)", fontWeight: 700, fontFamily: "var(--font-mono)" }}>
+        <div className="card calendar-kpi-card calendar-kpi-winrate" style={{ padding: "var(--space-4)" }}>
+          <div className="text-muted calendar-kpi-label" style={{ fontSize: "var(--text-xs)", textTransform: "uppercase", fontWeight: 600, marginBottom: 8 }}>Win Rate</div>
+          <div className="calendar-kpi-val" style={{ fontSize: "var(--text-2xl)", fontWeight: 700, fontFamily: "var(--font-mono)" }}>
             {winRate.toFixed(1)}%
           </div>
-          <div className="text-muted" style={{ fontSize: "var(--text-xs)", marginTop: 4 }}>
+          <div className="text-muted calendar-kpi-sub" style={{ fontSize: "var(--text-xs)", marginTop: 4 }}>
             {winningTrades}W / {losingTrades}L
           </div>
         </div>
         
-        <div className="card" style={{ padding: "var(--space-4)" }}>
-          <div className="text-muted" style={{ fontSize: "var(--text-xs)", textTransform: "uppercase", fontWeight: 600, marginBottom: 8 }}>Best Day</div>
-          <div className="text-positive" style={{ fontSize: "var(--text-2xl)", fontWeight: 700, fontFamily: "var(--font-mono)" }}>
+        <div className="card calendar-kpi-card calendar-kpi-best" style={{ padding: "var(--space-4)" }}>
+          <div className="text-muted calendar-kpi-label" style={{ fontSize: "var(--text-xs)", textTransform: "uppercase", fontWeight: 600, marginBottom: 8 }}>Best Day</div>
+          <div className="calendar-kpi-val text-positive" style={{ fontSize: "var(--text-2xl)", fontWeight: 700, fontFamily: "var(--font-mono)" }}>
             {bestDay.pnl > 0 ? formatINR(bestDay.pnl, { showSign: true }) : "—"}
           </div>
-          <div className="text-muted" style={{ fontSize: "var(--text-xs)", marginTop: 4 }}>
+          <div className="text-muted calendar-kpi-sub" style={{ fontSize: "var(--text-xs)", marginTop: 4 }}>
             {bestDay.date}
           </div>
         </div>
 
-        <div className="card" style={{ padding: "var(--space-4)" }}>
-          <div className="text-muted" style={{ fontSize: "var(--text-xs)", textTransform: "uppercase", fontWeight: 600, marginBottom: 8 }}>Worst Day</div>
-          <div className="text-negative" style={{ fontSize: "var(--text-2xl)", fontWeight: 700, fontFamily: "var(--font-mono)" }}>
+        <div className="card calendar-kpi-card calendar-kpi-worst" style={{ padding: "var(--space-4)" }}>
+          <div className="text-muted calendar-kpi-label" style={{ fontSize: "var(--text-xs)", textTransform: "uppercase", fontWeight: 600, marginBottom: 8 }}>Worst Day</div>
+          <div className="calendar-kpi-val text-negative" style={{ fontSize: "var(--text-2xl)", fontWeight: 700, fontFamily: "var(--font-mono)" }}>
             {worstDay.pnl < 0 ? formatINR(worstDay.pnl, { showSign: true }) : "—"}
           </div>
-          <div className="text-muted" style={{ fontSize: "var(--text-xs)", marginTop: 4 }}>
+          <div className="text-muted calendar-kpi-sub" style={{ fontSize: "var(--text-xs)", marginTop: 4 }}>
             {worstDay.date}
           </div>
         </div>
 
-        <div className="card" style={{ padding: "var(--space-4)" }}>
-          <div className="text-muted" style={{ fontSize: "var(--text-xs)", textTransform: "uppercase", fontWeight: 600, marginBottom: 8 }}>Avg Daily P&L</div>
-          <div className={cn(avgDailyPnl >= 0 ? "text-positive" : "text-negative")} style={{ fontSize: "var(--text-2xl)", fontWeight: 700, fontFamily: "var(--font-mono)" }}>
+        <div className="card calendar-kpi-card calendar-kpi-avg" style={{ padding: "var(--space-4)" }}>
+          <div className="text-muted calendar-kpi-label" style={{ fontSize: "var(--text-xs)", textTransform: "uppercase", fontWeight: 600, marginBottom: 8 }}>Avg Daily P&L</div>
+          <div className={cn("calendar-kpi-val", avgDailyPnl >= 0 ? "text-positive" : "text-negative")} style={{ fontSize: "var(--text-2xl)", fontWeight: 700, fontFamily: "var(--font-mono)" }}>
             {formatINR(avgDailyPnl, { showSign: true })}
+          </div>
+          <div className="text-muted calendar-kpi-sub" style={{ fontSize: "var(--text-xs)", marginTop: 4 }}>
+            {activeDaysCount} active days
           </div>
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "3fr 1fr", gap: "var(--space-6)" }}>
+      <div className="calendar-main-layout" style={{ display: "grid", gridTemplateColumns: "3fr 1fr", gap: "var(--space-6)" }}>
         {/* ─── CALENDAR GRID ─── */}
-        <div className="card" style={{ padding: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+        <div className="card calendar-grid-card" style={{ padding: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
           {/* Days of week header */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", background: "var(--border-color)", gap: "1px", borderBottom: "1px solid var(--border-color)" }}>
+          <div className="calendar-weekdays-row" style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", background: "var(--border-color)", gap: "1px", borderBottom: "1px solid var(--border-color)" }}>
             {['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'].map((day) => (
               <div key={day} style={{ padding: "12px", textAlign: "center", fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", background: "var(--bg-primary)" }}>
                 {day}
@@ -262,7 +268,7 @@ export default function CalendarView({
           </div>
           
           {/* Calendar Cells */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gridAutoRows: "120px", flex: 1, background: "var(--border-color)", gap: "1px" }}>
+          <div className="calendar-days-grid" style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gridAutoRows: "120px", flex: 1, background: "var(--border-color)", gap: "1px" }}>
             {gridCells.map((cell, index) => {
               const isCurrent = cell.type === "current";
               const dayData = isCurrent ? tradesByDay.get(cell.day) : null;
@@ -279,6 +285,12 @@ export default function CalendarView({
               return (
                 <div 
                   key={index} 
+                  className={cn(
+                    "calendar-day-cell",
+                    hasTrades && (dayData!.pnl > 0 ? "cell-profit" : "cell-loss"),
+                    cellIsToday && "cell-today",
+                    !isCurrent && "cell-muted"
+                  )}
                   style={{
                     padding: "12px",
                     background: bg,
@@ -288,16 +300,16 @@ export default function CalendarView({
                     boxShadow: cellIsToday ? "inset 0 0 0 2px var(--accent-primary)" : "none",
                   }}
                 >
-                  <div style={{ fontWeight: 600, fontSize: "var(--text-sm)", marginBottom: "auto" }}>
+                  <div className="calendar-day-num" style={{ fontWeight: 600, fontSize: "var(--text-sm)", marginBottom: "auto" }}>
                     {cell.day}
                   </div>
                   
                   {isCurrent && hasTrades && (
-                    <div style={{ marginTop: "auto" }}>
-                      <div className={cn(dayData!.pnl >= 0 ? "text-positive" : "text-negative")} style={{ fontWeight: 700, fontSize: "var(--text-base)", fontFamily: "var(--font-mono)", marginBottom: 2 }}>
+                    <div className="calendar-day-data" style={{ marginTop: "auto" }}>
+                      <div className={cn("calendar-day-pnl", dayData!.pnl >= 0 ? "text-positive" : "text-negative")} style={{ fontWeight: 700, fontSize: "var(--text-base)", fontFamily: "var(--font-mono)", marginBottom: 2 }}>
                         {formatINR(dayData!.pnl, { showSign: true })}
                       </div>
-                      <div className="text-muted" style={{ fontSize: "var(--text-xs)" }}>
+                      <div className="calendar-day-trades text-muted" style={{ fontSize: "var(--text-xs)" }}>
                         {dayData!.trades.length} trade{dayData!.trades.length !== 1 ? 's' : ''}
                       </div>
                     </div>
@@ -309,10 +321,10 @@ export default function CalendarView({
         </div>
 
         {/* ─── SIDEBAR ─── */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)" }}>
+        <div className="calendar-sidebar" style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)" }}>
           
           {/* Monthly Overview Donut */}
-          <div className="card" style={{ padding: "var(--space-4)" }}>
+          <div className="card calendar-sidebar-card" style={{ padding: "var(--space-4)" }}>
             <div style={{ fontSize: "var(--text-xs)", fontWeight: 700, color: "var(--text-muted)", marginBottom: 16 }}>MONTHLY OVERVIEW</div>
             {totalTrades > 0 ? (
               <div style={{ position: "relative", width: 160, height: 160, margin: "0 auto" }}>
@@ -356,7 +368,7 @@ export default function CalendarView({
           </div>
 
           {/* P&L Breakdown */}
-          <div className="card" style={{ padding: "var(--space-4)" }}>
+          <div className="card calendar-sidebar-card" style={{ padding: "var(--space-4)" }}>
             <div style={{ fontSize: "var(--text-xs)", fontWeight: 700, color: "var(--text-muted)", marginBottom: 16 }}>P&L BREAKDOWN</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: "var(--text-sm)" }}>
@@ -383,7 +395,7 @@ export default function CalendarView({
           </div>
 
           {/* Trade Breakdown */}
-          <div className="card" style={{ padding: "var(--space-4)" }}>
+          <div className="card calendar-sidebar-card" style={{ padding: "var(--space-4)" }}>
             <div style={{ fontSize: "var(--text-xs)", fontWeight: 700, color: "var(--text-muted)", marginBottom: 16 }}>TRADE BREAKDOWN</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: "var(--text-sm)" }}>
@@ -411,7 +423,7 @@ export default function CalendarView({
 
           {/* Most Active Days */}
           {mostActiveDays.length > 0 && (
-            <div className="card" style={{ padding: "var(--space-4)" }}>
+            <div className="card calendar-sidebar-card" style={{ padding: "var(--space-4)" }}>
               <div style={{ fontSize: "var(--text-xs)", fontWeight: 700, color: "var(--text-muted)", marginBottom: 16 }}>MOST ACTIVE DAYS</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 {mostActiveDays.map(([day, data], i) => (

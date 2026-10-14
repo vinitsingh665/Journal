@@ -1,6 +1,6 @@
 "use client";
 
-import { formatINR, formatPercent } from "@/lib/utils";
+import { formatINR, formatPercent, cn } from "@/lib/utils";
 import { useEnrichedPnl } from "@/hooks/useEnrichedPnl";
 import { useMemo } from "react";
 
@@ -198,44 +198,163 @@ export default function KpiCards({
     },
   ];
 
+  const isPnlPositive = displayTotalPnl >= 0;
+  const isTodayPositive = displayTodayPnl >= 0;
+
   return (
-    <div className="kpi-grid" id="kpi-grid">
-      {kpis.map((kpi) => (
-        <div
-          key={kpi.label}
-          className="kpi-card"
-          style={{ "--kpi-accent": kpi.accentColor } as React.CSSProperties}
-          id={`kpi-${kpi.label.toLowerCase().replace(/[^a-z]/g, "-")}`}
-        >
-          <style>{`
-            .kpi-card:hover::before {
-              background: var(--kpi-accent, var(--accent-primary));
-            }
-          `}</style>
-          <div className="kpi-card-header">
-            <span className="kpi-label">{kpi.label}</span>
-            <div
-              className="kpi-icon"
-              style={{
-                background: `${kpi.accentColor}14`,
-              }}
-            >
-              <span style={{ color: kpi.accentColor }}>{kpi.icon}</span>
+    <div className="kpi-container mb-6" id="kpi-container">
+      {/* ── MOBILE VIEW: Curated Hero P&L + 2x2 Grid ── */}
+      <div className="kpi-mobile-view">
+        {/* Hero Card: Total P&L & Today's P&L */}
+        <div className={cn("kpi-hero-card", isPnlPositive ? "hero-profit" : "hero-loss")}>
+          <div className="kpi-hero-header">
+            <div className="flex items-center gap-2">
+              <span className={cn("kpi-hero-dot", isPnlPositive ? "dot-profit" : "dot-loss")} />
+              <span className="kpi-hero-label">Net Realized & Live P&L</span>
+            </div>
+            {displayTotalReturnPercent != null && (
+              <span className={cn("kpi-hero-badge", isPnlPositive ? "badge-profit" : "badge-loss")}>
+                {isPnlPositive ? "↑" : "↓"} {formatPercent(displayTotalReturnPercent)}
+              </span>
+            )}
+          </div>
+
+          <div className="kpi-hero-value-wrap">
+            <div className={cn("kpi-hero-value", isPnlPositive ? "text-positive" : "text-negative")}>
+              {formatINR(displayTotalPnl, { compact: false, showSign: true })}
             </div>
           </div>
-          <div
-            className="kpi-value"
-            style={{ color: kpi.label.includes("P&L") ? kpi.accentColor : undefined }}
-          >
-            {kpi.value}
+
+          <div className="kpi-hero-subrow">
+            <div className="kpi-hero-substat">
+              <span className="kpi-hero-sublabel">Today&apos;s Return</span>
+              <span className={cn("kpi-hero-subvalue", isTodayPositive ? "text-positive" : "text-negative")}>
+                {formatINR(displayTodayPnl, { compact: true, showSign: true })}
+                {displayTodayReturnPercent != null && (
+                  <span className="kpi-hero-subpct"> ({formatPercent(displayTodayReturnPercent)})</span>
+                )}
+              </span>
+            </div>
+            <div className="kpi-hero-substat" style={{ textAlign: "right" }}>
+              <span className="kpi-hero-sublabel">Win Rate</span>
+              <span className={cn("kpi-hero-subvalue", liveWinRate >= 50 ? "text-positive" : "text-negative")}>
+                {liveWinRate.toFixed(1)}%
+                <span className="kpi-hero-subpct text-muted"> ({totalTrades} trades)</span>
+              </span>
+            </div>
           </div>
-          {kpi.change && (
-            <span className={`kpi-change ${kpi.positive ? "positive" : "negative"}`}>
-              {kpi.positive ? "↑" : "↓"} {kpi.change}
-            </span>
-          )}
         </div>
-      ))}
+
+        {/* 2x2 Grid of Core Metrics */}
+        <div className="kpi-mobile-grid">
+          {/* Available Capital */}
+          <div className="kpi-compact-card">
+            <div className="kpi-compact-header">
+              <span className="kpi-compact-label">Available</span>
+              <div className="kpi-compact-icon" style={{ background: "rgba(16, 185, 129, 0.12)", color: "#10B981" }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                </svg>
+              </div>
+            </div>
+            <div className="kpi-compact-value">{formatINR(availableCapital, { compact: true })}</div>
+            <div className="kpi-compact-sub text-muted">
+              {totalCapital > 0 ? `${((availableCapital / totalCapital) * 100).toFixed(0)}% free` : "0% free"}
+            </div>
+          </div>
+
+          {/* Deployed Capital */}
+          <div className="kpi-compact-card">
+            <div className="kpi-compact-header">
+              <span className="kpi-compact-label">Deployed</span>
+              <div className="kpi-compact-icon" style={{ background: "rgba(99, 102, 241, 0.12)", color: "#6366F1" }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                  <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+                </svg>
+              </div>
+            </div>
+            <div className="kpi-compact-value">{formatINR(totalInvestment, { compact: true })}</div>
+            <div className="kpi-compact-sub text-muted">
+              {openTrades?.length || 0} active pos
+            </div>
+          </div>
+
+          {/* Total Capital */}
+          <div className="kpi-compact-card">
+            <div className="kpi-compact-header">
+              <span className="kpi-compact-label">Total Capital</span>
+              <div className="kpi-compact-icon" style={{ background: "rgba(59, 130, 246, 0.12)", color: "#3B82F6" }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                  <path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4" />
+                  <path d="M4 6v12c0 1.1.9 2 2 2h14v-4H6a2 2 0 0 1-2-2z" />
+                  <path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4v-4h-4z" />
+                </svg>
+              </div>
+            </div>
+            <div className="kpi-compact-value">{formatINR(totalCapital, { compact: true })}</div>
+            <div className="kpi-compact-sub text-muted">Base Account</div>
+          </div>
+
+          {/* Risk on Portfolio */}
+          <div className="kpi-compact-card">
+            <div className="kpi-compact-header">
+              <span className="kpi-compact-label">Portfolio Risk</span>
+              <div className="kpi-compact-icon" style={{ background: "rgba(245, 158, 11, 0.12)", color: "#F59E0B" }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                </svg>
+              </div>
+            </div>
+            <div className="kpi-compact-value" style={{ color: totalRisk > 0 ? "#F59E0B" : undefined }}>
+              {formatINR(totalRisk, { compact: true })}
+            </div>
+            <div className="kpi-compact-sub text-muted">
+              {totalInvestment > 0 ? `${((totalRisk / totalInvestment) * 100).toFixed(1)}% of deployed` : "No risk defined"}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── DESKTOP VIEW: Full Grid ── */}
+      <div className="kpi-desktop-grid" id="kpi-grid">
+        {kpis.map((kpi) => (
+          <div
+            key={kpi.label}
+            className="kpi-card"
+            style={{ "--kpi-accent": kpi.accentColor } as React.CSSProperties}
+            id={`kpi-${kpi.label.toLowerCase().replace(/[^a-z]/g, "-")}`}
+          >
+            <style>{`
+              .kpi-card:hover::before {
+                background: var(--kpi-accent, var(--accent-primary));
+              }
+            `}</style>
+            <div className="kpi-card-header">
+              <span className="kpi-label">{kpi.label}</span>
+              <div
+                className="kpi-icon"
+                style={{
+                  background: `${kpi.accentColor}14`,
+                }}
+              >
+                <span style={{ color: kpi.accentColor }}>{kpi.icon}</span>
+              </div>
+            </div>
+            <div
+              className="kpi-value"
+              style={{ color: kpi.label.includes("P&L") ? kpi.accentColor : undefined }}
+            >
+              {kpi.value}
+            </div>
+            {kpi.change && (
+              <span className={`kpi-change ${kpi.positive ? "positive" : "negative"}`}>
+                {kpi.positive ? "↑" : "↓"} {kpi.change}
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

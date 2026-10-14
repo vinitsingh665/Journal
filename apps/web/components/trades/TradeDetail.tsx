@@ -220,7 +220,7 @@ export default function TradeDetail({ trade }: { trade: TradeData }) {
             borderColor: livePnl >= 0 ? "rgba(16, 185, 129, 0.15)" : "rgba(239, 68, 68, 0.15)",
           }}
         >
-          <div className="card-body flex items-center justify-between">
+          <div className="card-body trade-detail-pnl-banner flex items-center justify-between">
             <div>
               <div className="text-secondary" style={{ fontSize: "var(--text-xs)", marginBottom: 4 }}>
                 {quoteFetching ? "Fetching live price..." : "Live Price (TradingView)"}
@@ -273,7 +273,7 @@ export default function TradeDetail({ trade }: { trade: TradeData }) {
             borderColor: trade.netPnl >= 0 ? "rgba(16, 185, 129, 0.15)" : "rgba(239, 68, 68, 0.15)",
           }}
         >
-          <div className="card-body flex items-center justify-between">
+          <div className="card-body trade-detail-pnl-banner flex items-center justify-between">
             <div>
               <div className="text-secondary" style={{ fontSize: "var(--text-xs)", marginBottom: 4 }}>Net P&L</div>
               <span

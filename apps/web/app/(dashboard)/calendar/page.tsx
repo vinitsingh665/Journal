@@ -86,7 +86,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
 
   return (
     <>
-      <div className="page-header" style={{ marginBottom: "var(--space-6)" }}>
+      <div className="page-header calendar-page-header" style={{ marginBottom: "var(--space-6)" }}>
         <div>
           <h1 className="page-title">Calendar</h1>
           <p className="page-description text-muted">Review your daily performance and trading activity.</p>
