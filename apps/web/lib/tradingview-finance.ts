@@ -79,8 +79,12 @@ export async function fetchMultipleQuotes(
       const res = await fetch(`https://scanner.tradingview.com/${region}/scan`, {
         method: "POST",
         body: JSON.stringify(body),
-        headers: { "Content-Type": "application/json" },
-        next: { revalidate: 60 } // Cache for 60 seconds similar to Yahoo
+        headers: {
+          "Content-Type": "application/json",
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        },
+        next: { revalidate: 120 }, // Cache on server for 120 seconds
       });
 
       if (!res.ok) {

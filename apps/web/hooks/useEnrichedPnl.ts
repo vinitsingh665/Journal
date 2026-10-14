@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { fetchQuotesCached } from "@/lib/client-quotes";
 
 interface OpenPosition {
   id: string;
@@ -23,13 +24,13 @@ interface LivePnl {
 
 /**
  * Client-side hook that fetches live prices for open positions
- * and calculates unrealized P&L — replacing the old server-side blocking approach.
+ * and calculates unrealized P&L using shared cached batch quotes.
  *
- * Returns a Map keyed by "symbol:exchange" with live P&L data.
+ * Defaults to a 2-minute (120s) refresh interval and pauses when tab is hidden.
  */
 export function useEnrichedPnl(
   openPositions: OpenPosition[],
-  refreshInterval: number = 60000
+  refreshInterval: number = 120000
 ) {
   const [livePnl, setLivePnl] = useState<Map<string, LivePnl>>(new Map());
   const [loading, setLoading] = useState(false);
@@ -39,49 +40,37 @@ export function useEnrichedPnl(
   const positionsRef = useRef(openPositions);
   positionsRef.current = openPositions;
 
-  const fetchPrices = useCallback(async () => {
+  const lastFetchTimeRef = useRef<number>(0);
+
+  const fetchPrices = useCallback(async (force = false) => {
     const positions = positionsRef.current;
     if (positions.length === 0) return;
+
+    // Do not poll if the browser tab is hidden in the background
+    if (typeof document !== "undefined" && document.visibilityState === "hidden" && !force) {
+      return;
+    }
 
     setLoading(true);
     try {
       // Deduplicate symbols
       const uniqueMap = new Map<string, OpenPosition>();
       for (const p of positions) {
-        uniqueMap.set(`${p.symbol}:${p.exchange}`, p);
+        uniqueMap.set(`${p.symbol}:${p.exchange || "NSE"}`, p);
       }
       const uniqueSymbols = Array.from(uniqueMap.values());
 
-      // Group by exchange for the API
-      const byExchange = new Map<string, string[]>();
-      for (const { symbol, exchange } of uniqueSymbols) {
-        const exch = exchange || "NSE";
-        if (!byExchange.has(exch)) byExchange.set(exch, []);
-        byExchange.get(exch)!.push(symbol);
-      }
-
-      // Fetch all required symbols via batch API
-      const res = await fetch("/api/quotes", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          symbols: uniqueSymbols.map(s => ({ symbol: s.symbol, exchange: s.exchange || "NSE" }))
-        }),
-      });
-
-      if (!res.ok) throw new Error("Failed to fetch quotes");
-      const quotesMap = await res.json();
-      
-      const allQuotes = new Map<string, any>();
-      for (const [key, quote] of Object.entries(quotesMap)) {
-        allQuotes.set(key, quote);
-      }
+      // Fetch all required symbols via shared client deduplicated cache
+      const allQuotes = await fetchQuotesCached(
+        uniqueSymbols.map((s) => ({ symbol: s.symbol, exchange: s.exchange || "NSE" }))
+      );
 
       // Calculate P&L for each open position
       const pnlMap = new Map<string, LivePnl>();
 
       for (const pos of positions) {
-        const quote = allQuotes.get(`${pos.symbol}:${pos.exchange}`);
+        const fullKey = `${pos.symbol.toUpperCase()}:${(pos.exchange || "NSE").toUpperCase()}`;
+        const quote = allQuotes.get(fullKey) || allQuotes.get(pos.symbol.toUpperCase());
         if (!quote) continue;
 
         const openQty = pos.totalBuyQty - pos.totalSellQty;
@@ -129,6 +118,7 @@ export function useEnrichedPnl(
 
       setLivePnl(pnlMap);
       setLastUpdated(new Date());
+      lastFetchTimeRef.current = Date.now();
     } catch (e) {
       console.error("useEnrichedPnl: Failed to fetch prices:", e);
     } finally {
@@ -137,46 +127,49 @@ export function useEnrichedPnl(
   }, []); // No deps — uses ref
 
   useEffect(() => {
+    // Initial fetch on mount
     fetchPrices();
 
+    // Periodic polling only if interval > 0
+    let interval: ReturnType<typeof setInterval> | null = null;
     if (refreshInterval > 0) {
-      const interval = setInterval(fetchPrices, refreshInterval);
-      return () => clearInterval(interval);
+      interval = setInterval(() => {
+        fetchPrices();
+      }, refreshInterval);
     }
+
+    // Refresh immediately when returning to the tab if stale (> 60s since last fetch)
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        const timeSince = Date.now() - lastFetchTimeRef.current;
+        if (timeSince > 60000) {
+          fetchPrices(true);
+        }
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      if (interval) clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
   }, [fetchPrices, refreshInterval]);
 
-  // Ensure stale positions are removed immediately when openPositions changes
-  // and trigger a fetch if there are new positions we don't have prices for.
+  // Clean up stale positions when openPositions changes without triggering extra network calls
   useEffect(() => {
-    let needsFetch = false;
-    
-    // Check if we need to fetch (do we have positions that aren't in livePnl yet?)
-    setLivePnl(prev => {
+    setLivePnl((prev) => {
       let changed = false;
       const next = new Map(prev);
-      
-      // Remove stale
       for (const key of Array.from(next.keys())) {
-        if (!openPositions.find(p => p.id === key)) {
+        if (!openPositions.find((p) => p.id === key)) {
           next.delete(key);
           changed = true;
         }
       }
       return changed ? next : prev;
     });
+  }, [openPositions]);
 
-    // Check for new positions that aren't in the current livePnl state
-    // We can just look at livePnl because it's a dependency of this hook?
-    // Wait, no, we shouldn't add livePnl to deps. 
-    // We can just check if any openPosition is missing from the Map.
-    // However, since we can't reliably read the latest livePnl here without putting it in deps,
-    // let's just trigger a fetch if we don't have a lastUpdated OR if openPositions has changed
-    // since the last fetch.
-    // Actually, just fetchPrices() whenever openPositions changes and we have at least 1 open position!
-    if (openPositions.length > 0) {
-      fetchPrices();
-    }
-  }, [openPositions, fetchPrices]);
-
-  return { livePnl, loading, lastUpdated, refresh: fetchPrices };
+  return { livePnl, loading, lastUpdated, refresh: () => fetchPrices(true) };
 }

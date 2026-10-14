@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { formatINR, formatPercent, formatHoldingPeriod, formatQuantity, cn } from "@/lib/utils";
 import type { StockQuote } from "@/lib/finance";
+import { fetchQuotesCached } from "@/lib/client-quotes";
 import Sparkline from "@/components/charts/Sparkline";
 import { useRouter } from "next/navigation";
 
@@ -47,6 +48,7 @@ function getChartParams(entryTime: string): { range: string; interval: string } 
 export default function PositionsClient({ initialPositions, capital = 1000000, isShared }: { initialPositions: TradeData[], capital?: number, isShared?: boolean }) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("All");
+
   const [liveQuotes, setLiveQuotes] = useState<Map<string, StockQuote>>(new Map());
   const [chartDataMap, setChartDataMap] = useState<Map<string, number[]>>(new Map());
   
@@ -62,29 +64,13 @@ export default function PositionsClient({ initialPositions, capital = 1000000, i
         const uniquePositions = Array.from(new Map(initialPositions.map(p => [p.symbol, p])).values());
         const symbolsPayload = uniquePositions.map(p => ({ symbol: p.symbol, exchange: p.exchange }));
         
-        const res = await fetch("/api/quotes", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ symbols: symbolsPayload })
-        });
-        
-        if (res.ok) {
-          const data = await res.json();
-          const map = new Map<string, StockQuote>();
-          for (const [key, quote] of Object.entries(data)) {
-            const sym = key.split(":")[0];
-            map.set(sym, quote as StockQuote);
-          }
-          setLiveQuotes(map);
-        }
-
-        // Ping the background job to auto-close any trades that hit stop loss
-        await fetch("/api/cron/stop-loss").catch(() => {});
+        const map = await fetchQuotesCached(symbolsPayload);
+        setLiveQuotes(map);
       } catch { }
     };
 
     fetchQuotes();
-    const interval = setInterval(fetchQuotes, 60000);
+    const interval = setInterval(fetchQuotes, 120000);
 
     // When user returns to the tab, refresh immediately
     const handleVisibility = () => {

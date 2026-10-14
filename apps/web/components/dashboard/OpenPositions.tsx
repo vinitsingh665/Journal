@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { formatINR, formatPercent, formatHoldingPeriod, formatQuantity, cn } from "@/lib/utils";
 import type { StockQuote } from "@/lib/finance";
+import { fetchQuotesCached } from "@/lib/client-quotes";
 import MiniCandleChart from "./MiniCandleChart";
 
 interface Position {
@@ -63,21 +64,8 @@ export default function OpenPositions({ positions }: { positions: Position[] }) 
         const uniquePositions = Array.from(new Map(positions.map(p => [p.symbol, p])).values());
         const symbolsPayload = uniquePositions.map(p => ({ symbol: p.symbol, exchange: p.exchange }));
         
-        const res = await fetch("/api/quotes", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ symbols: symbolsPayload })
-        });
-        
-        if (res.ok) {
-          const data = await res.json();
-          const map = new Map<string, StockQuote>();
-          for (const [key, quote] of Object.entries(data)) {
-            const sym = key.split(":")[0];
-            map.set(sym, quote as StockQuote);
-          }
-          setLiveQuotes(map);
-        }
+        const map = await fetchQuotesCached(symbolsPayload);
+        setLiveQuotes(map);
       } catch {
         // silently fail
       } finally {
@@ -86,7 +74,7 @@ export default function OpenPositions({ positions }: { positions: Position[] }) 
     };
 
     fetchQuotes();
-    const interval = setInterval(fetchQuotes, 60000);
+    const interval = setInterval(fetchQuotes, 120000);
 
     // Immediately refresh prices when user comes back to this tab
     const handleVisibility = () => {

@@ -13,6 +13,7 @@ import {
   cn,
 } from "@/lib/utils";
 import type { StockQuote } from "@/lib/finance";
+import { fetchQuotesCached } from "@/lib/client-quotes";
 import AddExecutionModal from "./AddExecutionModal";
 
 // Dynamic import to avoid SSR issues with TradingView widget
@@ -86,14 +87,14 @@ export default function TradeDetail({ trade }: { trade: TradeData }) {
     if (trade.status !== "OPEN" && trade.status !== "PARTIAL") return;
 
     const fetchQuote = async () => {
+      if (document.visibilityState === "hidden") return;
       setQuoteFetching(true);
       try {
-        const res = await fetch(
-          `/api/quotes?symbols=${trade.symbol}&exchange=${trade.exchange}`
-        );
-        if (res.ok) {
-          const data = await res.json();
-          setLiveQuote(data);
+        const quotes = await fetchQuotesCached([{ symbol: trade.symbol, exchange: trade.exchange }]);
+        const key = `${trade.symbol.toUpperCase()}:${(trade.exchange || "NSE").toUpperCase()}`;
+        const quote = quotes.get(key) || quotes.get(trade.symbol.toUpperCase()) || null;
+        if (quote) {
+          setLiveQuote(quote);
         }
       } catch {
         // silently fail
@@ -103,8 +104,17 @@ export default function TradeDetail({ trade }: { trade: TradeData }) {
     };
 
     fetchQuote();
-    const interval = setInterval(fetchQuote, 60000);
-    return () => clearInterval(interval);
+    const interval = setInterval(fetchQuote, 120000);
+
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") fetchQuote();
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
   }, [trade.symbol, trade.exchange, trade.status]);
 
   // Calculate live P&L
