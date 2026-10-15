@@ -194,6 +194,12 @@ export default function ErrorPage({
     console.error(error);
   }, [error]);
 
+  const isDbError =
+    error?.name === "PrismaClientInitializationError" ||
+    error?.message?.toLowerCase().includes("database") ||
+    error?.message?.toLowerCase().includes("tidbcloud") ||
+    error?.message?.toLowerCase().includes("can't reach database server");
+
   return (
     <div style={{
       minHeight: "100vh",
@@ -213,7 +219,7 @@ export default function ErrorPage({
         lineHeight: 1,
         color: "var(--text-primary)"
       }}>
-        Something went wrong!
+        {isDbError ? "Database Reconnecting" : "Something went wrong!"}
       </h1>
 
       <div style={{ margin: "2rem 0", pointerEvents: "none" }}>
@@ -222,12 +228,13 @@ export default function ErrorPage({
       
       <p style={{
         color: "var(--text-secondary)",
-        maxWidth: 400,
+        maxWidth: 440,
         marginBottom: 40,
         lineHeight: 1.6
       }}>
-        We encountered an unexpected error. 
-        Please try again or return to the dashboard.
+        {isDbError
+          ? "The serverless database is currently waking up or reconnecting. Please click 'Try again' below to load your data."
+          : "We encountered an unexpected error. Please try again or return to the dashboard."}
       </p>
       
       <div style={{ display: 'flex', gap: '16px', position: 'relative', zIndex: 10 }}>

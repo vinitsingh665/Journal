@@ -1,4 +1,4 @@
-import { prisma } from "@repo/database";
+import { prisma, withDbRetry } from "@repo/database";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Suspense, cache } from "react";
@@ -26,7 +26,8 @@ const PnlDistribution = dynamic(() => import("@/components/dashboard/PnlDistribu
 export const revalidate = 30;
 
 const getDashboardData = cache(async (userId: string) => {
-  return Promise.all([
+  return withDbRetry(() =>
+    Promise.all([
     prisma.userSettings.findUnique({ where: { userId } }),
     prisma.trade.findMany({
       where: { userId, isArchived: false },
@@ -70,7 +71,8 @@ const getDashboardData = cache(async (userId: string) => {
       },
       orderBy: { entryTime: "desc" },
     }),
-  ]);
+  ])
+  );
 });
 
 async function DashboardContent() {
