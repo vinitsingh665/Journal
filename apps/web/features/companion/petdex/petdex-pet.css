@@ -85,6 +85,15 @@
   }
 }
 
+@media (max-width: 768px) {
+  .petdex-pet-bubble {
+    max-width: min(180px, 52vw);
+    font-size: 9.5px;
+    padding: 3px 6px;
+  }
+}
+
+
 /* 单帧视口：height/width + background-* 由组件按宠物网格内联设置（数据驱动）。
    逐帧步进也走内联 backgroundPositionX，这里只定基础渲染属性。 */
 .petdex-pet-sprite {

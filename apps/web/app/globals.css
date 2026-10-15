@@ -5689,6 +5689,12 @@ h4 { font-size: var(--text-lg); }
   -webkit-backdrop-filter: blur(12px);
 }
 
+@media (max-width: 640px) {
+  .petdex-dialog-overlay {
+    padding: 12px !important;
+  }
+}
+
 /* Companion dialog â€” main panel */
 .petdex-dialog-panel {
   position: relative;
@@ -5702,6 +5708,13 @@ h4 { font-size: var(--text-lg); }
   background: var(--petdex-bg) !important;
   box-shadow: var(--petdex-shadow);
   color: var(--petdex-text);
+}
+
+@media (max-width: 640px) {
+  .petdex-dialog-panel {
+    max-height: 92vh !important;
+    border-radius: 14px !important;
+  }
 }
 
 /* Force all text inside the dialog to use petdex-text color */

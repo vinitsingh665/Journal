@@ -274,9 +274,12 @@ export function MyBuddyCompanion() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // 位置：占视口宽/高的百分比，可整页任意拖动。未拖动过用默认落点（顶部随机 x）。
-  const xPercent = companionXPercent ?? homeXPercent;
-  const yPercent = companionYPercent ?? 1;
+  // 位置：占视口宽/高的百分比，可整页任意拖动。未拖动过用默认落点（桌面端顶部随机 x，移动端底部安全区）。
+  const isMobileViewport = viewportSize.width <= 768;
+  const defaultYPercent = isMobileViewport ? 72 : 1;
+  const defaultXPercent = isMobileViewport ? 6 : homeXPercent;
+  const xPercent = companionXPercent ?? defaultXPercent;
+  const yPercent = companionYPercent ?? defaultYPercent;
   const displayXPercent = dragPosition?.xPercent ?? xPercent;
   const displayYPercent = dragPosition?.yPercent ?? yPercent;
   const displayLeftPx = Math.round((displayXPercent / 100) * viewportSize.width);

@@ -3419,6 +3419,19 @@
 
 @media (max-width: 900px) {
   .mybuddy-companion-lane {
-    display: none;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 0;
+    overflow: visible;
+    pointer-events: none;
+  }
+  .mybuddy-companion-floating {
+    transform: scale(0.85);
+    transform-origin: center bottom;
+  }
+  .mybuddy-companion-debug {
+    display: none !important;
   }
 }
+
