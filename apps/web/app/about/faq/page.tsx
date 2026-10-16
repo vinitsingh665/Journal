@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import FAQClient from "./FAQClient";
 
 export const metadata = {
@@ -65,7 +65,7 @@ const faqs = [
   },
   {
     question: "How can I contact support if I have a different issue?",
-    answer: "You can reach out to us directly through the Contact page via Email (support@traderlabs.in) or drop us a message on Twitter / X (@traderlabs)."
+    answer: "You can reach out to us directly through the Contact page via Email (traderlabs.in@gmail.com) or drop us a message on Twitter / X (@traderlabs)."
   }
 ];
 

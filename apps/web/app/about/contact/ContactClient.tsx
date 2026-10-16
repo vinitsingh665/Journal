@@ -383,7 +383,7 @@ export default function ContactPage() {
         <div className="contact-channels-grid">
           {/* Email Card */}
           <a
-            href="mailto:support@traderlabs.in"
+            href="mailto:traderlabs.in@gmail.com"
             className="contact-channel-card"
           >
             <div className="contact-channel-top">
@@ -394,7 +394,7 @@ export default function ContactPage() {
             </div>
             <div>
               <div className="contact-channel-title">Email Us</div>
-              <div className="contact-channel-sub">support@traderlabs.in</div>
+              <div className="contact-channel-sub">traderlabs.in@gmail.com</div>
             </div>
             <div className="contact-channel-cta">
               <span>Send Email</span>
