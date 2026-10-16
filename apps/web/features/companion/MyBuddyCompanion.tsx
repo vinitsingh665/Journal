@@ -1,3 +1,5 @@
+"use client";
+
 // SPDX-License-Identifier: Elastic-2.0
 // Copyright (c) 2026 ClaymoreLab
 import {
@@ -11,7 +13,9 @@ import {
   type CSSProperties,
   type PointerEvent as ReactPointerEvent,
 } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
+import "./mybuddy-companion.css";
 import {
   isMyBuddyAction,
   MYBUDDY_ACTIONS,
@@ -100,6 +104,10 @@ export function MyBuddyCompanion() {
     festivalSkin,
     festivalPhase,
   } = useMyBuddyCompanionController();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const [importRefreshKey, setImportRefreshKey] = useState(0);
   const [importedPets, setImportedPets] = useState<ImportedPetEntry[]>([]);
   const [homeXPercent] = useState(randomCompanionHomeXPercent);
@@ -462,10 +470,10 @@ export function MyBuddyCompanion() {
     setPetStateName(null);
   }, [companionKind]);
 
-  // 全局隐藏开关：开启后不渲染陪伴形象（hooks 已在上方执行完，安全早返回）。
-  if (companionHidden) return null;
+  // 全局隐藏开关或未挂载：不渲染陪伴形象（hooks 已在上方执行完，安全早返回）。
+  if (!mounted || companionHidden || typeof document === "undefined") return null;
 
-  return (
+  return createPortal(
     <div className="mybuddy-companion-lane">
       {SHOW_PIKO_DEBUG && isPiko && (
         <div className="mybuddy-companion-debug mybuddy-companion-debug-panel">
@@ -528,7 +536,7 @@ export function MyBuddyCompanion() {
           top: displayTopPx,
           width: 66,
           height: 80,
-          zIndex: 25,
+          zIndex: 940,
           pointerEvents: "none",
         }}
       >
@@ -605,6 +613,7 @@ export function MyBuddyCompanion() {
           aria-hidden
         />
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

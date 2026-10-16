@@ -50,11 +50,11 @@ export default function AdminHealthPage() {
   }
 
   return (
-    <div style={{ flex: 1, overflowY: "auto", padding: "24px 40px", backgroundColor: "#09090b" }}>
+    <div className="admin-page-container" style={{ flex: 1, overflowY: "auto", padding: "24px 40px", backgroundColor: "#09090b" }}>
       
       {/* Top Navbar Area */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: 24, borderBottom: "1px solid #27272a", marginBottom: 32 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
+      <div className="admin-top-navbar" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: 24, borderBottom: "1px solid #27272a", marginBottom: 32 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, backgroundColor: "rgba(16, 185, 129, 0.1)", border: "1px solid rgba(16, 185, 129, 0.2)", padding: "4px 12px", borderRadius: 20 }}>
             <div style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: "#10b981", boxShadow: "0 0 8px #10b981" }}></div>
             <span style={{ color: "#10b981", fontSize: 11, fontWeight: 700, letterSpacing: "0.05em" }}>SYSTEM ONLINE</span>
@@ -74,15 +74,15 @@ export default function AdminHealthPage() {
 
       {/* Header */}
       <div style={{ marginBottom: 32 }}>
-        <h1 style={{ fontSize: 28, fontWeight: 700, margin: "0 0 8px 0" }}>System Health & Vitals</h1>
-        <p style={{ color: "#a1a1aa", margin: 0, fontSize: 14 }}>Monitor server load, database health, and API latency.</p>
+        <h1 className="admin-page-title" style={{ fontSize: 28, fontWeight: 700, margin: "0 0 8px 0" }}>System Health & Vitals</h1>
+        <p className="admin-page-subtitle" style={{ color: "#a1a1aa", margin: 0, fontSize: 14 }}>Monitor server load, database health, and API latency.</p>
       </div>
 
       {/* Grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 24 }}>
+      <div className="admin-bottom-grid" style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 24 }}>
         
         {/* Live Vitals Card */}
-        <div style={{ backgroundColor: "#000", border: "1px solid #27272a", borderRadius: 12, padding: 32 }}>
+        <div className="admin-card" style={{ backgroundColor: "#000", border: "1px solid #27272a", borderRadius: 12, padding: 32 }}>
           <h2 style={{ fontSize: 18, fontWeight: 700, margin: "0 0 32px 0" }}>Live Vitals</h2>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>

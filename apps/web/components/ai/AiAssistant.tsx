@@ -61,11 +61,25 @@ export default function AiAssistant() {
     }
   }, [messages, loading]);
 
-  const handleSubmit = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (!prompt.trim()) return;
+  const isMobile = windowWidth <= 768;
 
-    const userMsg = prompt.trim();
+  // Lock body scroll when mobile AI sheet is open
+  useEffect(() => {
+    if (isMobile && isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMobile, isOpen]);
+
+  const handleSubmit = async (e?: React.FormEvent, overrideText?: string) => {
+    if (e) e.preventDefault();
+    const userMsg = (overrideText ?? prompt).trim();
+    if (!userMsg) return;
+
     const newMessages: Message[] = [...messages, { role: "user", content: userMsg }];
     
     setMessages(newMessages);
@@ -247,30 +261,176 @@ export default function AiAssistant() {
       <div style={{ position: "relative" }}>
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="btn btn-secondary btn-sm"
-          style={{ display: "flex", alignItems: "center", gap: 6, borderRadius: 20, padding: "6px 14px" }}
+          className="btn btn-secondary btn-sm ai-assistant-btn"
+          style={{ display: "flex", alignItems: "center", gap: 6, borderRadius: 20, padding: "6px 12px", height: "32px" }}
           title="Ask AI (Cmd/Ctrl + K)"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
           </svg>
-          <span style={{ fontWeight: 600, fontSize: "var(--text-xs)", background: "linear-gradient(45deg, var(--accent-primary), #d946ef)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+          <span className="ai-assistant-text" style={{ fontWeight: 600, fontSize: "var(--text-xs)", color: "var(--text-primary)" }}>
             Ask AI
           </span>
-          <span className="text-muted" style={{ fontSize: 10, marginLeft: 4 }}>⌘K</span>
+          <span className="ai-assistant-shortcut text-muted" style={{ fontSize: 10, marginLeft: 2 }}>⌘K</span>
         </button>
       </div>
 
-      {isOpen && mounted && createPortal(
+      {/* ─── MOBILE PHONE VIEW: Native Bottom Sheet (<= 768px) ─── */}
+      {isOpen && mounted && isMobile && createPortal(
+        <>
+          <div 
+            className="mobile-ai-backdrop" 
+            onClick={() => setIsOpen(false)}
+            aria-hidden="true"
+          />
+          <div className="mobile-ai-sheet" role="dialog" aria-modal="true" aria-label="Ask AI Assistant">
+            {/* Grab handle */}
+            <div className="mobile-ai-handle-bar" onClick={() => setIsOpen(false)}>
+              <div className="mobile-ai-handle" />
+            </div>
+
+            {/* Mobile Header */}
+            <div className="mobile-ai-header">
+              <div className="mobile-ai-header-left">
+                <div className="mobile-ai-avatar">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                  </svg>
+                </div>
+                <div className="mobile-ai-header-info">
+                  <span className="mobile-ai-title">Groq AI Assistant</span>
+                  <div className="mobile-ai-status">
+                    <span className="mobile-ai-status-dot" />
+                    <span>Ready for trade commands</span>
+                  </div>
+                </div>
+              </div>
+
+              <button 
+                type="button"
+                onClick={() => setIsOpen(false)}
+                className="mobile-ai-close-btn"
+                aria-label="Close Ask AI"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+
+            {/* Mobile Chat Scroll Body */}
+            <div className="mobile-ai-chat-body" ref={chatScrollRef}>
+              {messages.length === 0 ? (
+                <div className="mobile-ai-empty">
+                  <div className="mobile-ai-empty-icon">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+                    </svg>
+                  </div>
+                  <h4 className="mobile-ai-empty-title">How can I help you?</h4>
+                  <p className="mobile-ai-empty-desc">
+                    Execute or buy a trade, add executions, calculate risk, or log trading mistakes.
+                  </p>
+
+                  <div className="mobile-ai-chips">
+                    <button 
+                      type="button" 
+                      className="mobile-ai-chip"
+                      onClick={() => handleSubmit(undefined, "Buy me a trade")}
+                    >
+                      ⚡ Buy me a trade
+                    </button>
+                    <button 
+                      type="button" 
+                      className="mobile-ai-chip"
+                      onClick={() => handleSubmit(undefined, "I made an FOMO mistake today")}
+                    >
+                      ⚠️ Log FOMO mistake
+                    </button>
+                    <button 
+                      type="button" 
+                      className="mobile-ai-chip"
+                      onClick={() => handleSubmit(undefined, "Calculate risk for entry 1500, stoploss 1470")}
+                    >
+                      🎯 Calculate risk
+                    </button>
+                    <button 
+                      type="button" 
+                      className="mobile-ai-chip"
+                      onClick={() => handleSubmit(undefined, "Take a screenshot of my dashboard")}
+                    >
+                      📸 Take screenshot
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                messages.map((msg, i) => (
+                  <div 
+                    key={i} 
+                    className={msg.role === "user" ? "mobile-ai-msg-user" : "mobile-ai-msg-bot"}
+                  >
+                    {msg.content}
+                  </div>
+                ))
+              )}
+
+              {loading && (
+                <div className="mobile-ai-loading">
+                  <div className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }} />
+                  <span style={{ fontSize: 13, color: "var(--text-muted)" }}>Thinking...</span>
+                </div>
+              )}
+            </div>
+
+            {/* Mobile Fixed Input Bar */}
+            <div className="mobile-ai-input-bar">
+              <div className="mobile-ai-input-wrap">
+                <textarea
+                  ref={inputRef}
+                  placeholder="Ask AI or type a command..."
+                  value={prompt}
+                  rows={1}
+                  onChange={(e) => {
+                    setPrompt(e.target.value);
+                    e.target.style.height = 'auto';
+                    e.target.style.height = Math.min(e.target.scrollHeight, 100) + 'px';
+                  }}
+                  onKeyDown={handleKeyDown}
+                  disabled={loading}
+                  className="mobile-ai-textarea"
+                />
+                
+                <button 
+                  type="button"
+                  onClick={() => handleSubmit()}
+                  className="mobile-ai-send-btn"
+                  disabled={!prompt.trim() || loading}
+                  aria-label="Send message"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13" />
+                    <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </>,
+        document.body
+      )}
+
+      {/* ─── DESKTOP VIEW: Draggable & Resizable Window (Screens >= 769px) ─── */}
+      {isOpen && mounted && !isMobile && createPortal(
         <div style={{ position: "fixed", top: 0, left: 0, width: 0, height: 0, zIndex: 99999 }}>
           <Rnd
             default={{
-              x: windowWidth - 480, // Default to right side
-              y: 80,
-              width: 450,
-              height: 500,
+              x: windowWidth < 600 ? 10 : Math.max(20, windowWidth - 480),
+              y: windowWidth < 600 ? 20 : 80,
+              width: windowWidth < 600 ? Math.min(windowWidth - 20, 420) : 450,
+              height: windowWidth < 600 ? Math.min(typeof window !== "undefined" ? window.innerHeight - 40 : 500, 560) : 500,
             }}
-            minWidth={300}
+            minWidth={windowWidth < 600 ? 280 : 300}
             minHeight={300}
             bounds="window"
             dragHandleClassName="ai-drag-handle"
@@ -337,13 +497,13 @@ export default function AiAssistant() {
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ margin: "0 auto", marginBottom: 12, opacity: 0.5 }}>
                       <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
                     </svg>
-                    Tell me about a trade or mistake you made. <br/> I'll ask for any missing details before logging it!
+                    Buy a trade, add an execution, calculate position size, or log a mistake.
                   </div>
                 ) : (
                   messages.map((msg, i) => (
                     <div key={i} style={{ 
                       alignSelf: msg.role === "user" ? "flex-end" : "flex-start",
-                      background: msg.role === "user" ? "#8b5cf6" : "var(--bg-secondary)",
+                      background: msg.role === "user" ? "var(--accent-primary, #3b82f6)" : "var(--bg-secondary)",
                       color: msg.role === "user" ? "#fff" : "var(--text-primary)",
                       padding: "8px 14px",
                       borderRadius: "16px",
@@ -410,7 +570,7 @@ export default function AiAssistant() {
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      background: prompt.trim() ? "#8b5cf6" : "var(--border-color)", 
+                      background: prompt.trim() ? "var(--accent-primary, #3b82f6)" : "var(--border-color)", 
                       color: "#fff", 
                       border: "none",
                       cursor: prompt.trim() && !loading ? "pointer" : "default"

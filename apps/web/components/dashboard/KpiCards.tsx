@@ -267,7 +267,7 @@ export default function KpiCards({
           <div className="kpi-compact-card">
             <div className="kpi-compact-header">
               <span className="kpi-compact-label">Deployed</span>
-              <div className="kpi-compact-icon" style={{ background: "rgba(99, 102, 241, 0.12)", color: "#6366F1" }}>
+              <div className="kpi-compact-icon" style={{ background: "rgba(255, 255, 255, 0.05)", color: "var(--text-secondary)" }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
                   <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
                   <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
@@ -284,7 +284,7 @@ export default function KpiCards({
           <div className="kpi-compact-card">
             <div className="kpi-compact-header">
               <span className="kpi-compact-label">Total Capital</span>
-              <div className="kpi-compact-icon" style={{ background: "rgba(59, 130, 246, 0.12)", color: "#3B82F6" }}>
+              <div className="kpi-compact-icon" style={{ background: "rgba(255, 255, 255, 0.05)", color: "var(--text-secondary)" }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
                   <path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4" />
                   <path d="M4 6v12c0 1.1.9 2 2 2h14v-4H6a2 2 0 0 1-2-2z" />

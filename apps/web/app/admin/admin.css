@@ -1,0 +1,699 @@
+/* ═══════════════════════════════════════════════════════════════════
+   ADMIN DASHBOARD — RESPONSIVE STYLES
+   Ensures 100% desktop fidelity while creating a stunning mobile experience
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Layout Container */
+.admin-layout-root {
+  display: flex;
+  min-height: 100vh;
+  background-color: #09090b;
+  color: #f4f4f5;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+.admin-main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.admin-page-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 40px;
+  background-color: #09090b;
+  position: relative;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ─── DESKTOP SIDEBAR ─── */
+.admin-desktop-sidebar {
+  width: 260px;
+  border-right: 1px solid #27272a;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px;
+  background-color: #000;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  overflow-y: auto;
+  flex-shrink: 0;
+  z-index: 100;
+}
+
+/* Hide mobile-only elements on desktop */
+.admin-mobile-header,
+.admin-mobile-drawer,
+.admin-mobile-drawer-backdrop,
+.admin-mobile-tabs,
+.admin-mobile-bottom-nav,
+.admin-mobile-tickets-view,
+.admin-users-mobile-view {
+  display: none !important;
+}
+
+/* ─── DESKTOP GRID LAYOUTS ─── */
+.admin-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.admin-bottom-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+  padding-bottom: 40px;
+}
+
+.admin-top-navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #27272a;
+  margin-bottom: 32px;
+}
+
+.admin-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 32px;
+}
+
+.admin-card {
+  background-color: #000;
+  border: 1px solid #27272a;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.admin-card:hover {
+  border-color: #3f3f46;
+}
+
+.admin-table-desktop-view {
+  display: block;
+}
+
+/* ─── MOBILE PHONE VIEW (max-width: 768px) ─── */
+@media (max-width: 768px) {
+  .admin-layout-root {
+    flex-direction: column;
+    min-height: 100dvh;
+  }
+
+  /* Hide desktop sidebar on mobile */
+  .admin-desktop-sidebar {
+    display: none !important;
+  }
+
+  /* Show mobile header - sleek single-row with logo, online dot, clock, and profile avatar */
+  .admin-mobile-header {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: rgba(9, 9, 11, 0.95);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid #27272a;
+    position: sticky;
+    top: 0;
+    z-index: 500;
+    width: 100%;
+    box-sizing: border-box;
+    height: 52px;
+  }
+
+  .admin-mobile-header-left {
+    display: flex;
+    align-items: center;
+  }
+
+  .admin-mobile-logo-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+  }
+
+  .admin-mobile-logo-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .admin-mobile-online-dot {
+    position: absolute;
+    bottom: -1px;
+    right: -2px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #10b981;
+    border: 2px solid #09090b;
+    box-shadow: 0 0 6px #10b981;
+    animation: adminPulse 2s infinite ease-in-out;
+  }
+
+  .admin-mobile-brand-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.02em;
+    margin-left: 8px;
+    line-height: 1;
+    display: inline-block;
+  }
+
+  .admin-mobile-header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .admin-mobile-clock {
+    color: #a1a1aa;
+    font-size: 11.5px;
+    font-weight: 500;
+    font-family: var(--font-mono), monospace;
+    letter-spacing: 0.02em;
+    background: rgba(24, 24, 27, 0.6);
+    border: 1px solid #27272a;
+    padding: 3px 8px;
+    border-radius: 6px;
+  }
+
+  .admin-mobile-user-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #3f3f46;
+    border: 1.5px solid #3f3f46;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ─── FIXED BOTTOM NAVIGATION BAR ON PHONE ─── */
+  .admin-mobile-bottom-nav {
+    display: flex !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: rgba(9, 9, 11, 0.96);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid #27272a;
+    z-index: 999;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 4px;
+    padding-bottom: max(4px, env(safe-area-inset-bottom, 0px));
+    box-sizing: border-box;
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.7);
+  }
+
+  .admin-bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    flex: 1;
+    height: 100%;
+    text-decoration: none;
+    color: #71717a;
+    transition: all 0.15s ease;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
+    padding: 6px 0;
+  }
+
+  .admin-bottom-nav-item:active {
+    transform: scale(0.95);
+  }
+
+  .admin-bottom-nav-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.15s ease, transform 0.15s ease;
+  }
+
+  .admin-bottom-nav-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    transition: color 0.15s ease;
+    line-height: 1;
+  }
+
+  .admin-bottom-nav-item.active {
+    color: #818cf8;
+  }
+
+  .admin-bottom-nav-item.active .admin-bottom-nav-icon-wrapper {
+    color: #818cf8;
+    transform: translateY(-1px);
+  }
+
+  .admin-bottom-nav-item.active .admin-bottom-nav-label {
+    color: #818cf8;
+    font-weight: 700;
+  }
+
+  /* Active glow indicator pill at top of active item */
+  .admin-bottom-nav-item.active::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 24px;
+    height: 3px;
+    border-radius: 0 0 3px 3px;
+    background: #6366f1;
+    box-shadow: 0 0 10px #6366f1;
+  }
+
+  /* Exit Tab styling in Bottom Nav */
+  .admin-bottom-nav-exit {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    color: #f87171 !important;
+  }
+
+  .admin-bottom-nav-exit .admin-bottom-nav-icon-wrapper {
+    color: #f87171;
+  }
+
+  .admin-bottom-nav-exit .admin-bottom-nav-label {
+    color: #f87171;
+  }
+
+  .admin-bottom-nav-exit:hover,
+  .admin-bottom-nav-exit:active {
+    color: #ef4444 !important;
+  }
+
+  .admin-bottom-nav-exit:active {
+    transform: scale(0.95);
+  }
+
+  .admin-page-container {
+    padding: 16px 14px calc(76px + env(safe-area-inset-bottom, 12px)) !important;
+    overflow-x: hidden;
+  }
+
+  /* Hide in-page top navbar on phone since SYSTEM ONLINE, clock, and Super Admin are housed in the sticky top bar */
+  .admin-top-navbar {
+    display: none !important;
+  }
+
+  /* Header on Phone */
+  .admin-page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  /* Hide Manage Users button and action buttons from header on phone view */
+  .admin-page-header-actions,
+  .admin-manage-users-btn {
+    display: none !important;
+  }
+
+  .admin-page-title {
+    font-size: 22px !important;
+    margin: 0 0 4px 0 !important;
+  }
+
+  .admin-page-subtitle {
+    font-size: 13px !important;
+  }
+
+  /* 4 Stat Cards: Perfect 2x2 Phone Grid */
+  .admin-stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+    margin-bottom: 20px !important;
+  }
+
+  .admin-card {
+    padding: 14px 12px !important;
+    border-radius: 12px !important;
+    background: #0e0e11 !important;
+    border: 1px solid #27272a !important;
+  }
+
+  .admin-stat-icon-wrapper {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 8px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .admin-stat-icon-wrapper svg {
+    width: 17px !important;
+    height: 17px !important;
+  }
+
+  .admin-stat-value {
+    font-size: 22px !important;
+    font-weight: 800 !important;
+    font-family: var(--font-mono), monospace !important;
+    margin-bottom: 4px !important;
+    line-height: 1.15 !important;
+    letter-spacing: -0.02em !important;
+  }
+
+  .admin-stat-label {
+    font-size: 11.5px !important;
+    color: #a1a1aa !important;
+    margin-bottom: 12px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .admin-stat-trend {
+    font-size: 10.5px !important;
+    font-weight: 600 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+  }
+
+  /* Bottom Stack on Phone */
+  .admin-bottom-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+    padding-bottom: 30px !important;
+  }
+
+  /* Hide raw table on phone, show mobile ticket cards and mobile user cards */
+  .admin-table-desktop-view {
+    display: none !important;
+  }
+
+  /* Mobile Users List View (No Horizontal Scrolling) */
+  .admin-users-mobile-view {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+  }
+
+  .admin-users-card-container {
+    padding: 4px 0 !important;
+    margin-bottom: 20px !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+  }
+
+  .admin-user-mobile-item {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 12px 14px !important;
+    border-bottom: 1px solid #1f1f23 !important;
+    gap: 12px !important;
+    transition: background 0.15s ease;
+  }
+
+  .admin-user-mobile-item:last-child {
+    border-bottom: none !important;
+  }
+
+  .admin-user-mobile-info {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 3px !important;
+    min-width: 0 !important;
+    flex: 1 !important;
+  }
+
+  .admin-user-mobile-name-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+
+  .admin-user-status-dot {
+    width: 7px !important;
+    height: 7px !important;
+    border-radius: 50% !important;
+    flex-shrink: 0 !important;
+    display: inline-block !important;
+  }
+
+  .admin-user-status-dot.online {
+    background-color: #10b981 !important;
+    box-shadow: 0 0 6px #10b981 !important;
+    animation: adminPulse 2s infinite ease-in-out !important;
+  }
+
+  .admin-user-status-dot.offline {
+    background-color: #52525b !important;
+  }
+
+  .admin-user-mobile-name {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: #f4f4f5 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .admin-user-guest-badge {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #a1a1aa !important;
+    font-size: 9.5px !important;
+    font-weight: 700 !important;
+    padding: 1px 5px !important;
+    border-radius: 4px !important;
+    letter-spacing: 0.04em !important;
+  }
+
+  .admin-user-mobile-email {
+    font-size: 12px !important;
+    color: #a1a1aa !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .admin-user-mobile-joined {
+    font-size: 11px !important;
+    color: #71717a !important;
+    margin-top: 1px !important;
+  }
+
+  .admin-user-mobile-action {
+    flex-shrink: 0 !important;
+  }
+
+  .admin-user-mobile-select {
+    background: #141417 !important;
+    border: 1px solid #27272a !important;
+    color: #f4f4f5 !important;
+    padding: 6px 10px !important;
+    border-radius: 8px !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    outline: none !important;
+    cursor: pointer !important;
+    font-family: inherit !important;
+  }
+
+  .admin-user-mobile-select:focus {
+    border-color: #6366f1 !important;
+  }
+
+  .admin-user-mobile-role-badge {
+    display: inline-block !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid #27272a !important;
+    color: #a1a1aa !important;
+    padding: 5px 10px !important;
+    border-radius: 8px !important;
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+  }
+
+  .admin-user-mobile-role-badge.self {
+    color: #818cf8 !important;
+    background: rgba(99, 102, 241, 0.12) !important;
+    border-color: rgba(99, 102, 241, 0.3) !important;
+  }
+
+  .admin-user-mobile-empty {
+    padding: 24px !important;
+    text-align: center !important;
+    color: #71717a !important;
+    font-size: 13px !important;
+  }
+
+  .admin-mobile-tickets-view {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    padding: 0 14px 14px 14px !important;
+  }
+
+  /* Mobile Ticket Card */
+  .admin-ticket-card {
+    background: #121215;
+    border: 1px solid #27272a;
+    border-radius: 10px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+
+  .admin-ticket-card:active {
+    background: #18181d;
+    border-color: #3f3f46;
+  }
+
+  .admin-ticket-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .admin-ticket-badge-new {
+    border: 1px solid rgba(249, 115, 22, 0.4);
+    background: rgba(249, 115, 22, 0.1);
+    color: #f97316;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.04em;
+  }
+
+  .admin-ticket-badge-resolved {
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.04em;
+  }
+
+  .admin-ticket-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #f4f4f5;
+  }
+
+  .admin-ticket-preview {
+    font-size: 12.5px;
+    color: #a1a1aa;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .admin-ticket-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #1f1f23;
+    padding-top: 8px;
+    margin-top: 2px;
+  }
+
+  .admin-ticket-sender-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .admin-ticket-sender-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: #e4e4e7;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .admin-ticket-sender-email {
+    font-size: 11px;
+    color: #71717a;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Modal on Phone */
+  .admin-modal-card {
+    width: 94% !important;
+    max-width: 94vw !important;
+    max-height: 85vh !important;
+    padding: 0 !important;
+    border-radius: 14px !important;
+  }
+}
+
+/* ─── KEYFRAME ANIMATIONS ─── */
+@keyframes adminPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 6px #10b981;
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.85);
+    box-shadow: 0 0 2px #10b981;
+  }
+}
+
+@keyframes adminFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes adminSlideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}

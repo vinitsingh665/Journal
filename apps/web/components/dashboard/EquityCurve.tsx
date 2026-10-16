@@ -23,10 +23,16 @@ export default function EquityCurve({ data }: EquityCurveProps) {
     const ctx = chartRef.current.getContext("2d");
     if (!ctx) return;
 
-    // Create gradient
+    // Determine if equity trend is positive
+    const isPositive = data.length > 1 
+      ? (data[data.length - 1]?.equity ?? 0) >= (data[0]?.equity ?? 0)
+      : (data[0]?.equity ?? 0) >= 0;
+    const strokeColor = isPositive ? "#10B981" : "#EF4444";
+
+    // Create subtle institutional gradient
     const gradient = ctx.createLinearGradient(0, 0, 0, 250);
-    gradient.addColorStop(0, "rgba(99, 102, 241, 0.15)");
-    gradient.addColorStop(1, "rgba(99, 102, 241, 0.01)");
+    gradient.addColorStop(0, isPositive ? "rgba(16, 185, 129, 0.16)" : "rgba(239, 68, 68, 0.16)");
+    gradient.addColorStop(1, isPositive ? "rgba(16, 185, 129, 0.01)" : "rgba(239, 68, 68, 0.01)");
 
     chartInstance.current = new Chart(ctx, {
       type: "line",
@@ -39,14 +45,14 @@ export default function EquityCurve({ data }: EquityCurveProps) {
           {
             label: "Equity",
             data: data.map((d) => d.equity),
-            borderColor: "#6366F1",
+            borderColor: strokeColor,
             backgroundColor: gradient,
             borderWidth: 2,
             fill: true,
-            tension: 0.4,
+            tension: 0.35,
             pointRadius: 0,
             pointHoverRadius: 4,
-            pointHoverBackgroundColor: "#6366F1",
+            pointHoverBackgroundColor: strokeColor,
             pointHoverBorderColor: "#fff",
             pointHoverBorderWidth: 2,
           },

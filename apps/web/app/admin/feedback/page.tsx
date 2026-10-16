@@ -75,11 +75,11 @@ export default function AdminFeedbackPage() {
   });
 
   return (
-    <div style={{ flex: 1, overflowY: "auto", padding: "24px 40px", backgroundColor: "#09090b", position: "relative" }}>
+    <div className="admin-page-container" style={{ flex: 1, overflowY: "auto", padding: "24px 40px", backgroundColor: "#09090b", position: "relative" }}>
       
       {/* Top Navbar Area */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: 24, borderBottom: "1px solid #27272a", marginBottom: 32 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
+      <div className="admin-top-navbar" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: 24, borderBottom: "1px solid #27272a", marginBottom: 32 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, backgroundColor: "rgba(16, 185, 129, 0.1)", border: "1px solid rgba(16, 185, 129, 0.2)", padding: "4px 12px", borderRadius: 20 }}>
             <div style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: "#10b981", boxShadow: "0 0 8px #10b981" }}></div>
             <span style={{ color: "#10b981", fontSize: 11, fontWeight: 700, letterSpacing: "0.05em" }}>SYSTEM ONLINE</span>
@@ -99,12 +99,12 @@ export default function AdminFeedbackPage() {
 
       {/* Header */}
       <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: 28, fontWeight: 700, margin: "0 0 8px 0" }}>User Inbox & Feedback</h1>
-        <p style={{ color: "#a1a1aa", margin: 0, fontSize: 14 }}>Read contact messages, bug reports, and resolve user issues.</p>
+        <h1 className="admin-page-title" style={{ fontSize: 28, fontWeight: 700, margin: "0 0 8px 0" }}>User Inbox & Feedback</h1>
+        <p className="admin-page-subtitle" style={{ color: "#a1a1aa", margin: 0, fontSize: 14 }}>Read contact messages, bug reports, and resolve user issues.</p>
       </div>
 
       {/* Pills Filter */}
-      <div style={{ display: "flex", gap: 12, marginBottom: 32 }}>
+      <div style={{ display: "flex", gap: 12, marginBottom: 32, flexWrap: "wrap" }}>
         <div onClick={() => setFilter("all")} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 8, backgroundColor: filter === "all" ? "#312e81" : "transparent", border: filter === "all" ? "1px solid #4338ca" : "1px solid #27272a", padding: "6px 16px", borderRadius: 20 }}>
           <span style={{ fontSize: 13, fontWeight: 600, color: filter === "all" ? "#fff" : "#a1a1aa" }}>All</span>
           <span style={{ fontSize: 11, fontWeight: 600, color: filter === "all" ? "#818cf8" : "#71717a", backgroundColor: filter === "all" ? "rgba(0,0,0,0.2)" : "rgba(255,255,255,0.05)", padding: "2px 6px", borderRadius: 10 }}>{feedback.length}</span>
@@ -136,7 +136,7 @@ export default function AdminFeedbackPage() {
       </div>
 
       {/* Table */}
-      <div style={{ backgroundColor: "#000", border: "1px solid #27272a", borderRadius: 12, padding: "24px 0", paddingBottom: 0, overflow: "hidden" }}>
+      <div className="admin-card" style={{ backgroundColor: "#000", border: "1px solid #27272a", borderRadius: 12, padding: "24px 0", paddingBottom: 0, overflowX: "auto" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ borderBottom: "1px solid #27272a", textAlign: "left", color: "#71717a", fontSize: 11, letterSpacing: "0.05em" }}>

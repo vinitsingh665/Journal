@@ -145,7 +145,7 @@ export default function Topbar({ userName = "Trader", avatar = null, isGuest = f
             <line x1="3" y1="18" x2="21" y2="18"></line>
           </svg>
         </button>
-        <div>
+        <div className="topbar-title-wrapper">
           <div className="topbar-title">{pageHeader.title}</div>
           <div className="topbar-subtitle">{pageHeader.subtitle}</div>
         </div>
@@ -195,19 +195,30 @@ export default function Topbar({ userName = "Trader", avatar = null, isGuest = f
           </button>
         )}
 
-        <div className="topbar-desktop-only">
-          <SnapshotTool userId={userId} />
-        </div>
+        <SnapshotTool userId={userId} />
         {!isGuest && (
-          <div className="topbar-desktop-only">
-            <AiAssistant />
-          </div>
+          <AiAssistant />
         )}
 
-        {/* Admin Button */}
-        {(role === "ADMIN" || role === "MEMBER") && (
+        {/* Admin Button - Desktop view (Original style) */}
+        {(role?.toUpperCase() === "ADMIN" || role?.toUpperCase() === "MEMBER") && (
           <Link href="/admin" className="btn btn-secondary topbar-desktop-only" style={{ borderRadius: "9999px", paddingLeft: "16px", paddingRight: "16px" }}>
             Admin
+          </Link>
+        )}
+
+        {/* Admin Button - Phone view */}
+        {(role?.toUpperCase() === "ADMIN" || role?.toUpperCase() === "MEMBER") && (
+          <Link 
+            href="/admin" 
+            className="topbar-admin-btn topbar-mobile-only"
+            title="Admin Dashboard"
+            id="btn-admin-mobile"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+            <span className="topbar-admin-text">Admin</span>
           </Link>
         )}
 

@@ -15,15 +15,19 @@ export default function SnapshotTool({ userId }: { userId?: string }) {
     setMounted(true);
   }, []);
 
-  // Close dropdown on outside click
+  // Close dropdown on outside click or tap
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
+    function handleClickOutside(event: MouseEvent | TouchEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
   }, []);
 
   const takeSnapshot = async (action: "download" | "copy" | "copylink" | "tweet") => {
@@ -104,11 +108,7 @@ export default function SnapshotTool({ userId }: { userId?: string }) {
       setNotification(action === "tweet" ? "Generating snapshot for tweet..." : "Capturing snapshot...");
       const element = document.querySelector(".app-content") as HTMLElement || document.body;
       
-      // Resolve the actual background color from the live document — CSS vars can't be
-      // reliably read via getPropertyValue from stylesheets in all browsers, but
-      // getComputedStyle on the body always returns a resolved rgb() value.
       const resolvedBg = window.getComputedStyle(document.body).backgroundColor;
-      // If the body background is transparent (rgba(0,0,0,0)), use a hardcoded dark color
       const bgColor = (resolvedBg && resolvedBg !== 'rgba(0, 0, 0, 0)' && resolvedBg !== 'transparent')
         ? resolvedBg
         : (document.documentElement.getAttribute('data-theme') === 'dark' ? '#09090B' : '#F5F6FA');
@@ -117,18 +117,11 @@ export default function SnapshotTool({ userId }: { userId?: string }) {
         useCORS: true, 
         scale: 2,
         backgroundColor: bgColor,
-        windowWidth: window.innerWidth,
-        windowHeight: window.innerHeight,
-        width: element.scrollWidth,
-        height: element.scrollHeight,
         onclone: (clonedDocument) => {
           const currentTheme = document.documentElement.getAttribute('data-theme');
-          // Copy data-theme to the cloned html element
           if (currentTheme) {
             clonedDocument.documentElement.setAttribute('data-theme', currentTheme);
           }
-          // Explicitly set background on body and .app-content in the clone using
-          // the resolved color — this is the only reliable way to prevent white gaps
           clonedDocument.body.style.backgroundColor = bgColor;
           const clonedContent = clonedDocument.querySelector('.app-content') as HTMLElement;
           if (clonedContent) {
@@ -153,22 +146,29 @@ export default function SnapshotTool({ userId }: { userId?: string }) {
         canvas.toBlob(async (blob) => {
           if (blob) {
             try {
-              await navigator.clipboard.write([
-                new ClipboardItem({ "image/png": blob })
-              ]);
-              if (action === "tweet") {
-                setNotification("Image copied! Go to the Twitter tab and press Ctrl+V to paste.");
-                setTimeout(() => setNotification(null), 8000);
+              if (navigator?.clipboard?.write) {
+                await navigator.clipboard.write([
+                  new ClipboardItem({ "image/png": blob })
+                ]);
+                if (action === "tweet") {
+                  setNotification("Image copied! Go to the Twitter tab and press Ctrl+V to paste.");
+                  setTimeout(() => setNotification(null), 8000);
+                } else {
+                  setNotification("Snapshot copied to clipboard!");
+                  setTimeout(() => setNotification(null), 3000);
+                }
               } else {
-                setNotification("Snapshot copied to clipboard!");
-                setTimeout(() => setNotification(null), 3000);
+                throw new Error("clipboard.write not supported");
               }
             } catch (err) {
-              console.error(err);
-              setNotification(action === "tweet" 
-                ? "Failed to copy image. You might need to allow clipboard permissions." 
-                : "Failed to copy image. Please try again.");
-              setTimeout(() => setNotification(null), 4000);
+              console.warn("Direct clipboard write failed, downloading image as fallback:", err);
+              const imgData = canvas.toDataURL("image/png");
+              const link = document.createElement("a");
+              link.href = imgData;
+              link.download = `TraderLabs_Snapshot_${new Date().toISOString().split('T')[0]}.png`;
+              link.click();
+              setNotification("Snapshot downloaded!");
+              setTimeout(() => setNotification(null), 3000);
             }
           }
         }, "image/png", 1.0);
@@ -185,7 +185,7 @@ export default function SnapshotTool({ userId }: { userId?: string }) {
     <div style={{ position: "relative" }} ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="btn btn-secondary btn-sm"
+        className="btn btn-secondary btn-sm topbar-snapshot-btn"
         style={{ 
           display: "flex", 
           alignItems: "center", 
@@ -210,21 +210,25 @@ export default function SnapshotTool({ userId }: { userId?: string }) {
         )}
       </button>
 
+      {/* Small Dropdown Menu (Just like desktop view on both mobile and desktop) */}
       {isOpen && (
-        <div style={{
-          position: "absolute",
-          top: "100%",
-          right: 0,
-          marginTop: "8px",
-          width: "200px",
-          background: "var(--bg-secondary)",
-          border: "1px solid var(--border-color)",
-          borderRadius: "8px",
-          boxShadow: "0 10px 15px -3px rgba(0,0,0,0.5)",
-          zIndex: 100,
-          overflow: "hidden",
-          padding: "4px 0"
-        }}>
+        <div 
+          className="snapshot-dropdown-menu"
+          style={{
+            position: "absolute",
+            top: "100%",
+            right: 0,
+            marginTop: "8px",
+            width: "200px",
+            background: "var(--bg-secondary)",
+            border: "1px solid var(--border-color)",
+            borderRadius: "8px",
+            boxShadow: "0 10px 25px -3px rgba(0,0,0,0.6)",
+            zIndex: 1000,
+            overflow: "hidden",
+            padding: "4px 0"
+          }}
+        >
           <button
             onClick={() => takeSnapshot("download")}
             style={{
@@ -232,7 +236,7 @@ export default function SnapshotTool({ userId }: { userId?: string }) {
               alignItems: "center",
               gap: "8px",
               width: "100%",
-              padding: "8px 16px",
+              padding: "9px 16px",
               background: "transparent",
               border: "none",
               color: "var(--text-primary)",
@@ -258,7 +262,7 @@ export default function SnapshotTool({ userId }: { userId?: string }) {
               alignItems: "center",
               gap: "8px",
               width: "100%",
-              padding: "8px 16px",
+              padding: "9px 16px",
               background: "transparent",
               border: "none",
               color: "var(--text-primary)",
@@ -283,7 +287,7 @@ export default function SnapshotTool({ userId }: { userId?: string }) {
               alignItems: "center",
               gap: "8px",
               width: "100%",
-              padding: "8px 16px",
+              padding: "9px 16px",
               background: "transparent",
               border: "none",
               color: "var(--text-primary)",
@@ -308,7 +312,7 @@ export default function SnapshotTool({ userId }: { userId?: string }) {
               alignItems: "center",
               gap: "8px",
               width: "100%",
-              padding: "8px 16px",
+              padding: "9px 16px",
               background: "transparent",
               border: "none",
               color: "var(--text-primary)",
@@ -327,6 +331,7 @@ export default function SnapshotTool({ userId }: { userId?: string }) {
         </div>
       )}
 
+      {/* Floating Notification (Exactly as desktop view) */}
       {mounted && notification && createPortal(
         <div style={{
           position: "fixed",

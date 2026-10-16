@@ -4,6 +4,7 @@ import { AdminSidebar } from "../../components/admin/AdminSidebar";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@repo/database";
 import { redirect } from "next/navigation";
+import "./admin.css";
 
 export const metadata: Metadata = {
   title: "Admin Panel | TraderLabs",
@@ -29,11 +30,11 @@ export default async function AdminLayout({
   }
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", backgroundColor: "#09090b", color: "#f4f4f5" }}>
+    <div className="admin-layout-root" style={{ display: "flex", minHeight: "100vh", backgroundColor: "#09090b", color: "#f4f4f5" }}>
       <AdminSidebar />
 
       {/* Main Content Area */}
-      <main style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+      <main className="admin-main-content" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
         {children}
       </main>
     </div>
