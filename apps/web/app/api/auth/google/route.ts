@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    let email, name, googleId;
+    let email, name, googleId, picture;
 
     if (credential) {
       // Verify the Google ID token
@@ -32,6 +32,7 @@ export async function POST(request: NextRequest) {
       email = payload.email;
       name = payload.name;
       googleId = payload.sub;
+      picture = payload.picture;
     } else {
       // Verify the access token by fetching userinfo
       const userInfoRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
@@ -49,6 +50,7 @@ export async function POST(request: NextRequest) {
       email = userInfo.email;
       name = userInfo.name;
       googleId = userInfo.sub;
+      picture = userInfo.picture;
     }
 
     // Find or create the user
@@ -79,10 +81,13 @@ export async function POST(request: NextRequest) {
               create: {
                 defaultCapital: 500000,
                 defaultRiskPct: 1.0,
+                avatar: picture || null,
               },
             },
           },
         });
+
+        // Seed mistake tags
 
         // Seed mistake tags
         const mistakeTags = [
@@ -108,6 +113,20 @@ export async function POST(request: NextRequest) {
           });
         }
       }
+    }
+
+    // Sync Google profile picture to userSettings if available
+    if (picture) {
+      await prisma.userSettings.upsert({
+        where: { userId: user.id },
+        update: { avatar: picture },
+        create: {
+          userId: user.id,
+          avatar: picture,
+          defaultCapital: 500000,
+          defaultRiskPct: 1.0,
+        },
+      });
     }
 
     // Issue JWT session token
