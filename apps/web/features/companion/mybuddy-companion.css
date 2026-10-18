@@ -2,11 +2,8 @@
 /* Copyright (c) 2026 ClaymoreLab */
 .mybuddy-companion-lane {
   position: fixed;
-  top: 0;
-  left: 152px;
-  right: 232px;
-  z-index: 25;
-  height: 52px;
+  inset: 0;
+  z-index: 940;
   pointer-events: none;
 }
 
@@ -3418,14 +3415,6 @@
 }
 
 @media (max-width: 900px) {
-  .mybuddy-companion-lane {
-    left: 0;
-    right: 0;
-    top: 0;
-    height: 0;
-    overflow: visible;
-    pointer-events: none;
-  }
   .mybuddy-companion-floating {
     transform: scale(0.85);
     transform-origin: center bottom;

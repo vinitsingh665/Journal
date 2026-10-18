@@ -950,7 +950,7 @@ export function PetGalleryDialog({
         ? createPortal(
             <div
               id="piko-accessory-menu"
-              className="petdex-accessory-menu-scroll fixed z-[150] max-h-[316px] overflow-y-auto rounded-[10px] border border-white/[0.12] bg-[#202326]/88 p-2 text-xs text-slate-100 shadow-[0_14px_34px_rgba(0,0,0,0.42)] backdrop-blur-2xl"
+              className="petdex-accessory-menu-scroll fixed z-[1050] max-h-[316px] overflow-y-auto rounded-[10px] border border-white/[0.12] bg-[#202326]/88 p-2 text-xs text-slate-100 shadow-[0_14px_34px_rgba(0,0,0,0.42)] backdrop-blur-2xl"
               style={{ top: accessoryMenuPos.top, left: accessoryMenuPos.left, width: accessoryMenuPos.width }}
               onPointerLeave={() => setAccessoryPreview(null)}
               onScroll={() => setAccessoryPreview(null)}
@@ -993,7 +993,7 @@ export function PetGalleryDialog({
       {accessoryMenuOpen && accessoryPreview
         ? createPortal(
             <div
-              className="pointer-events-none fixed z-[151] flex h-[76px] w-[76px] items-center justify-center rounded-[8px] border border-white/[0.08] bg-[#151719]/84 shadow-[0_8px_18px_rgba(0,0,0,0.26)] backdrop-blur-md"
+              className="pointer-events-none fixed z-[1051] flex h-[76px] w-[76px] items-center justify-center rounded-[8px] border border-white/[0.08] bg-[#151719]/84 shadow-[0_8px_18px_rgba(0,0,0,0.26)] backdrop-blur-md"
               style={
                 accessoryMenuPos
                   ? {

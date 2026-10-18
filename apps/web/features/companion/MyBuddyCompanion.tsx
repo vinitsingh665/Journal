@@ -474,7 +474,7 @@ export function MyBuddyCompanion() {
   if (!mounted || companionHidden || typeof document === "undefined") return null;
 
   return createPortal(
-    <div className="mybuddy-companion-lane">
+    <div className="mybuddy-companion-lane" style={{ zIndex: 940 }}>
       {SHOW_PIKO_DEBUG && isPiko && (
         <div className="mybuddy-companion-debug mybuddy-companion-debug-panel">
           <span className="mybuddy-companion-debug-label">
