@@ -8,6 +8,8 @@ type Accent = 'indigo' | 'blue' | 'emerald' | 'violet';
 interface ThemeContextType {
   theme: Theme;
   accent: Accent;
+  resolvedTheme: 'light' | 'dark';
+  isDark: boolean;
   setTheme: (theme: Theme) => void;
   setAccent: (accent: Accent) => void;
 }
@@ -23,55 +25,88 @@ export function ThemeProvider({
   defaultTheme?: Theme,
   defaultAccent?: Accent
 }) {
-  const [theme, setThemeState] = useState<Theme>(defaultTheme);
-  const [accent, setAccentState] = useState<Accent>(defaultAccent);
-  const [mounted, setMounted] = useState(false);
+  const [theme, setThemeState] = useState<Theme>(() => {
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('theme-preference') as Theme;
+      if (savedTheme) return savedTheme;
+    }
+    return defaultTheme;
+  });
+  const [accent, setAccentState] = useState<Accent>(() => {
+    if (typeof window !== 'undefined') {
+      const savedAccent = localStorage.getItem('accent-preference') as Accent;
+      if (savedAccent) return savedAccent;
+    }
+    return defaultAccent;
+  });
+  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>(() => {
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('theme-preference') as Theme;
+      if (savedTheme === 'dark') return 'dark';
+      if (savedTheme === 'light') return 'light';
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    return 'dark';
+  });
 
   useEffect(() => {
-    // Load from localStorage on mount
-    const savedTheme = localStorage.getItem('theme-preference') as Theme;
-    const savedAccent = localStorage.getItem('accent-preference') as Accent;
-    
-    if (savedTheme) setThemeState(savedTheme);
-    if (savedAccent) setAccentState(savedAccent);
-    
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!mounted) return;
-    
     const root = document.documentElement;
-    
-    // Handle theme
-    let effectiveTheme = theme;
-    if (theme === 'system') {
+    let effectiveTheme: 'light' | 'dark' = 'light';
+    if (theme === 'dark') {
+      effectiveTheme = 'dark';
+    } else if (theme === 'light') {
+      effectiveTheme = 'light';
+    } else {
       effectiveTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     }
-    
+
+    setResolvedTheme(effectiveTheme);
+
     if (effectiveTheme === 'dark') {
       root.setAttribute('data-theme', 'dark');
+      root.classList.add('dark');
     } else {
       root.removeAttribute('data-theme');
+      root.classList.remove('dark');
     }
-    
-    // Handle accent
-    root.setAttribute('data-accent', accent);
-    
-    // Persist to localStorage
-    localStorage.setItem('theme-preference', theme);
-    localStorage.setItem('accent-preference', accent);
-    
-  }, [theme, accent, mounted]);
 
-  const value = {
+    root.setAttribute('data-accent', accent);
+
+    try {
+      localStorage.setItem('theme-preference', theme);
+      localStorage.setItem('accent-preference', accent);
+    } catch {}
+  }, [theme, accent]);
+
+  // System theme changes listener
+  useEffect(() => {
+    if (theme !== 'system') return;
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const handler = (e: MediaQueryListEvent) => {
+      const eff = e.matches ? 'dark' : 'light';
+      setResolvedTheme(eff);
+      const root = document.documentElement;
+      if (eff === 'dark') {
+        root.setAttribute('data-theme', 'dark');
+        root.classList.add('dark');
+      } else {
+        root.removeAttribute('data-theme');
+        root.classList.remove('dark');
+      }
+    };
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, [theme]);
+
+  const value: ThemeContextType = {
     theme,
     accent,
+    resolvedTheme,
+    isDark: resolvedTheme === 'dark',
     setTheme: setThemeState,
     setAccent: setAccentState
   };
 
-  // Prevent hydration mismatch by rendering invisible initially or just raw
   return (
     <ThemeContext.Provider value={value}>
       {children}

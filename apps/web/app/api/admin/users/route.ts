@@ -25,28 +25,43 @@ export async function GET() {
         name: true,
         email: true,
         createdAt: true,
+        updatedAt: true,
         isGuest: true,
         role: true,
       }
     });
 
-    const twoMinutesAgo = new Date(Date.now() - 120000);
+    // Fetch all visitor presence records for registered users (no arbitrary time cutoff)
     const activeVisitors = await prisma.activeVisitor.findMany({
       where: {
-        userId: { not: null },
-        lastSeen: { gt: twoMinutesAgo }
+        userId: { not: null }
       },
       select: { userId: true, lastSeen: true }
     });
 
-    const activeUserMap = new Map();
-    activeVisitors.forEach(av => activeUserMap.set(av.userId, av.lastSeen));
+    const activeUserMap = new Map<string, Date>();
+    activeVisitors.forEach(av => {
+      if (av.userId) {
+        const existing = activeUserMap.get(av.userId);
+        if (!existing || av.lastSeen > existing) {
+          activeUserMap.set(av.userId, av.lastSeen);
+        }
+      }
+    });
 
-    const usersWithPresence = users.map(user => ({
-      ...user,
-      isOnline: activeUserMap.has(user.id),
-      lastSeen: activeUserMap.get(user.id) || null
-    }));
+    const twoMinutesAgoMs = Date.now() - 120000;
+
+    const usersWithPresence = users.map(user => {
+      const visitorLastSeen = activeUserMap.get(user.id);
+      const isOnline = visitorLastSeen ? visitorLastSeen.getTime() > twoMinutesAgoMs : false;
+      const effectiveLastSeen = visitorLastSeen || user.updatedAt || user.createdAt;
+
+      return {
+        ...user,
+        isOnline,
+        lastSeen: effectiveLastSeen ? new Date(effectiveLastSeen).toISOString() : null
+      };
+    });
 
     return NextResponse.json({ 
       success: true, 

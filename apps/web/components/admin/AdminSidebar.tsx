@@ -108,7 +108,8 @@ export function AdminSidebar() {
         height: "100vh",
         position: "sticky",
         top: 0,
-        overflowY: "auto"
+        overflowY: "auto",
+        flexShrink: 0
       }}>
         {/* Brand */}
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 40, paddingLeft: 8 }}>

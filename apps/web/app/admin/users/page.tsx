@@ -67,43 +67,74 @@ export default function AdminUsersPage() {
   const members = users.filter(u => u.role === 'MEMBER');
   const regularUsers = users.filter(u => u.role === 'USER' || !u.role);
 
+function formatTimeAgo(dateStr: string | Date | null | undefined): string {
+  if (!dateStr) return "Never";
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  if (diffMs < 0 || diffMs < 60 * 1000) return "Just now";
+  const diffMin = Math.floor(diffMs / (60 * 1000));
+  const diffHr = Math.floor(diffMin / 60);
+  const diffDays = Math.floor(diffHr / 24);
+  const diffMonths = Math.floor(diffDays / 30);
+
+  if (diffMin < 60) return `${diffMin}m ago`;
+  if (diffHr < 24) return `${diffHr}h ago`;
+  if (diffDays === 1) return "1d ago";
+  if (diffDays < 30) return `${diffDays}d ago`;
+  if (diffMonths < 12) return `${diffMonths}mo ago`;
+  return date.toLocaleDateString();
+}
+
   const renderUserTable = (userList: any[], emptyMessage: string) => (
     <div className="admin-card admin-users-card-container" style={{ backgroundColor: "#000", border: "1px solid #27272a", borderRadius: 12, padding: "24px 0", marginBottom: 32 }}>
       {/* ─── DESKTOP TABLE VIEW (100% untouched for desktop mode) ─── */}
       <div className="admin-table-desktop-view" style={{ overflowX: "auto" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
           <thead>
             <tr style={{ borderBottom: "1px solid #27272a", textAlign: "left", color: "#71717a", fontSize: 11, letterSpacing: "0.05em" }}>
-              <th style={{ padding: "0 24px 16px 24px", fontWeight: 600 }}>NAME</th>
-              <th style={{ padding: "0 24px 16px 0", fontWeight: 600 }}>EMAIL</th>
-              <th style={{ padding: "0 24px 16px 0", fontWeight: 600 }}>DATE JOINED</th>
-              <th style={{ padding: "0 24px 16px 0", fontWeight: 600 }}>STATUS</th>
-              <th style={{ padding: "0 24px 16px 0", fontWeight: 600, textAlign: "right" }}>ROLE</th>
+              <th style={{ width: "22%", padding: "0 24px 16px 24px", fontWeight: 600 }}>NAME</th>
+              <th style={{ width: "28%", padding: "0 24px 16px 0", fontWeight: 600 }}>EMAIL</th>
+              <th style={{ width: "16%", padding: "0 24px 16px 0", fontWeight: 600 }}>DATE JOINED</th>
+              <th style={{ width: "20%", padding: "0 24px 16px 0", fontWeight: 600 }}>STATUS</th>
+              <th style={{ width: "14%", padding: "0 24px 16px 0", fontWeight: 600, textAlign: "right" }}>ROLE</th>
             </tr>
           </thead>
           <tbody>
             {userList.map((user, idx) => (
               <tr key={user.id} style={{ borderBottom: idx === userList.length - 1 ? "none" : "1px solid #27272a", transition: "background 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.02)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}>
-                <td style={{ padding: "16px 24px" }}>
-                  <div style={{ fontSize: 14, fontWeight: 500, color: "#f4f4f5", display: "flex", alignItems: "center", gap: 8 }}>
-                    {user.isGuest && <span style={{ backgroundColor: "rgba(255,255,255,0.1)", color: "#a1a1aa", fontSize: 10, padding: "2px 6px", borderRadius: 4 }}>GUEST</span>}
-                    {user.name}
+                <td style={{ padding: "16px 24px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  <div style={{ fontSize: 14, fontWeight: 500, color: "#f4f4f5", display: "flex", alignItems: "center", gap: 8, overflow: "hidden" }}>
+                    {user.isGuest && <span style={{ backgroundColor: "rgba(255,255,255,0.1)", color: "#a1a1aa", fontSize: 10, padding: "2px 6px", borderRadius: 4, flexShrink: 0 }}>GUEST</span>}
+                    <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user.name}</span>
                   </div>
                 </td>
-                <td style={{ padding: "16px 24px 16px 0", color: "#a1a1aa", fontSize: 13 }}>{user.email || 'N/A'}</td>
-                <td style={{ padding: "16px 24px 16px 0", color: "#a1a1aa", fontSize: 13 }}>{new Date(user.createdAt).toLocaleDateString()}</td>
-                <td style={{ padding: "16px 24px 16px 0" }}>
+                <td style={{ padding: "16px 24px 16px 0", color: "#a1a1aa", fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {user.email || 'N/A'}
+                </td>
+                <td style={{ padding: "16px 24px 16px 0", color: "#a1a1aa", fontSize: 13, whiteSpace: "nowrap" }}>
+                  {new Date(user.createdAt).toLocaleDateString()}
+                </td>
+                <td style={{ padding: "16px 24px 16px 0", whiteSpace: "nowrap" }}>
                   {user.isOnline ? (
-                    <div style={{ display: "flex", alignItems: "center", gap: 6, color: "#10b981", fontSize: 12, fontWeight: 500 }}>
-                      <div style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: "#10b981", boxShadow: "0 0 6px #10b981" }}></div> Online
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12 }}>
+                      <div style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: "#10b981", boxShadow: "0 0 6px #10b981" }}></div>
+                      <span style={{ color: "#10b981", fontWeight: 600 }}>Online</span>
                     </div>
                   ) : (
-                    <div style={{ display: "flex", alignItems: "center", gap: 6, color: "#71717a", fontSize: 12, fontWeight: 500 }}>
-                      <div style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: "#3f3f46" }}></div> Offline
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12 }}>
+                      <div style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: "#52525b" }}></div>
+                      <span style={{ color: "#a1a1aa", fontWeight: 500 }}>Offline</span>
+                      <span 
+                        style={{ color: "#71717a", fontSize: 11, fontFamily: "var(--font-mono), monospace" }}
+                        title={user.lastSeen ? new Date(user.lastSeen).toLocaleString() : undefined}
+                      >
+                        • {formatTimeAgo(user.lastSeen)}
+                      </span>
                     </div>
                   )}
                 </td>
-                <td style={{ padding: "16px 24px 16px 0", textAlign: "right" }}>
+                <td style={{ padding: "16px 24px 16px 0", textAlign: "right", whiteSpace: "nowrap" }}>
                   {currentUserRole === 'ADMIN' && user.id !== currentUserId ? (
                     <select 
                       disabled={updatingId === user.id}
@@ -156,7 +187,7 @@ export default function AdminUsersPage() {
           userList.map((user) => (
             <div key={user.id} className="admin-user-mobile-item">
               <div className="admin-user-mobile-info">
-                {/* Name Row with Online/Offline Dot */}
+                {/* Name Row with Online/Offline Dot and Time Ago on the right of the name */}
                 <div className="admin-user-mobile-name-row">
                   <span 
                     className={`admin-user-status-dot ${user.isOnline ? "online" : "offline"}`} 
@@ -164,6 +195,14 @@ export default function AdminUsersPage() {
                   />
                   <span className="admin-user-mobile-name">{user.name}</span>
                   {user.isGuest && <span className="admin-user-guest-badge">GUEST</span>}
+                  {!user.isOnline && user.lastSeen && (
+                    <span 
+                      style={{ color: "#71717a", fontSize: 11, fontFamily: "var(--font-mono), monospace", flexShrink: 0, marginLeft: 2 }}
+                      title={new Date(user.lastSeen).toLocaleString()}
+                    >
+                      • {formatTimeAgo(user.lastSeen)}
+                    </span>
+                  )}
                 </div>
 
                 {/* Email */}

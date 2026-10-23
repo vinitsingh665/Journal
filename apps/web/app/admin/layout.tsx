@@ -30,11 +30,11 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="admin-layout-root" style={{ display: "flex", minHeight: "100vh", backgroundColor: "#09090b", color: "#f4f4f5" }}>
+    <div className="admin-layout-root" style={{ display: "flex", height: "100vh", maxHeight: "100vh", backgroundColor: "#09090b", color: "#f4f4f5", overflow: "hidden" }}>
       <AdminSidebar />
 
       {/* Main Content Area */}
-      <main className="admin-main-content" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+      <main className="admin-main-content" style={{ flex: 1, display: "flex", flexDirection: "column", height: "100vh", overflowY: "auto", minWidth: 0 }}>
         {children}
       </main>
     </div>

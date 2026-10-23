@@ -28,11 +28,21 @@ export async function POST() {
       create: { sessionId, lastSeen: new Date(), userId },
     });
 
-    // Cleanup old sessions (older than 10 minutes to keep DB small)
-    // Run this asynchronously so it doesn't block the request
+    // If user is logged in, touch their user record as well
+    if (userId) {
+      prisma.user.update({
+        where: { id: userId },
+        data: { updatedAt: new Date() }
+      }).catch(() => {});
+    }
+
+    // Cleanup old sessions for anonymous visitors only (keep logged-in user lastSeen records)
     const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
     prisma.activeVisitor.deleteMany({
-      where: { lastSeen: { lt: tenMinutesAgo } },
+      where: { 
+        userId: null,
+        lastSeen: { lt: tenMinutesAgo } 
+      },
     }).catch((err) => console.error("Failed to clean up old sessions:", err));
 
     return NextResponse.json({ success: true });

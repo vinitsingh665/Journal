@@ -64,7 +64,7 @@ export const metadata: Metadata = {
     siteName: "TraderLabs",
     images: [
       {
-        url: "/brand-logo.png",
+        url: "/og-image.png",
         width: 1200,
         height: 630,
         alt: "TraderLabs — Premium Trading Journal for Indian Traders",
@@ -78,7 +78,7 @@ export const metadata: Metadata = {
     title: "TraderLabs — Your Ultimate Trading Journal",
     description: "Track trades, analyze performance, and improve your edge.",
     creator: "@TraderLabs",
-    images: ["/brand-logo.png"],
+    images: ["/og-image.png"],
   },
   verification: {
     google: "6lVkmBYmvNlsNtkw6uCbljw7ct5Nhs00TUk3xPBrLjk",
@@ -104,6 +104,10 @@ export default function RootLayout({
                 }
                 if (effectiveTheme === 'dark') {
                   document.documentElement.setAttribute('data-theme', 'dark');
+                  document.documentElement.classList.add('dark');
+                } else {
+                  document.documentElement.removeAttribute('data-theme');
+                  document.documentElement.classList.remove('dark');
                 }
                 
                 var accent = localStorage.getItem('accent-preference') || 'blue';

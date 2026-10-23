@@ -84,7 +84,7 @@ export default function Differentiation() {
         <div className="diff__header">
           <span className="section-label">System Specs</span>
           <h2 className="diff__title">
-            Built for traders who treat this seriously.
+            Built for serious Indian equity &amp; derivatives traders.
           </h2>
         </div>
 

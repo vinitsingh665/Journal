@@ -29,9 +29,10 @@ export default function Nav({ isLoggedIn }) {
   };
 
   const navLinks = [
-    { label: 'The Problem', href: '#problem' },
     { label: 'Features', href: '#experience' },
+    { label: 'vs Spreadsheets', href: '#comparison' },
     { label: 'System Specs', href: '#differentiation' },
+    { label: 'FAQ', href: '#faq' },
   ];
 
   return (
@@ -40,7 +41,7 @@ export default function Nav({ isLoggedIn }) {
         {/* Logo */}
         <Link href="/" className="nav__logo" aria-label="TraderLabs home">
           <span className="nav__logo-mark">
-            <img src="/brand-logo.png" alt="" style={{ height: '32px', objectFit: 'contain' }} />
+            <img src="/brand-logo.png" alt="TraderLabs - Best Indian Trading Journal Logo" style={{ height: '32px', objectFit: 'contain' }} />
           </span>
           <span className="nav__logo-text">TraderLabs</span>
         </Link>

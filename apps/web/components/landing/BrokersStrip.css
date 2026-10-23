@@ -1,0 +1,82 @@
+.brokers-strip {
+  padding: var(--space-6) 0 var(--space-8) 0;
+  background: var(--color-bg-primary);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.brokers-strip__container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  text-align: center;
+}
+
+.brokers-strip__label {
+  font-size: var(--text-xs);
+  letter-spacing: 0.12em;
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+}
+
+.brokers-strip__list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+  max-width: 1000px;
+}
+
+.broker-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 9999px;
+  transition: border-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.broker-pill:hover {
+  border-color: var(--color-accent);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--color-accent-subtle);
+}
+
+.broker-pill__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-up);
+}
+
+.broker-pill__name {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.broker-pill__tag {
+  font-size: 10px;
+  color: var(--color-text-tertiary);
+  background: var(--color-bg-secondary);
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.02em;
+}
+
+@media (max-width: 640px) {
+  .brokers-strip {
+    padding: var(--space-4) 0 var(--space-6) 0;
+  }
+  .brokers-strip__list {
+    gap: var(--space-2);
+  }
+  .broker-pill {
+    padding: 6px 10px;
+  }
+  .broker-pill__name {
+    font-size: var(--text-xs);
+  }
+}

@@ -22,7 +22,7 @@ export default function Footer({ isLoggedIn }) {
       <div className="container footer__inner">
         <div className="footer__brand">
           <Link href="/" className="footer__logo font-mono" aria-label="TraderLabs home">
-            <img src="/brand-logo.png" alt="" style={{ height: '32px', objectFit: 'contain' }} />
+            <img src="/brand-logo.png" alt="TraderLabs - Best Indian Trading Journal Logo" style={{ height: '32px', objectFit: 'contain' }} />
             TraderLabs
           </Link>
           <p className="footer__tagline">Plan. Execute. Improve.</p>
@@ -32,7 +32,8 @@ export default function Footer({ isLoggedIn }) {
           <div className="footer__col">
             <span className="footer__col-title font-mono">Product</span>
             <a href="#experience" className="footer__link" onClick={handleSmoothScroll}>Features</a>
-            <a href="#differentiation" className="footer__link" onClick={handleSmoothScroll}>Why TraderLabs</a>
+            <a href="#comparison" className="footer__link" onClick={handleSmoothScroll}>Why TraderLabs</a>
+            <a href="#faq" className="footer__link" onClick={handleSmoothScroll}>FAQ</a>
             {isLoggedIn ? (
               <Link href="/dashboard" className="footer__link">Dashboard</Link>
             ) : (
@@ -43,6 +44,7 @@ export default function Footer({ isLoggedIn }) {
           <div className="footer__col">
             <span className="footer__col-title font-mono">Company</span>
             <Link href="/about/contact" className="footer__link">Contact</Link>
+            <Link href="/about/faq" className="footer__link">Help &amp; Docs</Link>
             <Link href="/about/privacy" className="footer__link">Privacy</Link>
             <Link href="/about/terms" className="footer__link">Terms</Link>
           </div>

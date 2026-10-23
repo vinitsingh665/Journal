@@ -50,11 +50,11 @@ export default function Problem() {
           <span className="section-label">The Problem</span>
           <h2 className="problem__title">
             Trading produces raw noise.<br />
-            You need a signal.
+            You need a systematic edge.
           </h2>
           <p className="problem__sub">
-            Spreadsheets give you a headache. Scattered notes lose their meaning. 
-            TraderLabs transforms your messy manual entries and emotional chaos into a crystal-clear, structured behavioral edge.
+            Manual spreadsheets give you a headache. Scattered notes fail during volatile market sessions in NSE F&amp;O and equities. 
+            TraderLabs eliminates emotional impulses, revenge trading, and messy logs to give you a crystal-clear behavioral edge.
           </p>
         </div>
 

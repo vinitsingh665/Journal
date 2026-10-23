@@ -2,7 +2,7 @@
 
 import { LATEST_VERSION } from "@/app/about/changelog/ChangelogClient";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTheme } from "@/components/layout/ThemeProvider";
@@ -147,6 +147,74 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
   // Integrations
   const [dhanClientId, setDhanClientId] = useState(initialSettings?.dhanClientId || "");
   const [dhanAccessToken, setDhanAccessToken] = useState(initialSettings?.dhanAccessToken || "");
+
+  // Security / Password states
+  const [currentPassword, setCurrentPassword] = useState(() => {
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("user_pwd") || localStorage.getItem("user_pwd") || "";
+    }
+    return "";
+  });
+  const [newPassword, setNewPassword] = useState("");
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [passwordStatus, setPasswordStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const currentPwdRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const saved = sessionStorage.getItem("user_pwd") || localStorage.getItem("user_pwd");
+      if (saved) {
+        setCurrentPassword(saved);
+      }
+    }
+    const timer = setTimeout(() => {
+      if (currentPwdRef.current?.value && !currentPassword) {
+        setCurrentPassword(currentPwdRef.current.value);
+      }
+    }, 400);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleUpdatePassword = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!newPassword) {
+      setPasswordStatus({ type: "error", message: "Please enter a new password." });
+      return;
+    }
+    if (newPassword.length < 4) {
+      setPasswordStatus({ type: "error", message: "Password must be at least 4 characters long." });
+      return;
+    }
+    setPasswordLoading(true);
+    setPasswordStatus(null);
+    try {
+      const res = await fetch("/api/auth/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setPasswordStatus({ type: "error", message: data.error || "Failed to update password." });
+        return;
+      }
+      setPasswordStatus({ type: "success", message: "Password updated successfully!" });
+      if (typeof window !== "undefined") {
+        try {
+          sessionStorage.setItem("user_pwd", newPassword);
+          localStorage.setItem("user_pwd", newPassword);
+        } catch {}
+      }
+      setCurrentPassword(newPassword);
+      setNewPassword("");
+    } catch {
+      setPasswordStatus({ type: "error", message: "Failed to connect to server. Please try again." });
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
 
   const tabs = ["General", "Trading", "Import & Sync", "Notifications", "Security", "Billing", "Data & Export", "Appearance", "About"];
 
@@ -865,18 +933,133 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
                 <p className="settings-row-desc" style={{ marginBottom: "var(--space-4)" }}>Manage your password and security settings.</p>
 
                 <div className="card card-body" style={{ display: "flex", flexDirection: "column" }}>
-                  <div className="settings-row">
-                    <div className="settings-row-text">
-                      <div className="settings-row-title">Two-Factor Authentication</div>
-                      <label className="form-label">Current Password</label>
-                      <input type="password" className="form-input" />
+                  <form onSubmit={handleUpdatePassword} autoComplete="on" style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)" }}>
+                    {/* Hidden username for browser password manager association */}
+                    <input type="text" name="username" value={email} autoComplete="username" style={{ display: "none" }} readOnly />
+
+                    {passwordStatus && (
+                      <div
+                        style={{
+                          padding: "10px 14px",
+                          borderRadius: "6px",
+                          fontSize: "0.85rem",
+                          fontWeight: 500,
+                          backgroundColor: passwordStatus.type === "success" ? "rgba(16, 185, 129, 0.12)" : "rgba(239, 68, 68, 0.12)",
+                          color: passwordStatus.type === "success" ? "#10B981" : "#EF4444",
+                          border: `1px solid ${passwordStatus.type === "success" ? "rgba(16, 185, 129, 0.25)" : "rgba(239, 68, 68, 0.25)"}`,
+                        }}
+                      >
+                        {passwordStatus.message}
+                      </div>
+                    )}
+
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" htmlFor="currentPassword" style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500 }}>
+                        Current Password
+                      </label>
+                      <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                        <input
+                          ref={currentPwdRef}
+                          id="currentPassword"
+                          name="current-password"
+                          type={showCurrentPassword ? "text" : "password"}
+                          className="form-input"
+                          style={{ width: "100%", paddingRight: "40px" }}
+                          placeholder="Current password"
+                          value={currentPassword}
+                          onChange={(e) => setCurrentPassword(e.target.value)}
+                          onFocus={(e) => {
+                            if (e.target.value && e.target.value !== currentPassword) {
+                              setCurrentPassword(e.target.value);
+                            }
+                          }}
+                          autoComplete="current-password"
+                          required
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                          aria-label={showCurrentPassword ? "Hide current password" : "Show current password"}
+                          style={{
+                            position: "absolute",
+                            right: "10px",
+                            top: "50%",
+                            transform: "translateY(-50%)",
+                            background: "transparent",
+                            border: "none",
+                            cursor: "pointer",
+                            color: "var(--text-secondary)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            padding: "4px",
+                          }}
+                        >
+                          {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
+                      </div>
                     </div>
-                    <div className="form-group mb-3">
-                      <label className="form-label">New Password</label>
-                      <input type="password" className="form-input" />
+
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" htmlFor="newPassword" style={{ display: "block", marginBottom: "6px", fontSize: "0.85rem", fontWeight: 500 }}>
+                        New Password
+                      </label>
+                      <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                        <input
+                          id="newPassword"
+                          name="new-password"
+                          type={showNewPassword ? "text" : "password"}
+                          className="form-input"
+                          style={{ width: "100%", paddingRight: "40px" }}
+                          placeholder="Enter new password (min. 4 characters)"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          autoComplete="new-password"
+                          required
+                          minLength={4}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowNewPassword(!showNewPassword)}
+                          aria-label={showNewPassword ? "Hide new password" : "Show new password"}
+                          style={{
+                            position: "absolute",
+                            right: "10px",
+                            top: "50%",
+                            transform: "translateY(-50%)",
+                            background: "transparent",
+                            border: "none",
+                            cursor: "pointer",
+                            color: "var(--text-secondary)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            padding: "4px",
+                          }}
+                        >
+                          {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
+                      </div>
                     </div>
-                    <button className="btn btn-primary mt-2">Update Password</button>
-                  </div>
+
+                    <div style={{ paddingTop: "var(--space-2)" }}>
+                      <button
+                        type="submit"
+                        className="btn btn-primary"
+                        disabled={passwordLoading}
+                        style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}
+                      >
+                        {passwordLoading ? (
+                          <>
+                            <RefreshCw size={15} className="animate-spin" />
+                            <span>Updating...</span>
+                          </>
+                        ) : (
+                          "Update Password"
+                        )}
+                      </button>
+                    </div>
+                  </form>
                 </div>
               </div>
             </div>
@@ -888,14 +1071,14 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
                 <div className="card card-body">
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingBottom: "var(--space-3)", borderBottom: "1px solid var(--border-secondary)", marginBottom: "var(--space-3)" }}>
                     <div>
-                      <div style={{ fontWeight: 600 }}>Windows PC â€¢ Chrome</div>
+                      <div style={{ fontWeight: 600 }}>Windows PC • Chrome</div>
                       <div className="text-muted" style={{ fontSize: "var(--text-xs)" }}>Mumbai, India (Current)</div>
                     </div>
                     <span className="badge badge-open">Active</span>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                     <div>
-                      <div style={{ fontWeight: 600 }}>iPhone 14 â€¢ Safari</div>
+                      <div style={{ fontWeight: 600 }}>iPhone 14 • Safari</div>
                       <div className="text-muted" style={{ fontSize: "var(--text-xs)" }}>Mumbai, India (2 hours ago)</div>
                     </div>
                     <button className="btn btn-secondary btn-sm">Revoke</button>
@@ -1446,6 +1629,131 @@ export default function SettingsClient({ user, initialSettings }: SettingsClient
                   </button>
                 </div>
               </div>
+            </div>
+
+            {/* Security & Password Card (Mobile) */}
+            <div className="settings-mobile-card">
+              <div className="settings-mobile-card-header">
+                <div className="settings-mobile-card-icon">
+                  <Shield size={16} />
+                </div>
+                <div>
+                  <h3 className="settings-mobile-card-title">SECURITY & PASSWORD</h3>
+                  <p className="settings-mobile-card-desc">Update your account login password.</p>
+                </div>
+              </div>
+
+              <form onSubmit={handleUpdatePassword} autoComplete="on">
+                <input type="text" name="username" value={email} autoComplete="username" style={{ display: "none" }} readOnly />
+
+                {passwordStatus && (
+                  <div
+                    style={{
+                      padding: "8px 12px",
+                      borderRadius: "6px",
+                      fontSize: "12px",
+                      fontWeight: 500,
+                      marginBottom: "12px",
+                      backgroundColor: passwordStatus.type === "success" ? "rgba(16, 185, 129, 0.12)" : "rgba(239, 68, 68, 0.12)",
+                      color: passwordStatus.type === "success" ? "#10B981" : "#EF4444",
+                      border: `1px solid ${passwordStatus.type === "success" ? "rgba(16, 185, 129, 0.25)" : "rgba(239, 68, 68, 0.25)"}`,
+                    }}
+                  >
+                    {passwordStatus.message}
+                  </div>
+                )}
+
+                <div className="settings-mobile-field">
+                  <label className="settings-mobile-label">Current Password</label>
+                  <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                    <input
+                      name="current-password"
+                      type={showCurrentPassword ? "text" : "password"}
+                      className="form-input"
+                      style={{ width: "100%", paddingRight: "40px" }}
+                      placeholder="Current password"
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                      autoComplete="current-password"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                      aria-label={showCurrentPassword ? "Hide password" : "Show password"}
+                      style={{
+                        position: "absolute",
+                        right: "10px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        background: "transparent",
+                        border: "none",
+                        cursor: "pointer",
+                        color: "var(--text-secondary)",
+                        display: "flex",
+                        alignItems: "center",
+                        padding: "4px",
+                      }}
+                    >
+                      {showCurrentPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="settings-mobile-field">
+                  <label className="settings-mobile-label">New Password</label>
+                  <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                    <input
+                      name="new-password"
+                      type={showNewPassword ? "text" : "password"}
+                      className="form-input"
+                      style={{ width: "100%", paddingRight: "40px" }}
+                      placeholder="New password (min. 4 characters)"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      autoComplete="new-password"
+                      required
+                      minLength={4}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                      aria-label={showNewPassword ? "Hide password" : "Show password"}
+                      style={{
+                        position: "absolute",
+                        right: "10px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        background: "transparent",
+                        border: "none",
+                        cursor: "pointer",
+                        color: "var(--text-secondary)",
+                        display: "flex",
+                        alignItems: "center",
+                        padding: "4px",
+                      }}
+                    >
+                      {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  className="btn btn-primary btn-sm"
+                  disabled={passwordLoading}
+                  style={{ width: "100%", marginTop: "4px", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
+                >
+                  {passwordLoading ? (
+                    <>
+                      <RefreshCw size={13} className="animate-spin" />
+                      <span>Updating...</span>
+                    </>
+                  ) : (
+                    "Update Password"
+                  )}
+                </button>
+              </form>
             </div>
 
             {/* Danger Zone Card */}

@@ -45,10 +45,10 @@ export default function Experience() {
         <div className="experience__header">
           <span className="section-label">The Command Center</span>
           <h2 className="experience__title">
-            All your data.<br />At a single glance.
+            All your trade data.<br />At a single glance.
           </h2>
           <p className="experience__sub">
-            Serious traders do not have time for fluffy metrics. The TraderLabs dashboard is designed for maximum data density, giving you instantaneous feedback on your portfolio health, recent executions, and behavioral patterns.
+            Serious traders do not have time for fluffy metrics. The TraderLabs dashboard is built for maximum data density, providing an instant P&amp;L calendar heatmap, automated R-Multiple calculations, and behavioral pattern detection for Indian equity, F&amp;O, and crypto markets.
           </p>
         </div>
 
