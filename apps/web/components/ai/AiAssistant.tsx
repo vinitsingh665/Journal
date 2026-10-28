@@ -262,16 +262,16 @@ export default function AiAssistant() {
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="btn btn-secondary btn-sm ai-assistant-btn"
-          style={{ display: "flex", alignItems: "center", gap: 6, borderRadius: 20, padding: "6px 12px", height: "32px" }}
+          style={{ display: "flex", alignItems: "center", gap: 6, borderRadius: 20, padding: "6px 14px", height: "32px" }}
           title="Ask AI (Cmd/Ctrl + K)"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
           </svg>
-          <span className="ai-assistant-text" style={{ fontWeight: 600, fontSize: "var(--text-xs)", color: "var(--text-primary)" }}>
+          <span className="ai-assistant-text" style={{ fontWeight: 600, fontSize: "var(--text-xs)", background: "linear-gradient(45deg, var(--accent-primary), #d946ef)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
             Ask AI
           </span>
-          <span className="ai-assistant-shortcut text-muted" style={{ fontSize: 10, marginLeft: 2 }}>⌘K</span>
+          <span className="ai-assistant-shortcut text-muted" style={{ fontSize: 10, marginLeft: 4 }}>⌘K</span>
         </button>
       </div>
 
